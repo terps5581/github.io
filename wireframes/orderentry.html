@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyfluent — Order Entry v8</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   CYFLUENT v7 — LIGHT MODE
+   WCAG 2.1 AA compliant
+   Base font: 14px | Min secondary: 12px
+   Touch targets: ≥ 44px
+   Codes: data layer only — zero clinical rendering
+   SAFER CPOE: actionable CDS response paths
+═══════════════════════════════════════════ */
+:root {
+  --bg:        #f2f5f9;
+  --surface:   #ffffff;
+  --surface2:  #f0f4f8;
+  --surface3:  #e4eaf3;
+  --surface4:  #d8e1ef;
+  --border:    #cbd5e1;
+  --border2:   #a0aec0;
+  --accent:    #1a6fdb;
+  --accent-dk: #1257b0;
+  --accent-lt: #3b8ef0;
+  --accent-bg: #ebf3ff;
+  --green:     #0d8050;
+  --green-dk:  #095e3c;
+  --green-lt:  #e8f7f1;
+  --amber:     #b05c00;
+  --amber-lt:  #fff5e6;
+  --red:       #c0253a;
+  --red-lt:    #fdeef1;
+  --purple:    #5c3d9e;
+  --purple-lt: #f0ecfa;
+  --text:      #111827;
+  --text-2:    #374151;
+  --text-3:    #6b7280;
+  --text-4:    #9ca3af;
+  --font:      'Inter', system-ui, sans-serif;
+  --font-t:    'Inter Tight', 'Inter', sans-serif;
+  --r:         8px;
+  --r-sm:      5px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+
+/* ── Shell ── */
+.shell{display:grid;grid-template-rows:52px 1fr;height:100vh;overflow:hidden}
+
+/* ── Topbar ── */
+.topbar{
+  background:var(--accent);display:flex;align-items:center;padding:0 20px;gap:0;
+  box-shadow:0 2px 6px rgba(0,0,0,.18);z-index:100
+}
+.logo{font-family:var(--font-t);font-weight:700;font-size:17px;letter-spacing:.04em;color:#fff;
+  padding-right:20px;border-right:1px solid rgba(255,255,255,.25);margin-right:18px;text-transform:uppercase}
+.pat-chip{
+  display:flex;align-items:center;gap:10px;padding:6px 14px;
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+  border-radius:var(--r);cursor:default
+}
+.pat-av{width:28px;height:28px;background:rgba(255,255,255,.28);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.pat-name{font-weight:600;font-size:14px;color:#fff}
+.pat-meta{font-size:12px;color:rgba(255,255,255,.82)}
+.tsp{flex:1}
+.enc-badge{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;
+  border-radius:4px;padding:3px 9px;font-size:12px;font-weight:600}
+.topbar-enc{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.82);
+  padding:0 16px;border-right:1px solid rgba(255,255,255,.2);margin-right:16px}
+.usr{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.88)}
+.usr-av{width:30px;height:30px;background:rgba(255,255,255,.25);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+
+/* ── 3-col main ── */
+.main{display:grid;grid-template-columns:216px 1fr 296px;overflow:hidden;height:100%}
+
+/* ── Left nav ── */
+.lnav{background:var(--surface);border-right:1.5px solid var(--border);overflow:hidden;display:flex;flex-direction:column}
+.ns{font-family:var(--font-t);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text-3);padding:16px 16px 6px}
+.ni{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;
+  border-left:3px solid transparent;color:var(--text-2);font-size:14px;transition:all .12s;min-height:44px}
+.ni:hover{background:var(--surface2);color:var(--text)}
+.ni.on{background:var(--accent-bg);border-left-color:var(--accent);color:var(--accent);font-weight:500}
+.ni-ico{font-size:16px;width:20px;text-align:center}
+.nb{margin-left:auto;background:var(--accent);color:#fff;border-radius:12px;
+  padding:2px 7px;font-size:11px;font-weight:700;min-width:22px;text-align:center}
+.nb.r{background:var(--red)}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--r);
+  font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;
+  transition:all .12s;white-space:nowrap;min-height:44px}
+.bp{background:var(--accent);color:#fff} .bp:hover{background:var(--accent-dk)}
+.bs{background:var(--surface);border:1.5px solid var(--border2);color:var(--text-2)}
+.bs:hover{background:var(--surface2);border-color:var(--accent);color:var(--accent)}
+.bg{background:transparent;color:var(--text-3);border:1.5px solid var(--border)}
+.bg:hover{background:var(--surface2);color:var(--text-2);border-color:var(--border2)}
+.bsuc{background:var(--green);color:#fff} .bsuc:hover{background:var(--green-dk)}
+
+/* ── CDS alerts — SAFER CPOE: actionable responses, not just dismiss ── */
+.cds{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:var(--r);font-size:13px;line-height:1.5}
+.cds-w{background:var(--amber-lt);border:1.5px solid rgba(176,92,0,.25)}
+.cds-e{background:var(--red-lt);border:1.5px solid rgba(192,37,58,.25)}
+.cds-i{background:var(--accent-bg);border:1.5px solid rgba(26,111,219,.2)}
+.cds-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.cds-body{flex:1}
+.cds-title{font-weight:700;margin-bottom:3px}
+.cds-w .cds-title{color:var(--amber)}
+.cds-e .cds-title{color:var(--red)}
+.cds-i .cds-title{color:var(--accent)}
+.cds-text{color:var(--text-2);font-size:13px}
+.cds-acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.cact{padding:6px 13px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;
+  border:none;font-family:var(--font);min-height:36px;transition:all .12s}
+.ca-ov{background:var(--amber-lt);border:1.5px solid rgba(176,92,0,.3);color:var(--amber)}
+.ca-ov:hover{background:#ffe0b3}
+.ca-ch{background:var(--accent-bg);border:1.5px solid rgba(26,111,219,.25);color:var(--accent)}
+.ca-ch:hover{background:#d0e6ff}
+.ca-dm{background:var(--surface3);border:1.5px solid var(--border);color:var(--text-3)}
+.ca-dm:hover{background:var(--surface4)}
+
+::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#718096}
+
+/* ═══════════════════════════════════════════
+   ORDER WORKSPACE
+═══════════════════════════════════════════ */
+.ows{display:flex;flex-direction:column;overflow:hidden;height:100%;background:var(--bg)}
+
+/* Fixed header — never scrolls */
+.ows-hdr{
+  background:var(--surface);border-bottom:1.5px solid var(--border);
+  flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.06)
+}
+.trow{display:flex;align-items:center;gap:12px;padding:14px 24px 12px}
+.ws-title{font-family:var(--font-t);font-size:18px;font-weight:700;color:var(--text)}
+.ws-sub{font-size:13px;color:var(--text-3);margin-left:auto;display:flex;align-items:center;gap:8px}
+.pri-sel{background:var(--surface2);border:1.5px solid var(--border);border-radius:5px;
+  color:var(--text);font-size:13px;padding:4px 8px;outline:none;height:36px;font-family:var(--font)}
+
+.cat-tabs{display:flex;gap:2px;padding:0 24px;overflow-x:auto;flex-shrink:0}
+.ct{
+  padding:9px 16px;font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;
+  border-bottom:2.5px solid transparent;transition:all .12s;border-radius:6px 6px 0 0;
+  white-space:nowrap;min-height:42px;display:flex;align-items:center;gap:6px;user-select:none
+}
+.ct:hover{color:var(--text);background:var(--surface2)}
+.ct.on{color:var(--accent);border-bottom-color:var(--accent);background:var(--accent-bg);font-weight:600}
+.tc{display:inline-flex;align-items:center;justify-content:center;background:var(--surface3);
+  border-radius:10px;padding:0 7px;font-size:11px;font-weight:700;color:var(--text-3);min-width:20px;height:18px}
+.ct.on .tc{background:var(--accent);color:#fff}
+
+.tp{display:none;flex-direction:column;overflow:hidden;flex:1}
+.tp.on{display:flex}
+
+/* ── Pane: Tray (All / Lab / etc.) ── */
+.sa{padding:14px 24px;display:flex;gap:10px;align-items:center;
+  flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border)}
+.sw{flex:1;position:relative}
+.si-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:16px;pointer-events:none}
+.si-in{
+  width:100%;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--r);padding:10px 14px 10px 40px;color:var(--text);
+  font-family:var(--font);font-size:14px;outline:none;transition:all .15s;height:44px
+}
+.si-in:focus{border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 3px rgba(26,111,219,.1)}
+.si-in::placeholder{color:var(--text-4)}
+.si-kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:var(--surface3);
+  border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:11px;color:var(--text-3)}
+.togg{display:flex;gap:2px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);padding:3px}
+.to{padding:6px 12px;border-radius:5px;font-size:12px;cursor:pointer;color:var(--text-2);
+  transition:all .1s;min-height:38px;display:flex;align-items:center}
+.to.on{background:var(--surface);color:var(--accent);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+.ta-box{margin:0 24px 4px;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--r);overflow:hidden;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,.07)}
+.ta-hdr{padding:8px 16px;background:var(--surface2);font-size:12px;color:var(--text-3);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.ta-ct{color:var(--green);font-weight:700}
+.ta-item{display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;
+  border-bottom:1px solid var(--border);transition:background .1s;min-height:52px}
+.ta-item:last-child{border-bottom:none}
+.ta-item:hover{background:var(--surface2)}
+.ta-item.hl{background:var(--accent-bg);border-left:3px solid var(--accent)}
+.ti-ic{width:32px;height:32px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.ti-lab{background:var(--green-lt);color:var(--green)}
+.ti-ref{background:var(--amber-lt);color:var(--amber)}
+.ti-img{background:var(--purple-lt);color:var(--purple)}
+.ti-med{background:var(--accent-bg);color:var(--accent)}
+.ti-d{flex:1;min-width:0}
+.ti-n{font-weight:600;font-size:14px;color:var(--text)}
+.ti-n em{color:var(--accent);font-style:normal}
+.ti-m{font-size:12px;color:var(--text-3);margin-top:2px}
+.ti-add{padding:6px 14px;border-radius:var(--r-sm);background:var(--surface2);
+  border:1.5px solid var(--border2);color:var(--text-2);font-size:12px;font-weight:500;
+  cursor:pointer;white-space:nowrap;transition:all .12s;min-height:36px;display:flex;align-items:center}
+.ti-add:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.fav{color:var(--text-4);cursor:pointer;font-size:16px;transition:color .1s;flex-shrink:0;padding:4px}
+.fav:hover{color:#d97706} .fav.on{color:#d97706}
+
+.os-strip{margin:8px 24px 4px;display:flex;gap:8px;align-items:center;overflow-x:auto;flex-shrink:0}
+.os-lbl{font-size:12px;color:var(--text-3);white-space:nowrap;flex-shrink:0;font-weight:500}
+.os-chip{display:flex;align-items:center;gap:5px;padding:6px 12px;
+  background:var(--surface);border:1.5px solid var(--border2);border-radius:20px;
+  font-size:12px;font-weight:500;color:var(--text-2);cursor:pointer;white-space:nowrap;
+  transition:all .12s;min-height:36px}
+.os-chip:hover{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+
+.tray-body{flex:1;overflow-y:auto;padding:14px 24px 80px}
+.tg{margin-bottom:14px}
+.tg-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.tg-name{font-family:var(--font-t);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
+.tg-line{flex:1;height:1px;background:var(--border)}
+.tg-ct{font-size:12px;color:var(--text-3)}
+
+.tri{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--surface);
+  border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:6px;
+  transition:box-shadow .12s,border-color .12s}
+.tri:hover{border-color:var(--border2);box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.tcb{width:20px;height:20px;border:2px solid var(--border2);border-radius:5px;flex-shrink:0;
+  margin-top:2px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .1s}
+.tcb.on{background:var(--accent);border-color:var(--accent)}
+.tcb.on::after{content:'\2713';color:#fff;font-size:12px;font-weight:700}
+.tri-bd{flex:1;min-width:0}
+.tri-n{font-weight:600;font-size:14px;color:var(--text);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ttag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:4px}
+.tl{background:var(--green-lt);color:var(--green)}
+.tr{background:var(--amber-lt);color:var(--amber)}
+.ti2{background:var(--purple-lt);color:var(--purple)}
+.tri-meta{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap}
+.tmf{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--text-2)}
+.tml{color:var(--text-3);font-weight:500}
+.tsel{background:var(--surface2);border:1px solid var(--border);border-radius:5px;
+  color:var(--text);font-family:var(--font);font-size:12px;padding:4px 8px;outline:none;cursor:pointer;height:30px}
+.pl{display:flex;align-items:center;gap:5px;background:var(--accent-bg);
+  border:1px solid rgba(26,111,219,.2);border-radius:5px;padding:4px 9px;
+  font-size:12px;color:var(--accent);cursor:pointer;font-weight:500}
+.pl:hover{border-color:var(--accent);background:#d0e5ff}
+.abadge{display:inline-flex;align-items:center;gap:4px;background:var(--green-lt);
+  border:1px solid rgba(13,128,80,.2);border-radius:4px;padding:2px 8px;font-size:12px;color:var(--green)}
+
+.tri-acts{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.tact{width:36px;height:36px;border-radius:var(--r-sm);border:1.5px solid var(--border);
+  background:var(--surface2);color:var(--text-3);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:15px;transition:all .1s}
+.tact.ed{border-color:rgba(13,128,80,.3);color:var(--green);background:var(--green-lt)}
+.tact.ed:hover{background:#bff0d8}
+.tact.rm:hover{border-color:var(--red);color:var(--red);background:var(--red-lt)}
+
+/* Inline edit panel */
+.iexp{margin:4px 0 6px 32px;background:var(--surface);border:1.5px solid var(--accent);
+  border-radius:var(--r);overflow:hidden;box-shadow:0 4px 12px rgba(26,111,219,.1)}
+.iexp-h{padding:10px 16px;background:var(--accent-bg);border-bottom:1px solid rgba(26,111,219,.15);
+  display:flex;align-items:center;gap:10px;font-size:13px;color:var(--accent);font-weight:600}
+.exp-g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:14px 16px}
+.ef{display:flex;flex-direction:column;gap:5px}
+.ef.full{grid-column:span 3}
+.el{font-size:12px;color:var(--text-3);font-weight:500}
+.ei,.es{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);
+  color:var(--text);font-family:var(--font);font-size:13px;padding:8px 10px;outline:none;width:100%;height:38px}
+.ei:focus,.es:focus{border-color:var(--accent);background:var(--surface)}
+.ef-foot{padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--surface2)}
+.ef-auto{flex:1;font-size:12px;color:var(--green);font-weight:500}
+
+.tray-footer{padding:14px 24px;border-top:1.5px solid var(--border);background:var(--surface);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+.tf-sum{flex:1;font-size:13px;color:var(--text-2)}
+.tf-sum strong{color:var(--text);font-weight:700}
+.sub-btn{background:var(--green);color:#fff;border:none;padding:11px 24px;border-radius:var(--r);
+  font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;gap:10px;transition:background .12s;min-height:44px}
+.sub-btn:hover{background:var(--green-dk)}
+.sub-ct{background:rgba(255,255,255,.28);border-radius:12px;padding:2px 9px;font-size:13px}
+
+/* ═══════════════════════════════════════════
+   MEDICATION PANE
+   Left = list (search + chart)
+   Right = Rx form
+   Zero codes rendered anywhere
+═══════════════════════════════════════════ */
+.med-pane{display:grid;grid-template-columns:400px 1fr;overflow:hidden;flex:1}
+.med-l{display:flex;flex-direction:column;border-right:1.5px solid var(--border);overflow:hidden;background:var(--bg)}
+.ms-wrap{padding:14px 16px 8px;flex-shrink:0;position:relative}
+.ms-ico{position:absolute;left:28px;top:calc(50% + 3px);transform:translateY(-50%);color:var(--text-3);font-size:16px;pointer-events:none}
+.ms-in{width:100%;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--r);padding:10px 14px 10px 42px;color:var(--text);font-family:var(--font);
+  font-size:14px;outline:none;transition:all .15s;height:44px}
+.ms-in:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,111,219,.1)}
+.ms-in::placeholder{color:var(--text-4)}
+.ms-hint{padding:0 16px 10px;font-size:12px;color:var(--text-3);border-bottom:1px solid var(--border);flex-shrink:0}
+.ms-hint a{color:var(--accent);cursor:pointer}
+
+/* Formulary search results */
+.form-res{overflow-y:auto;padding:12px 16px 16px}
+.form-h{font-size:12px;font-weight:700;color:var(--text-3);letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.form-h::after{content:'';flex:1;height:1px;background:var(--border)}
+.mres{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);
+  border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:6px;cursor:pointer;
+  transition:all .12s;min-height:52px}
+.mres:hover{border-color:var(--border2);box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.mres.sel{border-color:var(--accent);background:var(--accent-bg);box-shadow:0 0 0 2px rgba(26,111,219,.1)}
+.mr-ico{width:34px;height:34px;border-radius:var(--r-sm);background:var(--accent-bg);
+  color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.mr-b{flex:1;min-width:0}
+.mr-n{font-weight:700;font-size:14px;color:var(--text)}
+.mr-g{font-size:12px;color:var(--text-3);margin-top:1px}
+.mr-chips{display:flex;gap:5px;margin-top:4px;flex-wrap:wrap}
+.mc{font-size:11px;padding:2px 7px;border-radius:10px;font-weight:500}
+.mc-f{background:var(--green-lt);color:var(--green)}
+.mc-nf{background:var(--amber-lt);color:var(--amber)}
+.mc-t{background:var(--surface3);color:var(--text-3);border:1px solid var(--border)}
+
+/* Chart med list */
+.med-chart{flex:1;overflow-y:auto;padding:12px 16px 60px}
+.ml-lbl{font-size:11px;font-weight:700;color:var(--text-3);letter-spacing:.08em;text-transform:uppercase;
+  margin:4px 0 10px;display:flex;align-items:center;gap:8px}
+.ml-lbl .ll{flex:1;height:1px;background:var(--border)}
+.roi{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);
+  border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:6px;
+  cursor:pointer;transition:all .12s;min-height:60px}
+.roi:hover{border-color:var(--border2);box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.roi.sel{border-color:var(--accent);background:var(--accent-bg)}
+.roi.sel.rp{border-color:var(--purple);background:var(--purple-lt)}
+.roi.sel.dc{border-color:var(--amber);background:var(--amber-lt)}
+.ri-ico{width:34px;height:34px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.ri-act{background:var(--green-lt)}
+.ri-dc{background:var(--amber-lt)}
+.ri-rp{background:var(--purple-lt)}
+.ri-b{flex:1;min-width:0}
+.ri-n{font-weight:700;font-size:14px;color:var(--text);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ri-sig{font-size:12px;color:var(--text-2);margin-top:2px}
+.ri-meta{font-size:11px;color:var(--text-3);margin-top:2px}
+.rist{font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px}
+.st-a{background:var(--green-lt);color:var(--green)}
+.st-d{background:var(--amber-lt);color:var(--amber)}
+.st-r{background:var(--purple-lt);color:var(--purple)}
+.rob{padding:7px 13px;border-radius:var(--r-sm);font-size:12px;font-weight:700;cursor:pointer;
+  font-family:var(--font);transition:all .12s;border:none;white-space:nowrap;flex-shrink:0;min-height:36px}
+.rob-a{background:var(--green);color:#fff} .rob-a:hover{background:var(--green-dk)}
+.rob-d{background:var(--amber-lt);border:1.5px solid rgba(176,92,0,.3);color:var(--amber)} .rob-d:hover{background:#ffdfab}
+.rob-r{background:var(--purple-lt);border:1.5px solid rgba(92,61,158,.25);color:var(--purple)} .rob-r:hover{background:#e0d6f7}
+
+/* Rx form (right col) — zero code rendering anywhere */
+.med-r{display:flex;flex-direction:column;overflow:hidden;background:var(--surface)}
+.med-empty{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;color:var(--text-3);gap:14px;padding:30px;text-align:center}
+.mf{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.mf-hdr{padding:16px 20px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.mf-drug{font-weight:800;font-size:16px;color:var(--text);display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.mf-meta{font-size:12px;color:var(--text-3)}
+.mf-src{margin-top:10px;padding:9px 12px;border-radius:var(--r-sm);font-size:13px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.src-p{background:var(--accent-bg);border:1px solid rgba(26,111,219,.2);color:var(--text-2)}
+.src-p strong{color:var(--accent)}
+.src-ok{background:var(--green-lt);border:1px solid rgba(13,128,80,.2);color:var(--green)}
+.mf-body{flex:1;overflow-y:auto;padding:16px 20px}
+.fsec{margin-bottom:16px}
+.fsl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text-3);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.fsl::after{content:'';flex:1;height:1px;background:var(--border)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.frow.t3{grid-template-columns:1fr 1fr 1fr}
+.ff{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:12px;color:var(--text-2);font-weight:500}
+.fi,.fse{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);
+  color:var(--text);font-family:var(--font);font-size:13px;padding:8px 10px;outline:none;
+  transition:all .12s;width:100%;height:40px}
+.fi:focus,.fse:focus{border-color:var(--accent);background:var(--surface)}
+.sig-b{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:10px}
+.sig-pre{font-size:13px;color:var(--text);margin-bottom:8px;font-weight:500}
+.sig-pre span{color:var(--accent);font-weight:600}
+.sig-pills{display:flex;gap:6px;flex-wrap:wrap}
+.sp{padding:5px 11px;background:var(--surface);border:1.5px solid var(--border2);
+  border-radius:12px;font-size:12px;color:var(--text-2);cursor:pointer;
+  transition:all .1s;font-weight:500;min-height:32px;display:flex;align-items:center}
+.sp:hover{border-color:var(--accent);color:var(--accent)}
+.sp.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent);font-weight:600}
+.pl-row{display:flex;align-items:center;gap:12px;padding:10px 12px;
+  background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px}
+.pl-m{font-size:13px;font-weight:600;color:var(--text)}
+.pl-s{font-size:12px;color:var(--text-3);margin-top:1px}
+.tog-sw{width:40px;height:22px;background:var(--border2);border-radius:11px;position:relative;
+  cursor:pointer;transition:background .2s;flex-shrink:0}
+.tog-sw.on{background:var(--accent)}
+.tog-sw::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;
+  top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tog-sw.on::after{left:20px}
+.mf-foot{padding:14px 20px;border-top:1.5px solid var(--border);flex-shrink:0;background:var(--surface2)}
+.mf-foot-btns{display:flex;gap:8px;margin-bottom:8px}
+.mf-foot-note{font-size:12px;color:var(--text-3);text-align:center}
+
+/* ── Right panel ── */
+.rp{background:var(--surface);border-left:1.5px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.rp-h{padding:14px 16px;border-bottom:1px solid var(--border);font-family:var(--font-t);
+  font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text-3);display:flex;align-items:center;gap:8px}
+.rp-b{flex:1;overflow-y:auto;padding:14px 16px}
+.cs{margin-bottom:18px}
+.cl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text-3);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.cl::after{content:'';flex:1;height:1px;background:var(--border)}
+.pri-name{flex:1;color:var(--text-2)}
+.pri{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.pri:last-child{border-bottom:none}
+.pd{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:4px}
+.pc{font-size:11px;color:var(--text-3);font-family:monospace}
+.ali-name{flex:1;color:var(--text-2);font-weight:500}
+.ali{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.ali:last-child{border-bottom:none}
+.as{font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px}
+.as-h{background:var(--red-lt);color:var(--red)}
+.as-m{background:var(--amber-lt);color:var(--amber)}
+.mc2-name{flex:1;color:var(--text-2)}
+.mc2{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+.mc2:last-child{border-bottom:none}
+.mr2{font-size:11px;color:var(--text-3);background:var(--surface2);border-radius:3px;padding:2px 6px;border:1px solid var(--border)}
+.rri{padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.rri:last-child{border-bottom:none}
+.rrr{display:flex;align-items:center;gap:6px}
+.rrv{font-size:13px;font-weight:700;font-family:monospace}
+.rrv.ab{color:var(--amber)}
+.rrd{font-size:12px;color:var(--text-3)}
+.sug{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;background:var(--surface2);
+  border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:7px;cursor:pointer;
+  transition:all .1s;min-height:48px}
+.sug:hover{border-color:var(--accent);background:var(--accent-bg)}
+.sg-b{flex:1} .sg-n{font-weight:600;font-size:13px;color:var(--text)} .sg-r{font-size:12px;color:var(--text-3);margin-top:2px}
+.sg-a{font-size:13px;color:var(--accent);cursor:pointer;flex-shrink:0;font-weight:700;padding:4px}
+.pbg{display:inline-flex;align-items:center;background:var(--purple-lt);border:1px solid rgba(92,61,158,.2);
+  border-radius:4px;padding:2px 8px;font-size:11px;color:var(--purple);font-weight:500}
+
+/* ── Legend footer ── */
+.leg{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1.5px solid var(--border);
+  padding:8px 24px;display:flex;align-items:center;gap:16px;z-index:200;flex-wrap:wrap;
+  box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+.leg-t{font-family:var(--font-t);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3)}
+.leg-i{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-3)}
+.ld{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">Cyfluent</div>
+  <div class="pat-chip">
+    <div class="pat-av">CR</div>
+    <div>
+      <div class="pat-name">Carlos Ramirez</div>
+      <div class="pat-meta">DOB: 03/12/1978 &nbsp;&middot;&nbsp; MRN: 00471829 &nbsp;&middot;&nbsp; M, 46y &nbsp;&middot;&nbsp; Identity verified &#10003;</div>
+    </div>
+  </div>
+  <div class="tsp"></div>
+  <div class="topbar-enc"><span class="enc-badge">&#9679; Active</span>&nbsp;Intake Review &nbsp;&middot;&nbsp; 10/16/2025</div>
+  <div class="usr"><div class="usr-av">MS</div> M. Snyder, PA-C</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- LEFT NAV -->
+<div class="lnav">
+  <div class="ns">Encounter</div>
+  <div class="ni"><span class="ni-ico">&#128203;</span>Assignments</div>
+  <div class="ni"><span class="ni-ico">&#128221;</span>HPI</div>
+  <div class="ni"><span class="ni-ico">&#128269;</span>Review of Systems</div>
+  <div class="ni"><span class="ni-ico">&#129658;</span>Physical Exam</div>
+  <div class="ni"><span class="ni-ico">&#128203;</span>Assessment / Plan</div>
+  <div class="ni on"><span class="ni-ico">&#9879;&#65039;</span>Orders <span class="nb">3</span></div>
+  <div class="ni"><span class="ni-ico">&#10084;&#65039;</span>Vitals</div>
+  <div class="ni"><span class="ni-ico">&#128206;</span>Documents</div>
+  <div class="ni"><span class="ni-ico">&#10145;&#65039;</span>Referrals <span class="nb r">1</span></div>
+  <div class="ns" style="margin-top:8px">Chart</div>
+  <div class="ni"><span class="ni-ico">&#128197;</span>Timeline</div>
+  <div class="ni"><span class="ni-ico">&#127973;</span>Problem List</div>
+  <div class="ni"><span class="ni-ico">&#128138;</span>Medications</div>
+  <div class="ni"><span class="ni-ico">&#9888;&#65039;</span>Allergies</div>
+  <div class="ni"><span class="ni-ico">&#128202;</span>Results</div>
+  <div class="ni"><span class="ni-ico">&#128198;</span>Scheduler</div>
+</div>
+
+<!-- ORDER WORKSPACE -->
+<div class="ows">
+  <div class="ows-hdr">
+    <div class="trow">
+      <div class="ws-title">Add Orders</div>
+      <div class="ws-sub">
+        Ordering as: <strong>M. Snyder, PA-C</strong>&nbsp;&middot;&nbsp;Priority:
+        <select class="pri-sel"><option>Routine</option><option>ASAP</option><option>STAT</option></select>
+      </div>
+    </div>
+    <div class="cat-tabs">
+      <div class="ct on" data-p="all">All <span class="tc">3</span></div>
+      <div class="ct" data-p="lab">Lab <span class="tc">2</span></div>
+      <div class="ct" data-p="img">Imaging</div>
+      <div class="ct" data-p="med">&#128138; Medication</div>
+      <div class="ct" data-p="ref">Referral / Consult</div>
+      <div class="ct" data-p="proc">Procedure</div>
+      <div class="ct" data-p="staff">Staff Instruction</div>
+    </div>
+  </div>
+
+  <!-- PANE: ALL (default) -->
+  <div class="tp on" id="pane-all">
+    <div class="sa">
+      <div class="sw">
+        <span class="si-ico">&#128269;</span>
+        <input class="si-in" id="tsearch" type="text" value="comp" placeholder="Search orders — lab, imaging, referral, medication&hellip;"/>
+        <span class="si-kbd">&#8629; add</span>
+      </div>
+      <div class="togg">
+        <div class="to on">All</div>
+        <div class="to">&#11088; Favorites</div>
+      </div>
+      <button class="btn bs">&#128203; Order Sets</button>
+    </div>
+
+    <div class="ta-box" id="ta">
+      <div class="ta-hdr">Labs matching &ldquo;comp&rdquo; &mdash; <span class="ta-ct">4 results</span> &nbsp;&middot;&nbsp; Terminology codes stored in background only</div>
+      <div class="ta-item hl"><div class="ti-ic ti-lab">&#129514;</div><div class="ti-d"><div class="ti-n"><em>Comp</em>rehensive Metabolic Panel (CMP)</div><div class="ti-m">Lab &middot; 14 components &middot; Fasting preferred &middot; Last ordered: 10/10/25</div></div><span class="fav on">&#11088;</span><div class="ti-add">+ Add</div></div>
+      <div class="ta-item"><div class="ti-ic ti-lab">&#129514;</div><div class="ti-d"><div class="ti-n">Basic Metabolic Panel (BMP)</div><div class="ti-m">Lab &middot; 8 components &middot; No special prep</div></div><span class="fav">&#9734;</span><div class="ti-add">+ Add</div></div>
+      <div class="ta-item"><div class="ti-ic ti-lab">&#129514;</div><div class="ti-d"><div class="ti-n">Complete Blood Count (CBC) with Differential</div><div class="ti-m">Lab &middot; No special prep</div></div><span class="fav on">&#11088;</span><div class="ti-add">+ Add</div></div>
+      <div class="ta-item"><div class="ti-ic ti-ref">&#8599;&#65039;</div><div class="ti-d"><div class="ti-n"><em>Comp</em>rehension Assessment &mdash; Speech/Language</div><div class="ti-m">Referral &middot; Speech-Language Pathology</div></div><span class="fav">&#9734;</span><div class="ti-add">+ Add</div></div>
+    </div>
+
+    <div class="os-strip">
+      <span class="os-lbl">Quick sets:</span>
+      <div class="os-chip">&#128203; Intake Screening</div>
+      <div class="os-chip">&#129752; CKD Workup</div>
+      <div class="os-chip">&#128202; Annual Physical Labs</div>
+      <div class="os-chip">&#129504; BH Intake</div>
+      <div class="os-chip" style="color:var(--text-3)">+ New set&hellip;</div>
+    </div>
+
+    <div class="tray-body">
+      <div class="tg">
+        <div class="tg-hdr"><span class="tg-name">Lab</span><span class="tg-line"></span><span class="tg-ct">2 orders</span></div>
+
+        <div class="tri" id="ppd-row">
+          <div class="tcb on"></div>
+          <div class="tri-bd">
+            <div class="tri-n">PPD &mdash; Tuberculin Skin Test <span class="ttag tl">Lab</span></div>
+            <div class="tri-meta">
+              <div class="tmf"><span class="tml">Priority:</span><select class="tsel"><option>Routine</option><option>ASAP</option></select></div>
+              <div class="tmf"><span class="tml">Link:</span><div class="pl">&#128279; TB Screening</div></div>
+              <div class="tmf"><span class="tml">Assign:</span><select class="tsel"><option>Nursing</option><option>M. Snyder</option></select></div>
+              <span class="abadge">&#10003; Billing codes auto-mapped</span>
+            </div>
+          </div>
+          <div class="tri-acts">
+            <div class="tact ed" id="ppd-edit" title="Edit details">&#9998;&#65039;</div>
+            <div class="tact rm" title="Remove">&times;</div>
+          </div>
+        </div>
+
+        <div class="iexp" id="ppd-exp" style="display:none">
+          <div class="iexp-h">&#9998;&#65039; Editing: PPD &mdash; Tuberculin Skin Test</div>
+          <div class="exp-g">
+            <div class="ef"><div class="el">Priority</div><select class="es"><option>Routine</option><option>ASAP</option><option>STAT</option></select></div>
+            <div class="ef"><div class="el">Specimen Type</div><select class="es"><option>Skin Intradermal</option><option>Whole Blood</option></select></div>
+            <div class="ef"><div class="el">Collection Date</div><input class="ei" type="date" value="2025-10-16"/></div>
+            <div class="ef"><div class="el">Assign To</div><select class="es"><option>Nursing &mdash; Floor</option><option>M. Snyder, PA-C</option></select></div>
+            <div class="ef"><div class="el">Link to Problem</div><select class="es"><option>TB Screening</option><option>Other Infectious Disease Screening</option></select></div>
+            <div class="ef"><div class="el">Collection Site</div><select class="es"><option>Left forearm</option><option>Right forearm</option></select></div>
+            <div class="ef full"><div class="el">Special Instructions</div><textarea class="ei" style="height:54px;resize:none;padding:8px 10px" placeholder="e.g. Use non-latex gloves&hellip;"></textarea></div>
+          </div>
+          <div class="ef-foot">
+            <span class="ef-auto">&#10003; Billing codes mapped automatically &mdash; no manual entry needed</span>
+            <button class="btn bg" id="ppd-cancel" style="min-height:38px;padding:7px 14px">Cancel</button>
+            <button class="btn bp" id="ppd-save" style="min-height:38px;padding:7px 14px">Save Changes</button>
+          </div>
+        </div>
+
+        <div class="tri">
+          <div class="tcb on"></div>
+          <div class="tri-bd">
+            <div class="tri-n">Varicella IgG &mdash; Antibody Titer <span class="ttag tl">Lab</span></div>
+            <div class="tri-meta">
+              <div class="tmf"><span class="tml">Priority:</span><select class="tsel"><option>Routine</option><option>ASAP</option></select></div>
+              <div class="tmf"><span class="tml">Link:</span><div class="pl">&#128279; Viral Disease Screening</div></div>
+              <span class="abadge">&#10003; Billing codes auto-mapped</span>
+            </div>
+          </div>
+          <div class="tri-acts"><div class="tact ed">&#9998;&#65039;</div><div class="tact rm">&times;</div></div>
+        </div>
+      </div>
+
+      <div class="tg">
+        <div class="tg-hdr"><span class="tg-name">Referral</span><span class="tg-line"></span><span class="tg-ct">1 order</span></div>
+        <div class="tri">
+          <div class="tcb on"></div>
+          <div class="tri-bd">
+            <div class="tri-n">Gastroenterology &mdash; Levine (GI) Consult <span class="ttag tr">Referral</span></div>
+            <div class="tri-meta">
+              <div class="tmf"><span class="tml">Priority:</span><select class="tsel"><option>Routine</option><option>Urgent</option></select></div>
+              <div class="tmf"><span class="tml">Link:</span><div class="pl">&#128279; Diverticulitis</div></div>
+              <div class="tmf"><span class="tml">Clinic:</span><select class="tsel"><option>Levine GI Associates</option><option>Regional GI Center</option></select></div>
+            </div>
+          </div>
+          <div class="tri-acts"><div class="tact ed">&#9998;&#65039;</div><div class="tact rm">&times;</div></div>
+        </div>
+      </div>
+
+      <!-- CDS Alert — SAFER CPOE 2025: must include actionable response, not just dismiss -->
+      <div class="cds cds-w" id="cds1">
+        <span class="cds-icon">&#9888;&#65039;</span>
+        <div class="cds-body">
+          <div class="cds-title">CKD Stage 4 &mdash; Contrast Imaging Caution</div>
+          <div class="cds-text">Patient eGFR is 22 mL/min (10/10/2025). Contrast-enhanced imaging may require nephrology clearance before scheduling. No contrast orders are currently staged.</div>
+          <div class="cds-acts">
+            <button class="cact ca-ov">Override with documented reason</button>
+            <button class="cact ca-ch">Review nephrology consult option</button>
+            <button class="cact ca-dm">Acknowledge &mdash; no contrast ordered</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /tray-body -->
+
+    <div class="tray-footer">
+      <div class="tf-sum"><strong>3 orders</strong> staged &middot; 3 selected &middot; 0 errors <span class="abadge" style="margin-left:10px">All billing codes auto-mapped &#10003;</span></div>
+      <button class="btn bg" style="min-height:44px">Save Draft</button>
+      <button class="btn bs" style="min-height:44px">&#9881; Options</button>
+      <button class="sub-btn">Sign &amp; Submit <span class="sub-ct">3</span></button>
+    </div>
+  </div><!-- /pane-all -->
+
+  <!-- STUB PANES -->
+  <div class="tp" id="pane-lab"><div class="tray-body" style="display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:14px">Lab orders &mdash; 2 staged</div></div>
+  <div class="tp" id="pane-img"><div class="tray-body" style="display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:14px">No imaging orders staged</div></div>
+  <div class="tp" id="pane-ref"><div class="tray-body" style="display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:14px">Referral / Consult</div></div>
+  <div class="tp" id="pane-proc"><div class="tray-body" style="display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:14px">Procedure orders</div></div>
+  <div class="tp" id="pane-staff"><div class="tray-body" style="display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:14px">Staff Instructions</div></div>
+
+  <!-- PANE: MEDICATION -->
+  <div class="tp" id="pane-med">
+    <div class="med-pane">
+      <!-- Left col -->
+      <div class="med-l">
+        <div class="ms-wrap">
+          <span class="ms-ico">&#128269;</span>
+          <input class="ms-in" id="medSearch" placeholder="Search to prescribe, or select from chart&hellip;"/>
+        </div>
+        <div class="ms-hint">Generic preferred &middot; In-house formulary active &nbsp;&middot;&nbsp; <a>Show brand names</a></div>
+
+        <div class="form-res" id="fres" style="display:none">
+          <div class="form-h" id="fhdr">Results</div>
+          <div class="mres" data-m="nmet500"><div class="mr-ico">&#128138;</div><div class="mr-b"><div class="mr-n">Metformin HCl 500 mg Tablet</div><div class="mr-g">Generic &middot; Oral tablet &middot; Biguanide</div><div class="mr-chips"><span class="mc mc-f">&#10003; Formulary</span><span class="mc mc-t">Tier 1</span></div></div><span class="fav on">&#11088;</span></div>
+          <div class="mres" data-m="nmet1000"><div class="mr-ico">&#128138;</div><div class="mr-b"><div class="mr-n">Metformin HCl 1000 mg Tablet</div><div class="mr-g">Generic &middot; Oral tablet</div><div class="mr-chips"><span class="mc mc-f">&#10003; Formulary</span><span class="mc mc-t">Tier 1</span></div></div><span class="fav">&#9734;</span></div>
+          <div class="mres" data-m="njan"><div class="mr-ico">&#128138;</div><div class="mr-b"><div class="mr-n">Metformin / Sitagliptin 500/50 mg</div><div class="mr-g">Janumet &middot; Combination</div><div class="mr-chips"><span class="mc mc-nf">Non-formulary</span><span class="mc mc-t">Tier 3 &mdash; PA may be required</span></div></div><span class="fav">&#9734;</span></div>
+        </div>
+
+        <div class="med-chart" id="mchrt">
+          <div class="ml-lbl">Active <span class="ll"></span></div>
+          <div class="roi sel" data-m="met" data-type="active"><div class="ri-b"><div class="ri-n">Metformin HCl 500 mg <span class="rist st-a">Active</span></div><div class="ri-sig">1 tab by mouth twice daily with meals &middot; Pill Line &middot; 2 refills</div><div class="ri-meta">Prescribed 10/16/25 &middot; M. Snyder, PA-C</div></div><button class="rob rob-a">Reorder &#8594;</button></div>
+          <div class="roi" data-m="lis" data-type="active"><div class="ri-b"><div class="ri-n">Lisinopril 10 mg <span class="rist st-a">Active</span></div><div class="ri-sig">1 tab by mouth daily &middot; Pill Line &middot; 5 refills</div><div class="ri-meta">Prescribed 10/16/25 &middot; M. Snyder, PA-C</div></div><button class="rob rob-a">Reorder &#8594;</button></div>
+          <div class="roi" data-m="ato" data-type="active"><div class="ri-b"><div class="ri-n">Atorvastatin 20 mg <span class="rist st-a">Active</span></div><div class="ri-sig">1 tab by mouth at bedtime &middot; KOP &middot; 3 refills</div><div class="ri-meta">Prescribed 10/16/25 &middot; Jeremy Grim, MD</div></div><button class="rob rob-a">Reorder &#8594;</button></div>
+          <div class="ml-lbl" style="margin-top:14px">Discontinued <span class="ll"></span></div>
+          <div class="roi" data-m="metdc" data-type="discontinued" style="opacity:.85"><div class="ri-b"><div class="ri-n">Metformin HCl 500 mg <span class="rist st-d">Discontinued</span></div><div class="ri-sig">Stopped: GI intolerance &middot; 09/01/2025</div></div><button class="rob rob-d">Restart &#8594;</button></div>
+          <div class="ml-lbl" style="margin-top:14px">Patient-Reported <span class="ll"></span></div>
+          <div class="roi" data-m="ome" data-type="reported"><div class="ri-b"><div class="ri-n">Omeprazole 20 mg <span class="rist st-r">Reported</span></div><div class="ri-sig">Daily for GERD &middot; self-report, no Rx on file</div></div><button class="rob rob-r">Convert to Rx &#8594;</button></div>
+        </div>
+      </div><!-- /med-l -->
+
+      <!-- Right col: Rx form — no codes anywhere -->
+      <div class="med-r">
+        <div class="med-empty" id="mempty" style="display:none">
+          <div style="font-size:44px;opacity:.12">&#128138;</div>
+          <div style="font-size:15px;font-weight:600;color:var(--text-2)">Select a medication</div>
+          <div style="font-size:13px;color:var(--text-3);line-height:1.7">Choose from the medication list on the left,<br>or search above to write a new prescription.</div>
+        </div>
+        <div class="mf" id="mform">
+          <div class="mf-hdr">
+            <div class="mf-drug" id="mf-drug">Metformin HCl 500 mg Tablet <span class="rist st-a">Active</span></div>
+            <div class="mf-meta" id="mf-meta">Generic &middot; Tier 1 in-formulary &middot; Last dispensed: 10/16/2025</div>
+            <div class="mf-src src-p" id="mf-src"><span>&#128203;</span><div id="mf-st"><strong>Previous Rx:</strong> 1 tablet twice daily with meals &middot; Qty: 60 &middot; 30-day supply &middot; 2 refills &middot; Pill Line &mdash; pre-populated below</div></div>
+          </div>
+          <div class="mf-body">
+            <!-- CDS — SAFER CPOE: actionable response options -->
+            <div class="cds cds-e" id="med-cds" style="margin-bottom:8px;padding:7px 10px;">
+              <span class="cds-icon">&#9888;&#65039;</span>
+              <div class="cds-body">
+                <div class="cds-title">Metformin Contraindicated &mdash; Renal Function</div>
+                <div class="cds-text">Metformin is contraindicated when eGFR &lt;30 mL/min. Patient eGFR: <strong>22 mL/min</strong> (10/10/2025). Clinical justification or dose adjustment required.</div>
+                <div class="cds-acts">
+                  <button class="cact ca-ov">Override with documented reason</button>
+                  <button class="cact ca-ch">Switch to alternative medication</button>
+                  <button class="cact ca-dm">Acknowledge</button>
+                </div>
+              </div>
+            </div>
+            <div class="fsec">
+              <div class="fsl">Sig / Directions</div>
+              <div class="sig-b">
+                <div class="sig-pre">Take <span>1 tablet (500 mg)</span> by <span>mouth</span> <span>twice daily</span> with meals</div>
+                <div class="sig-pills">
+                  <div class="sp">Once daily</div><div class="sp on">Twice daily (BID)</div>
+                  <div class="sp">Three times daily (TID)</div><div class="sp on">With meals</div>
+                  <div class="sp">At bedtime</div>
+                </div>
+              </div>
+              <input class="fi" value="Take 1 tablet by mouth twice daily with meals" style="height:auto;padding:9px 10px"/>
+            </div>
+            <div class="fsec">
+              <div class="fsl">Quantity &amp; Supply</div>
+              <div class="frow t3">
+                <div class="ff"><div class="fl">Quantity</div><input class="fi" value="60"/></div>
+                <div class="ff"><div class="fl">Unit</div><select class="fse"><option>Tablets</option><option>Capsules</option><option>mL</option></select></div>
+                <div class="ff"><div class="fl">Days Supply</div><input class="fi" value="30"/></div>
+              </div>
+              <div class="frow">
+                <div class="ff"><div class="fl">Refills</div><input class="fi" value="3"/></div>
+                <div class="ff"><div class="fl">Start Date</div><input class="fi" type="date" value="2025-10-16"/></div>
+              </div>
+            </div>
+            <div class="fsec">
+              <div class="fsl">Dispensing Method</div>
+              <div class="pl-row"><div style="flex:1"><div class="pl-m">Pill Line</div><div class="pl-s">Facility dispenses at scheduled times</div></div><div class="tog-sw on" id="plt"></div></div>
+              <div class="pl-row"><div style="flex:1"><div class="pl-m">Keep on Person (KOP)</div><div class="pl-s">Patient self-administers</div></div><div class="tog-sw" id="kpt"></div></div>
+            </div>
+            <div class="fsec">
+              <div class="fsl">Problem Link &amp; Pharmacy</div>
+              <div class="frow">
+                <div class="ff"><div class="fl">Link to Problem</div><select class="fse"><option>Type 2 Diabetes Mellitus</option><option>CKD Stage 4</option><option>Hypertension</option></select></div>
+                <div class="ff"><div class="fl">Pharmacy</div><select class="fse"><option>In-house pharmacy</option><option>External &mdash; CVS</option><option>eRx &mdash; Surescripts</option></select></div>
+              </div>
+            </div>
+            <div class="fsec">
+              <div class="fsl">Taper / Variable Dose</div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:13px;color:var(--text-2)">
+                <div style="flex:1">Standard dose active &mdash; enable for step-down schedules or dose packs</div>
+                <button class="btn bg" style="min-height:38px;padding:7px 12px;font-size:12px">+ Add Taper Steps</button>
+              </div>
+            </div>
+          </div><!-- /mf-body -->
+          <div class="mf-foot">
+            <div class="mf-foot-btns">
+              <button class="btn bg" style="flex:1;min-height:44px">Save Draft</button>
+              <button class="btn bsuc" id="sign-btn" style="flex:2;min-height:44px;font-size:14px">Sign &amp; Send to Pharmacy &#8594;</button>
+            </div>
+            <div class="mf-foot-note">Billing codes (NDC / RxNorm) assigned automatically in background &middot; Pharmacy queue notified on sign</div>
+          </div>
+        </div><!-- /mf -->
+      </div><!-- /med-r -->
+    </div><!-- /med-pane -->
+  </div><!-- /pane-med -->
+
+</div><!-- /ows -->
+
+<!-- RIGHT PANEL -->
+<div class="rp">
+  <div class="rp-h">&#128203; Patient Context <span style="margin-left:auto;font-size:11px;color:var(--text-4);text-transform:none;letter-spacing:0;font-weight:400">Read-only</span></div>
+  <div class="rp-b">
+
+    <!-- 1. Suggested Orders -->
+    <div class="cs">
+      <div class="cl">&#128161; Suggested <span class="pbg" style="margin-left:4px">P2</span></div>
+      <div class="sug"><div class="sg-b"><div class="sg-n">Renal Function Panel</div><div class="sg-r">CKD Stage 4 &mdash; last ordered 90+ days ago</div></div><span class="sg-a">+ Add</span></div>
+      <div class="sug"><div class="sg-b"><div class="sg-n">HbA1c</div><div class="sg-r">Type 2 Diabetes &mdash; no result in 6 months</div></div><span class="sg-a">+ Add</span></div>
+    </div>
+
+    <!-- 2. Allergies -->
+    <div class="cs">
+      <div class="cl">&#9888; Allergies</div>
+      <div class="ali"><div class="ali-name">Penicillin</div><span class="as as-h">Severe</span></div>
+      <div class="ali"><div class="ali-name">Sulfa drugs</div><span class="as as-m">Moderate</span></div>
+    </div>
+
+    <!-- 3. Active Problems -->
+    <div class="cs">
+      <div class="cl">Active Problems</div>
+      <div class="pri"><div class="pri-name">Chronic Kidney Disease, Stage 4</div><div class="pc">N18.4</div></div>
+      <div class="pri"><div class="pri-name">Type 2 Diabetes Mellitus</div><div class="pc">E11.65</div></div>
+      <div class="pri"><div class="pri-name">Diverticulitis of large intestine</div><div class="pc">K57.30</div></div>
+      <div class="pri"><div class="pri-name">Essential Hypertension</div><div class="pc">I10</div></div>
+    </div>
+
+    <!-- 4. Active Medications -->
+    <div class="cs">
+      <div class="cl">Active Medications</div>
+      <div class="mc2"><div class="mc2-name">Metformin 500 mg</div><span class="mr2">PO BID</span></div>
+      <div class="mc2"><div class="mc2-name">Lisinopril 10 mg</div><span class="mr2">PO daily</span></div>
+      <div class="mc2"><div class="mc2-name">Atorvastatin 20 mg</div><span class="mr2">PO nightly</span></div>
+    </div>
+
+    <!-- 5. Recent Results -->
+    <div class="cs">
+      <div class="cl">Recent Results</div>
+      <div class="rri"><div class="rrr"><div style="flex:1">Creatinine</div><div class="rrv ab">3.8 mg/dL &#8593;</div></div><div class="rrd">10/10/2025</div></div>
+      <div class="rri"><div class="rrr"><div style="flex:1">eGFR</div><div class="rrv ab">22 mL/min &#8595;</div></div><div class="rrd">10/10/2025</div></div>
+      <div class="rri"><div class="rrr"><div style="flex:1">Lipid Panel</div><div class="rrv" style="color:var(--green)">Complete</div></div><div class="rrd">10/10/2025</div></div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<div class="leg">
+  <span class="leg-t">v8</span>
+  <div class="leg-i"><span class="ld" style="background:var(--accent)"></span> Light mode &mdash; WCAG 2.1 AA contrast throughout</div>
+  <div class="leg-i"><span class="ld" style="background:var(--green)"></span> All codes hidden from clinical view (RxNorm, LOINC, CPT, NDC &mdash; background only)</div>
+  <div class="leg-i"><span class="ld" style="background:var(--amber)"></span> 14px base &middot; 12px minimum secondary &middot; &ge;44px touch targets</div>
+  <div class="leg-i"><span class="ld" style="background:var(--red)"></span> CDS alerts: actionable responses (Override / Change / Acknowledge) per SAFER CPOE guide</div>
+</div>
+
+<script>
+// Category tabs
+document.querySelectorAll('.ct').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.ct').forEach(x => x.classList.remove('on'));
+    t.classList.add('on');
+    document.querySelectorAll('.tp').forEach(p => p.classList.remove('on'));
+    const p = document.getElementById('pane-' + t.dataset.p);
+    if (p) p.classList.add('on');
+  });
+});
+
+// Toggle opts
+document.querySelectorAll('.to').forEach(o => {
+  o.addEventListener('click', () => {
+    const g = o.closest('.togg');
+    g.querySelectorAll('.to').forEach(x => x.classList.remove('on'));
+    o.classList.add('on');
+  });
+});
+
+// Checkboxes
+document.querySelectorAll('.tcb').forEach(cb => cb.addEventListener('click', () => cb.classList.toggle('on')));
+
+// PPD inline edit
+const ppdEdit = document.getElementById('ppd-edit');
+const ppdExp  = document.getElementById('ppd-exp');
+ppdEdit.addEventListener('click', () => {
+  const open = ppdExp.style.display !== 'none';
+  ppdExp.style.display = open ? 'none' : 'block';
+  ppdEdit.style.background = open ? 'var(--green-lt)' : '#bff0d8';
+});
+document.getElementById('ppd-cancel').addEventListener('click', () => { ppdExp.style.display = 'none'; ppdEdit.style.background = 'var(--green-lt)'; });
+document.getElementById('ppd-save').addEventListener('click', () => {
+  ppdExp.style.display = 'none'; ppdEdit.style.background = 'var(--green-lt)';
+  const orig = ppdEdit.innerHTML; ppdEdit.innerHTML = '&#10003;'; ppdEdit.style.color = 'var(--green)';
+  setTimeout(() => { ppdEdit.innerHTML = orig; ppdEdit.style.color = ''; }, 1500);
+});
+
+// Remove order items
+document.querySelectorAll('.tact.rm').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.tri');
+    const nxt = item.nextElementSibling;
+    item.style.transition = 'opacity .15s'; item.style.opacity = '0';
+    if (nxt && nxt.classList.contains('iexp')) { nxt.style.opacity = '0'; setTimeout(() => nxt.remove(), 150); }
+    setTimeout(() => item.remove(), 150);
+  });
+});
+
+// Typeahead add
+document.querySelectorAll('.ti-add').forEach(b => {
+  b.addEventListener('click', () => { b.textContent = '\u2713 Added'; b.style.background = 'var(--green)'; b.style.color = '#fff'; b.style.borderColor = 'var(--green)'; });
+});
+
+// Tray search toggle
+document.getElementById('tsearch').addEventListener('input', function () {
+  document.getElementById('ta').style.display = this.value.trim() ? 'block' : 'none';
+});
+
+// Favs
+document.querySelectorAll('.fav').forEach(s => {
+  s.addEventListener('click', e => {
+    e.stopPropagation();
+    s.classList.toggle('on'); s.innerHTML = s.classList.contains('on') ? '&#11088;' : '&#9734;';
+  });
+});
+
+// Order set chips
+document.querySelectorAll('.os-chip').forEach(c => {
+  c.addEventListener('click', () => {
+    c.style.background = 'var(--accent-bg)'; c.style.borderColor = 'var(--accent)';
+    setTimeout(() => { c.style.background = ''; c.style.borderColor = ''; }, 700);
+  });
+});
+
+// CDS actions
+document.querySelectorAll('.ca-dm').forEach(b => {
+  b.addEventListener('click', () => {
+    const bar = b.closest('.cds'); bar.style.opacity = '0'; bar.style.transition = 'opacity .2s';
+    setTimeout(() => bar.remove(), 200);
+  });
+});
+document.querySelectorAll('.ca-ov').forEach(b => {
+  b.addEventListener('click', () => {
+    const reason = prompt('Enter clinical reason for override:');
+    if (reason) {
+      const bar = b.closest('.cds');
+      bar.className = 'cds cds-i';
+      bar.innerHTML = '<span class="cds-icon">&#128203;</span><div class="cds-body"><div class="cds-title">Alert Override Documented</div><div class="cds-text">Reason: ' + reason + ' &middot; Documented by M. Snyder, PA-C</div></div>';
+    }
+  });
+});
+
+// Pill Line / KOP exclusive
+const plt = document.getElementById('plt'), kpt = document.getElementById('kpt');
+plt.addEventListener('click', () => { plt.classList.toggle('on'); if (plt.classList.contains('on')) kpt.classList.remove('on'); });
+kpt.addEventListener('click', () => { kpt.classList.toggle('on'); if (kpt.classList.contains('on')) plt.classList.remove('on'); });
+
+// Sig pills
+document.querySelectorAll('.sp').forEach(p => {
+  p.addEventListener('click', () => { document.querySelectorAll('.sp').forEach(x => x.classList.remove('on')); p.classList.add('on'); });
+});
+
+// Med list selection + form load
+const medDB = {
+  met:    { n:'Metformin HCl 500 mg Tablet', s:'Active', sc:'st-a', m:'Generic &middot; Tier 1 &middot; Last dispensed: 10/16/2025', srcc:'src-p', si:'&#128203;', st:'<strong>Previous Rx:</strong> 1 tablet twice daily with meals &middot; 60 tabs &middot; 30 days &middot; 2 refills &middot; Pill Line', cds:true },
+  lis:    { n:'Lisinopril 10 mg Tablet', s:'Active', sc:'st-a', m:'Generic &middot; Tier 1 &middot; Last dispensed: 10/16/2025', srcc:'src-p', si:'&#128203;', st:'<strong>Previous Rx:</strong> 1 tablet once daily &middot; 30 tabs &middot; 30 days &middot; 5 refills &middot; Pill Line', cds:false },
+  ato:    { n:'Atorvastatin 20 mg Tablet', s:'Active', sc:'st-a', m:'Generic &middot; Tier 1 &middot; Last dispensed: 10/16/2025', srcc:'src-p', si:'&#128203;', st:'<strong>Previous Rx:</strong> 1 tablet at bedtime &middot; 30 tabs &middot; 30 days &middot; 3 refills &middot; KOP', cds:false },
+  metdc:  { n:'Metformin HCl 500 mg Tablet', s:'Discontinued', sc:'st-d', m:'Generic &middot; Discontinued 09/01/2025 &mdash; GI intolerance', srcc:'src-p', si:'&#9888;&#65039;', st:'<strong>Discontinued Rx:</strong> Stopped for GI intolerance &mdash; review before restarting', cds:true },
+  ome:    { n:'Omeprazole 20 mg Capsule', s:'Patient-Reported', sc:'st-r', m:'Generic &middot; No prior Rx on file', srcc:'src-p', si:'&#128172;', st:'<strong>Patient-reported:</strong> Daily for GERD &middot; No formal Rx on file', cds:false },
+  nmet500:{ n:'Metformin HCl 500 mg Tablet', s:'New Rx', sc:'st-a', m:'Generic &middot; Tier 1 in-formulary', srcc:'src-ok', si:'&#10003;', st:'No allergy interactions detected', cds:true },
+  nmet1000:{ n:'Metformin HCl 1000 mg Tablet', s:'New Rx', sc:'st-a', m:'Generic &middot; Tier 1 in-formulary', srcc:'src-ok', si:'&#10003;', st:'No allergy interactions detected', cds:true },
+  njan:   { n:'Metformin / Sitagliptin 500/50 mg', s:'New Rx', sc:'st-d', m:'Janumet &middot; Non-formulary &middot; Tier 3', srcc:'src-ok', si:'&#10003;', st:'No allergy interactions detected', cds:false },
+};
+function loadMed(key) {
+  const d = medDB[key]; if (!d) return;
+  document.getElementById('mf-drug').innerHTML = d.n + ' <span class="rist ' + d.sc + '">' + d.s + '</span>';
+  document.getElementById('mf-meta').innerHTML = d.m;
+  const src = document.getElementById('mf-src');
+  src.className = 'mf-src ' + d.srcc;
+  src.innerHTML = '<span>' + d.si + '</span><div>' + d.st + '</div>';
+  const cds = document.getElementById('med-cds');
+  if (cds) cds.style.display = d.cds ? 'flex' : 'none';
+  document.getElementById('mempty').style.display = 'none';
+  document.getElementById('mform').style.display = 'flex';
+}
+document.querySelectorAll('.roi').forEach(r => {
+  r.addEventListener('click', e => {
+    if (e.target.closest('.rob')) return;
+    document.querySelectorAll('.roi').forEach(x => x.classList.remove('sel','rp','dc'));
+    r.classList.add('sel');
+    if (r.dataset.type === 'reported') r.classList.add('rp');
+    if (r.dataset.type === 'discontinued') r.classList.add('dc');
+    loadMed(r.dataset.m);
+  });
+});
+document.querySelectorAll('.rob').forEach(b => {
+  b.addEventListener('click', e => {
+    e.stopPropagation();
+    const r = b.closest('.roi');
+    document.querySelectorAll('.roi').forEach(x => x.classList.remove('sel','rp','dc'));
+    r.classList.add('sel');
+    if (r.dataset.type === 'reported') r.classList.add('rp');
+    if (r.dataset.type === 'discontinued') r.classList.add('dc');
+    loadMed(r.dataset.m);
+    const orig = b.innerHTML; b.innerHTML = '&#10003; Loaded'; b.style.opacity = '.7';
+    setTimeout(() => { b.innerHTML = orig; b.style.opacity = ''; }, 1400);
+  });
+});
+
+// Formulary search
+const msIn = document.getElementById('medSearch'), fres = document.getElementById('fres'), fhdr = document.getElementById('fhdr'), mchrt = document.getElementById('mchrt');
+msIn.addEventListener('input', function () {
+  if (this.value.trim()) { fhdr.textContent = 'Matching "' + this.value.trim() + '"'; fres.style.display = 'block'; mchrt.style.display = 'none'; }
+  else { fres.style.display = 'none'; mchrt.style.display = 'block'; }
+});
+document.querySelectorAll('.mres').forEach(r => {
+  r.addEventListener('click', () => {
+    document.querySelectorAll('.mres,.roi').forEach(x => x.classList.remove('sel','rp','dc'));
+    r.classList.add('sel'); loadMed(r.dataset.m);
+  });
+});
+
+// Sign button
+document.getElementById('sign-btn').addEventListener('click', function () {
+  this.innerHTML = '&#10003; Sent to Pharmacy'; this.style.background = 'var(--green-dk)';
+  setTimeout(() => { this.innerHTML = 'Sign &amp; Send to Pharmacy &#8594;'; this.style.background = ''; }, 2000);
+});
+
+// Suggestion adds
+document.querySelectorAll('.sg-a').forEach(b => {
+  b.addEventListener('click', () => { b.textContent = '\u2713'; b.style.color = 'var(--green)'; });
+});
+</script>
+</body>
+</html>
