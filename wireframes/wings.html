@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Overview — Wings Legal</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOKENS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+:root {
+  /* Sidebar */
+  --sb-bg:      #1e3a5f;
+  --sb-hover:   rgba(255,255,255,.07);
+  --sb-active:  rgba(96,165,250,.2);
+  --sb-border:  rgba(255,255,255,.1);
+  --sb-text:    #bdd0ea;
+  --sb-text-on: #f0f6ff;
+
+  /* Content */
+  --bg:         #f0f4f9;
+  --surface:    #ffffff;
+  --surface-2:  #f7f9fc;
+  --border:     #dde4ef;
+  --border-2:   #c8d3e8;
+
+  /* Brand */
+  --blue:       #2563eb;
+  --blue-light: #eff6ff;
+  --blue-dark:  #1d4ed8;
+
+  /* Status */
+  --green:      #16a34a;
+  --green-bg:   #f0fdf4;
+  --amber:      #b45309;
+  --amber-bg:   #fffbeb;
+  --red:        #dc2626;
+  --red-bg:     #fef2f2;
+  --slate:      #64748b;
+
+  /* Text */
+  --t1: #0f172a;
+  --t2: #334155;
+  --t3: #64748b;
+  --t4: #94a3b8;
+
+  --sans: 'Plus Jakarta Sans', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.06);
+  --shadow-md: 0 4px 12px rgba(15,23,42,.10), 0 2px 4px rgba(15,23,42,.06);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-size: 14px; line-height: 1.5; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LAYOUT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.app { display: flex; height: 100vh; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SIDEBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.sidebar {
+  width: 220px;
+  background: var(--sb-bg);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(255,255,255,.05);
+}
+
+.sb-brand {
+  padding: 18px 16px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--sb-border);
+}
+.sb-logo {
+  width: 32px; height: 32px;
+  background: var(--blue);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800; color: white; flex-shrink: 0;
+  letter-spacing: -.5px;
+}
+.sb-name { font-size: 15px; font-weight: 700; color: var(--sb-text-on); }
+.sb-sub  { font-size: 11px; color: var(--sb-text); margin-top: 1px; }
+
+.sb-client {
+  padding: 10px 12px;
+  margin: 8px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius);
+}
+.sb-client-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--t4); margin-bottom: 4px; }
+.sb-client-name  { font-size: 13px; font-weight: 700; color: white; line-height: 1.3; }
+.sb-client-id    { font-size: 12px; color: var(--sb-text); margin-top: 3px; display: flex; gap: 8px; }
+.sb-client-nav   { display: flex; gap: 4px; margin-top: 8px; }
+.sb-nav-btn {
+  flex: 1; height: 28px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 5px;
+  color: var(--sb-text); font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .15s;
+  font-family: var(--sans);
+}
+.sb-nav-btn:hover { background: rgba(255,255,255,.12); color: white; }
+
+.sb-section {
+  padding: 16px 12px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: #7aafd4;
+}
+
+.sb-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px;
+  height: 36px;
+  color: var(--sb-text);
+  border-radius: 6px;
+  margin: 1px 6px;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 500;
+  border: none; background: transparent;
+  width: calc(100% - 12px);
+  text-align: left;
+  transition: all .15s;
+  border-left: 2px solid transparent;
+  position: relative;
+}
+.sb-item:hover { background: var(--sb-hover); color: var(--sb-text-on); }
+.sb-item.active { background: var(--sb-active); color: #fff; border-left-color: #60a5fa; font-weight: 600; }
+.sb-item .icon { font-size: 14px; flex-shrink: 0; opacity: .7; }
+.sb-item.active .icon { opacity: 1; }
+.sb-badge {
+  margin-left: auto;
+  min-width: 18px; height: 18px;
+  background: var(--red);
+  color: white; font-size: 10px; font-weight: 700;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 5px;
+}
+.sb-badge.blue { background: #1d4ed8; }
+
+.sb-footer {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid var(--sb-border);
+  display: flex; align-items: center; gap: 8px;
+}
+.sb-avatar {
+  width: 32px; height: 32px;
+  background: #1d4ed8;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.sb-user-name { font-size: 12.5px; font-weight: 600; color: var(--sb-text-on); }
+.sb-user-role { font-size: 11px; color: var(--sb-text); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MAIN AREA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* TOPBAR */
+.topbar {
+  height: 52px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.topbar-search {
+  flex: 1; max-width: 360px;
+  height: 34px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px;
+  font-size: 13px; color: var(--t3);
+  cursor: text;
+  transition: border-color .15s;
+}
+.topbar-search:hover { border-color: var(--border-2); }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.tb-btn {
+  width: 34px; height: 34px;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; cursor: pointer;
+  color: var(--t3);
+  transition: all .15s;
+  position: relative;
+}
+.tb-btn:hover { background: var(--bg); border-color: var(--border-2); }
+.tb-notif::after {
+  content: '2';
+  position: absolute; top: 6px; right: 6px;
+  width: 8px; height: 8px;
+  background: var(--red); border-radius: 50%; border: 2px solid white;
+  font-size: 0;
+}
+.tb-ctx {
+  height: 34px; padding: 0 10px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12.5px; color: var(--t2); font-weight: 500;
+  cursor: pointer;
+}
+.tb-ctx-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; }
+.tb-divider { width: 1px; height: 22px; background: var(--border); }
+
+/* CONTENT AREA */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CLIENT HEADER STRIP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.client-header {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow);
+}
+.ch-avatar {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: white; flex-shrink: 0;
+  letter-spacing: -.5px;
+}
+.ch-name { font-size: 18px; font-weight: 800; color: var(--t1); letter-spacing: -.3px; line-height: 1.2; }
+.ch-ids  { display: flex; gap: 14px; margin-top: 3px; }
+.ch-id   { font-size: 12.5px; color: var(--t3); display: flex; align-items: center; gap: 4px; }
+.ch-id-label { font-family: var(--sans); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--t4); }
+.ch-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.ch-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag {
+  height: 24px; padding: 0 10px;
+  border-radius: 12px; border: 1.5px solid;
+  font-size: 11.5px; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+}
+.tag.blue   { background: var(--blue-light); color: #1d4ed8; border-color: #bfdbfe; }
+.tag.green  { background: var(--green-bg);   color: var(--green); border-color: #bbf7d0; }
+.tag.amber  { background: var(--amber-bg);   color: var(--amber); border-color: #fde68a; }
+.tag.red    { background: var(--red-bg);     color: var(--red);   border-color: #fecaca; }
+.tag.slate  { background: #f1f5f9; color: var(--slate); border-color: #cbd5e1; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MAIN GRID (no-scroll layout)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.grid-main {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.grid-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.grid-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-2);
+}
+.card-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--t3);
+}
+.card-action {
+  margin-left: auto;
+  height: 26px; padding: 0 10px;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  font-size: 12px; font-weight: 600;
+  color: var(--t2);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+  font-family: var(--sans);
+  transition: all .15s;
+}
+.card-action:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+.card-body { padding: 12px 16px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DATA ROWS — read mode
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.data-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.data-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+.data-cell {
+  background: var(--surface);
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background .12s;
+  position: relative;
+}
+.data-cell:hover { background: #fafcff; }
+.data-cell:hover .edit-hint { opacity: 1; }
+.data-cell.editing { background: #f0f7ff; }
+
+.dc-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--t4);
+  margin-bottom: 3px;
+}
+.dc-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--t1);
+  line-height: 1.3;
+}
+.dc-value.mono { font-size: 13.5px; }
+.dc-value.empty { color: var(--t4); font-weight: 400; font-style: italic; }
+
+.edit-hint {
+  position: absolute;
+  top: 6px; right: 8px;
+  font-size: 10px;
+  color: var(--blue);
+  opacity: 0;
+  transition: opacity .12s;
+  font-weight: 600;
+}
+
+.inline-input {
+  display: none;
+  width: 100%;
+  height: 30px;
+  background: white;
+  border: 1.5px solid var(--blue);
+  border-radius: 4px;
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t1);
+  font-family: var(--sans);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+.data-cell.editing .dc-value { display: none; }
+.data-cell.editing .dc-label { color: var(--blue); }
+.data-cell.editing .inline-input { display: block; }
+.data-cell.editing .edit-hint { display: none; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   KV LIST — compact pairs
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.kv-list { display: flex; flex-direction: column; }
+.kv-row {
+  display: flex;
+  align-items: center;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+.kv-row:last-child { border-bottom: none; }
+.kv-key {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--t3);
+  width: 120px;
+  flex-shrink: 0;
+}
+.kv-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t1);
+  flex: 1;
+}
+.kv-val.mono { font-size: 13px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ALERT BANNER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.alert-banner {
+  background: var(--red-bg);
+  border: 1.5px solid #fecaca;
+  border-left: 4px solid var(--red);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+}
+.alert-icon { font-size: 15px; flex-shrink: 0; line-height: 1.4; }
+.alert-content { flex: 1; }
+.alert-title { font-weight: 700; color: var(--red); font-size: 13px; margin-bottom: 3px; }
+.alert-items { color: #991b1b; font-size: 12.5px; line-height: 1.8; }
+.alert-dismiss { flex-shrink: 0; font-size: 15px; color: #fca5a5; cursor: pointer; padding: 2px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   STATUS CARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.status-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.status-cell {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.status-cell-label { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--t4); margin-bottom: 4px; }
+.status-cell-value { font-size: 15px; font-weight: 800; color: var(--t1); letter-spacing: -.3px; }
+.status-cell-sub   { font-size: 11px; color: var(--t3); margin-top: 2px; }
+.status-cell.green { border-color: #bbf7d0; background: #f0fdf4; }
+.status-cell.green .status-cell-value { color: var(--green); }
+.status-cell.amber { border-color: #fde68a; background: #fffbeb; }
+.status-cell.amber .status-cell-value { color: var(--amber); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   QUICK ACTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.qa-grid { display: flex; flex-direction: column; gap: 5px; }
+.qa-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px; font-weight: 600; color: var(--t2);
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all .15s;
+  text-align: left;
+}
+.qa-btn:hover { background: var(--blue-light); border-color: #bfdbfe; color: var(--blue); }
+.qa-icon { font-size: 14px; }
+.qa-arrow { margin-left: auto; color: var(--t4); font-size: 12px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ACTIVITY FEED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.activity-list { display: flex; flex-direction: column; }
+.activity-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--blue); flex-shrink: 0; margin-top: 5px;
+}
+.activity-dot.green  { background: var(--green); }
+.activity-dot.amber  { background: #d97706; }
+.activity-dot.red    { background: var(--red); }
+.activity-dot.slate  { background: var(--slate); }
+.activity-text { font-size: 12.5px; color: var(--t2); line-height: 1.45; flex: 1; }
+.activity-text strong { color: var(--t1); font-weight: 600; }
+.activity-time { font-size: 11.5px; color: var(--t4); flex-shrink: 0; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   UPCOMING EVENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.event-list { display: flex; flex-direction: column; gap: 6px; }
+.event-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  border-left: 3px solid;
+}
+.event-item.court    { border-left-color: var(--blue); }
+.event-item.deadline { border-left-color: var(--red); }
+.event-item.meeting  { border-left-color: var(--green); }
+.event-date {
+  font-size: 11px; font-weight: 600;
+  color: var(--t3); width: 52px; flex-shrink: 0; line-height: 1.3; text-align: center;
+}
+.event-date .day { font-size: 18px; font-weight: 800; color: var(--t1); display: block; line-height: 1; }
+.event-name { font-size: 12.5px; font-weight: 600; color: var(--t1); }
+.event-meta { font-size: 11px; color: var(--t3); margin-top: 1px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TASK PILLS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.task-list { display: flex; flex-direction: column; gap: 5px; }
+.task-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.task-check {
+  width: 16px; height: 16px;
+  border: 2px solid var(--border-2);
+  border-radius: 4px; flex-shrink: 0;
+  cursor: pointer;
+  transition: all .12s;
+}
+.task-check:hover { border-color: var(--blue); }
+.task-text  { font-size: 12.5px; font-weight: 500; color: var(--t1); flex: 1; }
+.task-pri   { width: 4px; height: 24px; border-radius: 2px; flex-shrink: 0; }
+.task-pri.h { background: var(--red); }
+.task-pri.m { background: #d97706; }
+.task-pri.l { background: var(--green); }
+.task-due   { font-family: var(--mono); font-size: 11px; color: var(--t4); }
+.task-due.overdue { color: var(--red); font-weight: 600; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BUTTONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 34px; padding: 0 14px;
+  border-radius: 6px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all .15s;
+  border: 1.5px solid transparent;
+  white-space: nowrap;
+}
+.btn.primary { background: var(--blue); color: white; border-color: var(--blue); }
+.btn.primary:hover { background: var(--blue-dark); border-color: var(--blue-dark); }
+.btn.ghost   { background: white; color: var(--t2); border-color: var(--border); }
+.btn.ghost:hover { border-color: var(--border-2); background: var(--bg); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   NAV TABS (sub-nav)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.sub-nav {
+  display: flex;
+  gap: 2px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  flex-shrink: 0;
+}
+.sub-tab {
+  height: 42px; padding: 0 14px;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 500;
+  color: var(--t3);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.sub-tab:hover { color: var(--t1); }
+.sub-tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+.sub-tab-badge {
+  min-width: 16px; height: 16px;
+  background: var(--red);
+  color: white; font-size: 10px; font-weight: 700;
+  border-radius: 8px; padding: 0 4px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCREEN SWITCHER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.screen { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.screen.active { display: flex; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FILINGS SCREEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.filing-timeline { padding: 4px 0; }
+.fi {
+  display: flex; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+.fi:last-child { border-bottom: none; }
+.fi-track { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; padding-top: 2px; }
+.fi-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--blue);
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px var(--blue);
+  flex-shrink: 0;
+}
+.fi-dot.done  { background: var(--green); box-shadow: 0 0 0 2px var(--green); }
+.fi-dot.pend  { background: #d97706; box-shadow: 0 0 0 2px #d97706; }
+.fi-dot.none  { background: var(--border-2); box-shadow: 0 0 0 2px var(--border-2); }
+.fi-line      { width: 2px; flex: 1; background: var(--border); min-height: 14px; margin-top: 3px; }
+.fi:last-child .fi-line { display: none; }
+.fi-date  { font-family: var(--mono); font-size: 11.5px; color: var(--t3); margin-bottom: 3px; display: flex; align-items: center; gap: 7px; }
+.fi-title { font-size: 13.5px; font-weight: 700; color: var(--t1); }
+.fi-sub   { font-size: 12px; color: var(--t3); margin-top: 2px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TASKS SCREEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.task-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+  transition: box-shadow .15s;
+}
+.task-card:hover { box-shadow: var(--shadow-md); }
+.task-card-body { flex: 1; }
+.task-card-title { font-size: 13.5px; font-weight: 700; color: var(--t1); margin-bottom: 5px; }
+.task-card-meta { font-size: 12px; color: var(--t3); display: flex; gap: 14px; flex-wrap: wrap; }
+.task-card-actions { display: flex; gap: 6px; align-items: flex-start; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DOCTORS SCREEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.dr-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--blue);
+}
+.dr-card.pending  { border-left-color: #d97706; }
+.dr-card.received { border-left-color: var(--green); }
+.dr-card.none     { border-left-color: var(--border-2); }
+.dr-name  { font-size: 14px; font-weight: 700; color: var(--t1); }
+.dr-dates { display: flex; gap: 20px; margin-top: 4px; }
+.dr-date  { display: flex; flex-direction: column; }
+.dr-date-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--t4); }
+.dr-date-value { font-size: 12.5px; font-weight: 600; color: var(--t2); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CALENDAR SCREEN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.cal-hdr { background: var(--t1); color: white; text-align: center; padding: 8px 4px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.cal-day { background: var(--surface); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 7px 6px; min-height: 72px; }
+.cal-day:nth-child(7n) { border-right: none; }
+.cal-day.other   { background: var(--surface-2); }
+.cal-day.today   { background: #eff6ff; outline: 2px solid var(--blue); outline-offset: -2px; }
+.cal-day-n       { font-size: 12px; font-weight: 700; color: var(--t3); margin-bottom: 4px; }
+.cal-day.today .cal-day-n { background: var(--blue); color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+.cal-evt { font-size: 10px; font-weight: 700; padding: 2px 5px; border-radius: 3px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 2px solid; }
+.cal-evt.court    { background: #dbeafe; color: #1e40af; border-left-color: var(--blue); }
+.cal-evt.deadline { background: #fee2e2; color: #991b1b; border-left-color: var(--red); }
+.cal-evt.meeting  { background: #f0fdf4; color: #15803d; border-left-color: var(--green); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCROLLABLE CONTENT INNER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.scroll-content { overflow-y: auto; flex: 1; padding: 16px 20px; }
+
+/* Focus states */
+.data-cell:focus { outline: 2px solid var(--blue); outline-offset: -2px; }
+*:focus-visible  { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.ai-section { animation: fadeIn .3s ease forwards; opacity: 0; }
+.ai-section:nth-child(2) { animation-delay: .05s; }
+.ai-section:nth-child(3) { animation-delay: .1s; }
+.ai-section:nth-child(4) { animation-delay: .15s; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <nav class="sidebar" aria-label="Primary navigation">
+    <div class="sb-brand">
+      <div class="sb-logo">W</div>
+      <div>
+        <div class="sb-name">Wings</div>
+        <div class="sb-sub">Legal Management</div>
+      </div>
+    </div>
+
+    <div class="sb-client">
+      <div class="sb-client-label">Active Client</div>
+      <div class="sb-client-name">Ryan L. Dykins</div>
+      <div class="sb-client-id">
+        <span>ID: 001</span>
+      </div>
+    </div>
+
+    <div class="sb-section">Client</div>
+    <button class="sb-item active" onclick="showScreen('general')" aria-current="page">
+      <span class="icon">👤</span> General
+    </button>
+    <button class="sb-item" onclick="showScreen('filings')">
+      <span class="icon">📋</span> Filings &amp; Appeals
+    </button>
+    <button class="sb-item" onclick="showScreen('awards')">
+      <span class="icon">💰</span> Awards &amp; Payments
+    </button>
+    <button class="sb-item" onclick="showScreen('intake')">
+      <span class="icon">📝</span> Intake I
+    </button>
+    <button class="sb-item" onclick="showScreen('doctors')">
+      <span class="icon">🏥</span> Medical Records
+    </button>
+
+    <div class="sb-section">Tools</div>
+    <button class="sb-item" onclick="showScreen('documents')">
+      <span class="icon">📁</span> Documents
+      <span class="sb-badge blue" aria-label="14 documents">14</span>
+    </button>
+    <button class="sb-item" onclick="showScreen('tasks')">
+      <span class="icon">✅</span> Tasks
+      <span class="sb-badge" aria-label="5 open tasks, 2 overdue">5</span>
+    </button>
+    <button class="sb-item" onclick="showScreen('calendar')">
+      <span class="icon">📅</span> Calendar
+    </button>
+    <button class="sb-item">
+      <span class="icon">💬</span> Messages
+      <span class="sb-badge" aria-label="3 unread messages">3</span>
+    </button>
+
+    <div class="sb-footer">
+      <div class="sb-avatar" aria-hidden="true">MH</div>
+      <div>
+        <div class="sb-user-name">Marc Hanes</div>
+        <div class="sb-user-role">Admin · SS Demo A</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div class="main" id="main-content" tabindex="-1">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-search" role="search" tabindex="0" aria-label="Search clients, documents, cases">
+        🔍&nbsp; Search clients, docs, cases…
+      </div>
+      <div class="topbar-right">
+        <div class="tb-ctx">
+          <div class="tb-ctx-dot" aria-hidden="true"></div>
+          SS Demo A
+        </div>
+        <div class="tb-divider" aria-hidden="true"></div>
+        <button class="tb-btn tb-notif" aria-label="Notifications — 2 unread">🔔</button>
+        <button class="tb-btn" aria-label="Settings">⚙</button>
+      </div>
+    </header>
+
+    <!-- ═══ SCREEN: GENERAL ═══ -->
+    <div class="screen active" id="screen-general" role="main" aria-label="General — Client Overview">
+      <div class="sub-nav" role="tablist" aria-label="General sub-sections">
+        <div class="sub-tab active" role="tab" aria-selected="true">Overview</div>
+        <div class="sub-tab" role="tab" aria-selected="false">Contact &amp; Address</div>
+        <div class="sub-tab" role="tab" aria-selected="false">Case Notes</div>
+        <div class="sub-tab" role="tab" aria-selected="false">History</div>
+      </div>
+
+      <div class="content">
+        <!-- Client identity strip -->
+        <div class="client-header">
+          <div class="ch-avatar" aria-hidden="true">RD</div>
+          <div>
+            <div class="ch-name">Ryan L. Dykins</div>
+            <div class="ch-ids">
+              <span class="ch-id"><span class="ch-id-label">SSN</span>&nbsp;271-06-1691</span>
+              <span class="ch-id"><span class="ch-id-label">DOB</span>&nbsp;10/12/1971 · Age 52</span>
+              <span class="ch-id"><span class="ch-id-label">File</span>&nbsp;123-45HS</span>
+              <span class="ch-id"><span class="ch-id-label">Since</span>&nbsp;01/23/1999</span>
+            </div>
+          </div>
+          <div class="ch-right">
+            <div class="ch-tags">
+              <span class="tag blue">Title XVI</span>
+              <span class="tag green">Active</span>
+              <span class="tag red">⚠ Needs interpreter</span>
+            </div>
+          </div>
+          <button class="btn ghost" style="margin-left:8px">Edit Client</button>
+        </div>
+
+        <!-- Alert -->
+        <div class="alert-banner" role="alert" aria-live="assertive">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-content">
+            <div class="alert-title">Action Required — Flagged by Chris Olinsky</div>
+            <div class="alert-items">Update client medications &nbsp;·&nbsp; Order medical records &nbsp;·&nbsp; Call client &nbsp;·&nbsp; Arrange interpreter</div>
+          </div>
+          <button class="alert-dismiss" aria-label="Dismiss alert">✕</button>
+        </div>
+
+        <!-- Main grid -->
+        <div class="grid-main">
+          <div class="grid-left">
+
+            <!-- Case Assignment — inline editable -->
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Case Assignment</span>
+                <span style="font-size:11px;color:var(--t4);margin-left:4px">Click any field to edit</span>
+                <button class="card-action">Save Changes</button>
+              </div>
+              <div class="card-body" style="padding: 10px 12px;">
+                <div class="data-grid cols-4">
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0" role="button" aria-label="Edit Attorney">
+                    <div class="dc-label">Attorney</div>
+                    <div class="dc-value">Chris Olinsky</div>
+                    <input class="inline-input" value="Chris Olinsky" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)">
+                    <span class="edit-hint">edit</span>
+                  </div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0" role="button" aria-label="Edit Case Manager">
+                    <div class="dc-label">Case Manager</div>
+                    <div class="dc-value">Marc Hanes</div>
+                    <input class="inline-input" value="Marc Hanes" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)">
+                    <span class="edit-hint">edit</span>
+                  </div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0" role="button" aria-label="Edit Main Representative">
+                    <div class="dc-label">Main Representative</div>
+                    <div class="dc-value">Albert Daley</div>
+                    <input class="inline-input" value="Albert Daley" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)">
+                    <span class="edit-hint">edit</span>
+                  </div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0" role="button" aria-label="Edit Second Representative">
+                    <div class="dc-label">Second Rep</div>
+                    <div class="dc-value empty">— Unassigned —</div>
+                    <input class="inline-input" value="" placeholder="Assign rep…" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)">
+                    <span class="edit-hint">edit</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Case Status + Key Dates -->
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Case Status &amp; Key Dates</span>
+                <button class="card-action">Edit</button>
+              </div>
+              <div class="card-body" style="padding:10px 12px">
+                <div class="status-row" style="margin-bottom:10px;grid-template-columns:repeat(4,1fr)">
+                  <div class="status-cell" style="border-left:3px solid #3b82f6">
+                    <div class="status-cell-label">SSD Stage</div>
+                    <div class="status-cell-value" style="font-size:13px;letter-spacing:-.2px">Reconsideration</div>
+                    <div class="status-cell-sub">Filed 06/14/2015</div>
+                  </div>
+                  <div class="status-cell amber">
+                    <div class="status-cell-label">Case Status</div>
+                    <div class="status-cell-value">Pending</div>
+                    <div class="status-cell-sub">Since 01/23/2006</div>
+                  </div>
+                  <div class="status-cell">
+                    <div class="status-cell-label">Last Action</div>
+                    <div class="status-cell-value" style="font-size:14px">01/24/2006</div>
+                    <div class="status-cell-sub">Marc Hanes</div>
+                  </div>
+                  <div class="status-cell green">
+                    <div class="status-cell-label">Fees Earned</div>
+                    <div class="status-cell-value">$105.35</div>
+                    <div class="status-cell-sub">Time: 0.00 hrs</div>
+                  </div>
+                </div>
+                <div class="data-grid cols-4" style="border:none;background:transparent;gap:0">
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0" style="border-radius:6px 0 0 6px;border:1px solid var(--border)">
+                    <div class="dc-label">Case Date</div>
+                    <div class="dc-value mono">01/23/1999</div>
+                    <input class="inline-input" value="01/23/1999" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)">
+                    <span class="edit-hint">edit</span>
+                  </div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0" style="border:1px solid var(--border);border-left:none">
+                    <div class="dc-label">Next Action</div>
+                    <div class="dc-value mono">02/25/2006</div>
+                    <input class="inline-input" value="02/25/2006" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)">
+                    <span class="edit-hint">edit</span>
+                  </div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0" style="border:1px solid var(--border);border-left:none">
+                    <div class="dc-label">Hearing Date</div>
+                    <div class="dc-value mono" style="color:var(--blue)">10/16/2021</div>
+                    <input class="inline-input" value="10/16/2021" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)">
+                    <span class="edit-hint">edit</span>
+                  </div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0" style="border-radius:0 6px 6px 0;border:1px solid var(--border);border-left:none">
+                    <div class="dc-label">Dependent</div>
+                    <div class="dc-value">Yes — Title XVI</div>
+                    <input class="inline-input" value="Yes — Title XVI" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)">
+                    <span class="edit-hint">edit</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card" style="flex:1;overflow:hidden">
+              <div class="card-header">
+                <span class="card-title">Recent Activity</span>
+                <button class="card-action">View All</button>
+              </div>
+              <div class="card-body">
+                <div class="activity-list" aria-label="Recent activity">
+                  <div class="activity-item"><div class="activity-dot red"></div><div class="activity-text"><strong>Alert flagged</strong> — needs interpreter + medication update</div><div class="activity-time">2d ago</div></div>
+                  <div class="activity-item"><div class="activity-dot amber"></div><div class="activity-text"><strong>Medical records</strong> requested from Dr. Rainey</div><div class="activity-time">3d ago</div></div>
+                  <div class="activity-item"><div class="activity-dot blue"></div><div class="activity-text"><strong>Hearing confirmed</strong> — Oct 16, 2021 with Judge Alaga-Gadigian</div><div class="activity-time">1wk</div></div>
+                  <div class="activity-item"><div class="activity-dot green"></div><div class="activity-text"><strong>Records received</strong> from Dr. Van Helsing (09/13/2019)</div><div class="activity-time">2yr</div></div>
+                  <div class="activity-item"><div class="activity-dot slate"></div><div class="activity-text"><strong>1695 filed</strong> — Representative appointment form submitted</div><div class="activity-time">Jan 2016</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right column -->
+          <div class="grid-right">
+
+            <!-- Quick Actions -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Quick Actions</span></div>
+              <div class="card-body" style="padding:10px 12px">
+                <div class="qa-grid">
+                  <button class="qa-btn" onclick="showScreen('doctors')" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border-color:#bfdbfe;color:#1d4ed8">
+                    <span class="qa-icon">✨</span>AI Medical Summary<span class="qa-arrow" style="color:#3b82f6">›</span>
+                  </button>
+                  <button class="qa-btn"><span class="qa-icon">📄</span>Create Document<span class="qa-arrow">›</span></button>
+                  <button class="qa-btn"><span class="qa-icon">✅</span>Add Task<span class="qa-arrow">›</span></button>
+                  <button class="qa-btn"><span class="qa-icon">📅</span>Schedule Event<span class="qa-arrow">›</span></button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upcoming -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Upcoming</span><button class="card-action" onclick="showScreen('calendar')">Calendar ›</button></div>
+              <div class="card-body">
+                <div class="event-list">
+                  <div class="event-item court">
+                    <div class="event-date"><span class="day">16</span>OCT</div>
+                    <div><div class="event-name">Hearing — 9:00 AM</div><div class="event-meta">Judge Alaga-Gadigian · Winston Salem</div></div>
+                  </div>
+                  <div class="event-item deadline">
+                    <div class="event-date"><span class="day">28</span>OCT</div>
+                    <div><div class="event-name">Deadline: Appeal</div><div class="event-meta">Documents due to DDS</div></div>
+                  </div>
+                  <div class="event-item meeting">
+                    <div class="event-date"><span class="day">21</span>OCT</div>
+                    <div><div class="event-name">Meeting: DDS</div><div class="event-meta">Remote · Marc Hanes</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Open Tasks -->
+            <div class="card" style="flex:1;overflow:hidden">
+              <div class="card-header"><span class="card-title">Open Tasks</span><span class="tag red" style="font-size:11px;height:20px;padding:0 7px">2 overdue</span><button class="card-action" onclick="showScreen('tasks')" style="margin-left:4px">All ›</button></div>
+              <div class="card-body">
+                <div class="task-list" aria-label="Open tasks">
+                  <div class="task-item"><div class="task-pri h" role="img" aria-label="High priority"></div><div class="task-check" aria-label="Mark complete" tabindex="0" role="checkbox" aria-checked="false"></div><div class="task-text">Needs interpreter — update medications</div><div class="task-due overdue">Overdue</div></div>
+                  <div class="task-item"><div class="task-pri m" role="img" aria-label="Medium priority"></div><div class="task-check" tabindex="0" role="checkbox" aria-checked="false"></div><div class="task-text">Call client — update med info</div><div class="task-due">10/30</div></div>
+                  <div class="task-item"><div class="task-pri l" role="img" aria-label="Low priority"></div><div class="task-check" tabindex="0" role="checkbox" aria-checked="false"></div><div class="task-text">Order medical records from Rainey</div><div class="task-due">11/05</div></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN: FILINGS ═══ -->
+    <div class="screen" id="screen-filings" role="main" aria-label="Filings and Appeals">
+      <div class="sub-nav">
+        <div class="sub-tab active">Timeline</div>
+        <div class="sub-tab">Hearing Details</div>
+        <div class="sub-tab">Comments</div>
+      </div>
+      <div class="scroll-content">
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:16px;max-width:1100px">
+          <div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+              <div class="status-cell"><div class="status-cell-label">Initial Filed</div><div class="status-cell-value" style="font-size:15px;font-family:var(--mono)">05/28/15</div><div class="status-cell-sub">Application submitted</div></div>
+              <div class="status-cell"><div class="status-cell-label">Fee Agreement</div><div class="status-cell-value" style="font-size:15px;font-family:var(--mono)">05/28/15</div><div class="status-cell-sub">Filed</div></div>
+              <div class="status-cell amber"><div class="status-cell-label">Stage</div><div class="status-cell-value" style="font-size:14px">Reconsideration</div><div class="status-cell-sub">Pending DDS</div></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Filing Timeline</span><button class="card-action">+ Add Event</button></div>
+              <div class="card-body">
+                <div class="filing-timeline" role="list" aria-label="Filing timeline">
+                  <div class="fi" role="listitem"><div class="fi-track"><div class="fi-dot done"></div><div class="fi-line"></div></div><div><div class="fi-date">05/28/2015&nbsp; <span class="tag green" style="height:20px;padding:0 8px;font-size:10.5px">✓ Complete</span></div><div class="fi-title">Initial Application Filed</div><div class="fi-sub">Social Security — initial claim submitted</div></div></div>
+                  <div class="fi" role="listitem"><div class="fi-track"><div class="fi-dot done"></div><div class="fi-line"></div></div><div><div class="fi-date">01/26/2016&nbsp; <span class="tag green" style="height:20px;padding:0 8px;font-size:10.5px">✓ Complete</span></div><div class="fi-title">1695 Filed</div><div class="fi-sub">Form 1695 — representative appointment</div></div></div>
+                  <div class="fi" role="listitem"><div class="fi-track"><div class="fi-dot pend"></div><div class="fi-line"></div></div><div><div class="fi-date">Pending&nbsp; <span class="tag amber" style="height:20px;padding:0 8px;font-size:10.5px">● Pending</span></div><div class="fi-title">Decision</div><div class="fi-sub">Awaiting DDS determination</div></div></div>
+                  <div class="fi" role="listitem"><div class="fi-track"><div class="fi-dot none"></div><div class="fi-line"></div></div><div><div class="fi-date">—&nbsp; <span class="tag slate" style="height:20px;padding:0 8px;font-size:10.5px">Not started</span></div><div class="fi-title">Result</div><div class="fi-sub">Not yet determined</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:12px">
+              <div class="card-header"><span class="card-title">Hearing Details</span><button class="card-action">Edit</button></div>
+              <div class="card-body" style="padding:10px 14px">
+                <div class="kv-list">
+                  <div class="kv-row"><span class="kv-key">Date</span><span class="kv-val mono">10/16/2021</span></div>
+                  <div class="kv-row"><span class="kv-key">Judge</span><span class="kv-val">Alaga-Gadigian, H.</span></div>
+                  <div class="kv-row"><span class="kv-key">Time</span><span class="kv-val mono">09:00 AM</span></div>
+                  <div class="kv-row"><span class="kv-key">Location</span><span class="kv-val">Winston Salem</span></div>
+                  <div class="kv-row"><span class="kv-key">Result</span><span class="kv-val"><span class="tag amber" style="height:22px">● Pending</span></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Comments</span></div>
+              <div class="card-body"><textarea style="width:100%;min-height:100px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none" placeholder="Add case notes…"></textarea></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN: AWARDS ═══ -->
+    <div class="screen" id="screen-awards" role="main" aria-label="Awards and Payments">
+      <div class="scroll-content" style="display:flex;align-items:center;justify-content:center;height:100%">
+        <div style="text-align:center;color:var(--t3)"><div style="font-size:36px;margin-bottom:12px">💰</div><div style="font-size:16px;font-weight:700;color:var(--t2)">Awards &amp; Payments</div><div style="font-size:13px;margin-top:6px">No awards recorded for this client.</div></div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN: INTAKE ═══ -->
+    <div class="screen" id="screen-intake" role="main" aria-label="Intake I">
+      <div class="sub-nav"><div class="sub-tab active">Background</div><div class="sub-tab">Medical History</div><div class="sub-tab">Employment</div></div>
+      <div class="scroll-content">
+        <div style="max-width:900px">
+          <div class="card" style="margin-bottom:12px">
+            <div class="card-header"><span class="card-title">Personal Background</span><span style="font-size:11px;color:var(--t4);margin-left:4px">Click to edit</span><button class="card-action">Save</button></div>
+            <div class="card-body" style="padding:10px 12px">
+              <div class="data-grid cols-4">
+                <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Date of Birth</div><div class="dc-value mono">10/12/1971</div><input class="inline-input" value="10/12/1971" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                <div class="data-cell" tabindex="0"><div class="dc-label">Age (auto)</div><div class="dc-value" style="color:var(--slate)">52</div></div>
+                <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Age Category</div><div class="dc-value">Nearing Adv. 50</div><input class="inline-input" value="Nearing Adv. 50" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Highest Grade</div><div class="dc-value">7</div><input class="inline-input" value="7" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Education</div><div class="dc-value">College</div><input class="inline-input" value="College" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Height</div><div class="dc-value empty">Not recorded</div><input class="inline-input" value="" placeholder="e.g. 5'10&quot;" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Weight (lbs)</div><div class="dc-value empty">Not recorded</div><input class="inline-input" value="" placeholder="e.g. 185" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Highest Income</div><div class="dc-value mono">$0.00</div><input class="inline-input" value="$0.00" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="card-header"><span class="card-title">Abilities</span><button class="card-action">Edit</button></div>
+            <div class="card-body">
+              <div style="display:flex;gap:20px;flex-wrap:wrap">
+                <div style="display:flex;align-items:center;gap:8px"><div style="width:16px;height:16px;border-radius:4px;background:var(--blue);display:flex;align-items:center;justify-content:center;color:white;font-size:10px">✓</div><span style="font-size:13px;font-weight:500;color:var(--t1)">Can Read</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><div style="width:16px;height:16px;border-radius:4px;background:var(--blue);display:flex;align-items:center;justify-content:center;color:white;font-size:10px">✓</div><span style="font-size:13px;font-weight:500;color:var(--t1)">Can Write</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><div style="width:16px;height:16px;border-radius:4px;background:var(--blue);display:flex;align-items:center;justify-content:center;color:white;font-size:10px">✓</div><span style="font-size:13px;font-weight:500;color:var(--t1)">Arithmetic</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><div style="width:16px;height:16px;border-radius:4px;border:2px solid var(--border);background:white"></div><span style="font-size:13px;font-weight:500;color:var(--t3)">Personal Finances</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Disabilities</span><button class="card-action">+ Add</button></div>
+            <table style="width:100%;border-collapse:collapse">
+              <thead><tr style="background:var(--surface-2);border-bottom:1px solid var(--border)"><th scope="col" style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Type</th><th scope="col" style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Severity</th><th scope="col" style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Description</th><th scope="col" style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)"></th></tr></thead>
+              <tbody>
+                <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px;font-weight:700;color:var(--t1)">Arthritis</td><td style="padding:10px 14px"><span class="tag red">Primary</span></td><td style="padding:10px 14px;color:var(--t2);font-size:13px">Chronic joint inflammation</td><td style="padding:10px 14px"><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">Edit</button></td></tr>
+                <tr><td style="padding:10px 14px;font-weight:700;color:var(--t1)">Headaches</td><td style="padding:10px 14px"><span class="tag amber">Secondary</span></td><td style="padding:10px 14px;color:var(--t2);font-size:13px">Chronic migraines, 3–4× per week</td><td style="padding:10px 14px"><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">Edit</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN: DOCTORS ═══ -->
+    <div class="screen" id="screen-doctors" role="main" aria-label="Medical Records">
+      <div class="scroll-content">
+        <div style="max-width:900px">
+
+          <!-- AI Summary Banner -->
+          <div style="background:linear-gradient(135deg,#1e3a5f,#1d4ed8);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;box-shadow:0 4px 16px rgba(29,78,216,.25)">
+            <div style="width:42px;height:42px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">✨</div>
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:700;color:white;margin-bottom:3px">AI Medical Records Summary</div>
+              <div style="font-size:12.5px;color:rgba(255,255,255,.75);line-height:1.4">Generate a concise summary of all medical records for <strong style="color:white">Ryan L. Dykins</strong> ahead of the Oct 16 hearing — conditions, treatment history, and key findings.</div>
+            </div>
+            <button onclick="openAISummary()" style="flex-shrink:0;height:38px;padding:0 18px;background:white;border:none;border-radius:6px;font-size:13px;font-weight:700;color:#1d4ed8;cursor:pointer;font-family:var(--sans);transition:all .15s;white-space:nowrap" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='white'">
+              Generate Summary
+            </button>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div style="font-size:13px;color:var(--t3)">3 providers · <span style="color:var(--amber);font-weight:600">2 records pending</span></div>
+            <div style="display:flex;gap:8px"><button class="btn ghost">📋 Request All Pending</button><button class="btn primary">+ Add Provider</button></div>
+          </div>
+          <div class="dr-card pending">
+            <div style="flex:1"><div class="dr-name">Rainey, David</div><div class="dr-dates"><div class="dr-date"><div class="dr-date-label">Requested</div><div class="dr-date-value">01/06/2020</div></div><div class="dr-date"><div class="dr-date-label">Start</div><div class="dr-date-value">01/01/2006</div></div><div class="dr-date"><div class="dr-date-label">End</div><div class="dr-date-value">01/06/2020</div></div><div class="dr-date"><div class="dr-date-label">Received</div><div class="dr-date-value" style="color:var(--t4);font-style:italic">Not received</div></div></div></div>
+            <span class="tag amber">● Records Pending</span>
+            <div style="display:flex;gap:6px"><button class="btn ghost" style="height:30px;font-size:12px;padding:0 10px" aria-label="Edit Rainey, David">Edit</button></div>
+          </div>
+          <div class="dr-card received">
+            <div style="flex:1"><div class="dr-name">Van Helsing, Abraham</div><div class="dr-dates"><div class="dr-date"><div class="dr-date-label">Requested</div><div class="dr-date-value">07/03/2019</div></div><div class="dr-date"><div class="dr-date-label">Start</div><div class="dr-date-value">07/01/1998</div></div><div class="dr-date"><div class="dr-date-label">End</div><div class="dr-date-value">07/01/2019</div></div><div class="dr-date"><div class="dr-date-label">Received</div><div class="dr-date-value" style="color:var(--green);font-weight:700">09/13/2019</div></div></div></div>
+            <span class="tag green">✓ Records Received</span>
+            <div style="display:flex;gap:6px"><button class="btn ghost" style="height:30px;font-size:12px;padding:0 10px" aria-label="Edit Van Helsing, Abraham">Edit</button></div>
+          </div>
+          <div class="dr-card none">
+            <div style="flex:1"><div class="dr-name">Pierce, Mildred</div><div style="margin-top:4px"><span class="tag slate" style="height:22px;font-size:12px">No records on file</span></div></div>
+            <div style="display:flex;gap:6px"><button class="btn ghost" style="height:30px;font-size:12px;padding:0 10px" aria-label="Edit Pierce, Mildred">Edit</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI SUMMARY MODAL -->
+    <div id="ai-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(3px)" role="dialog" aria-modal="true" aria-label="AI Medical Summary">
+      <div style="background:white;border-radius:12px;width:660px;max-width:92vw;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(15,23,42,.25)">
+        <!-- Modal header -->
+        <div style="padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;background:linear-gradient(135deg,#1e3a5f,#2563eb);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">✨</div>
+          <div>
+            <div style="font-size:15px;font-weight:800;color:var(--t1)">AI Medical Records Summary</div>
+            <div style="font-size:12px;color:var(--t3)">Ryan L. Dykins · Hearing: Oct 16, 2021</div>
+          </div>
+          <button onclick="closeAISummary()" style="margin-left:auto;width:32px;height:32px;background:var(--bg);border:1.5px solid var(--border);border-radius:6px;cursor:pointer;font-size:16px;color:var(--t3);font-family:var(--sans)" aria-label="Close">✕</button>
+        </div>
+        <!-- Modal body -->
+        <div id="ai-modal-body" style="flex:1;overflow-y:auto;padding:20px">
+          <div id="ai-loading" style="text-align:center;padding:40px 20px">
+            <div style="font-size:28px;margin-bottom:12px;animation:spin 1.5s linear infinite;display:inline-block">⏳</div>
+            <div style="font-size:14px;font-weight:600;color:var(--t2)">Analyzing medical records…</div>
+            <div style="font-size:12.5px;color:var(--t3);margin-top:6px">Reviewing 2 providers · synthesizing findings</div>
+          </div>
+          <div id="ai-result" style="display:none"></div>
+        </div>
+        <!-- Modal footer -->
+        <div id="ai-footer" style="display:none;padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn ghost" onclick="closeAISummary()">Close</button>
+          <button class="btn primary">📄 Save to Documents</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN: DOCUMENTS ═══ -->
+    <div class="screen" id="screen-documents" role="main" aria-label="Documents">
+      <div class="scroll-content" style="display:flex;align-items:center;justify-content:center;height:100%">
+        <div style="text-align:center;color:var(--t3)"><div style="font-size:36px;margin-bottom:12px">📁</div><div style="font-size:16px;font-weight:700;color:var(--t2)">Documents &amp; Templates</div><div style="font-size:13px;margin-top:6px">14 documents on file for Ryan L. Dykins</div><div style="margin-top:14px;display:flex;gap:8px;justify-content:center"><button class="btn ghost">🔀 Merge</button><button class="btn primary">⬆ Upload</button></div></div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN: TASKS ═══ -->
+    <div class="screen" id="screen-tasks" role="main" aria-label="Tasks and Reminders">
+      <div class="scroll-content">
+        <div style="max-width:800px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <div style="display:flex;gap:6px">
+              <button class="btn primary" style="height:32px;font-size:12px;border-radius:16px">Weekly</button>
+              <button class="btn ghost" style="height:32px;font-size:12px;border-radius:16px">Monthly</button>
+              <button class="btn ghost" style="height:32px;font-size:12px;border-radius:16px">All</button>
+            </div>
+            <button class="btn primary">+ Add Task</button>
+          </div>
+          <div class="alert-banner" style="margin-bottom:12px" role="alert"><div class="alert-icon">🔴</div><div class="alert-content"><div class="alert-title">2 tasks overdue</div><div class="alert-items" style="font-size:12px">Assigned to Chris Olinsky — immediate attention required</div></div></div>
+          <div class="task-card"><div class="task-pri h" style="min-height:70px" role="img" aria-label="High priority"></div><div class="task-card-body"><div class="task-card-title">Needs an interpreter — update client medications</div><div class="task-card-meta"><span>📅 02/08/2021</span><span>⏰ Due: 02/01/2029</span><span>👤 Chris Olinsky</span><span style="color:var(--red);font-weight:600">Overdue</span></div></div><div class="task-card-actions"><button class="btn primary" style="height:30px;font-size:12px;padding:0 10px" aria-label="Mark complete: update client medications">✓ Done</button><button class="btn ghost" style="height:30px;font-size:12px;padding:0 10px">Delete</button></div></div>
+          <div class="task-card"><div class="task-pri m" style="min-height:70px" role="img" aria-label="Medium priority"></div><div class="task-card-body"><div class="task-card-title">Call client to update medication information</div><div class="task-card-meta"><span>📅 03/30/2021</span><span>⏰ Due: 10/30/2021</span><span>👤 Marc → Katherine Whaling</span></div></div><div class="task-card-actions"><button class="btn primary" style="height:30px;font-size:12px;padding:0 10px" aria-label="Mark complete: call client">✓ Done</button><button class="btn ghost" style="height:30px;font-size:12px;padding:0 10px">Delete</button></div></div>
+          <div class="task-card" style="opacity:.5"><div class="task-pri l" style="min-height:52px" role="img" aria-label="Low priority"></div><div class="task-card-body"><div class="task-card-title" style="text-decoration:line-through;color:var(--t3)">Request medical records from Dr. Rainey</div><div class="task-card-meta"><span style="color:var(--green);font-weight:600">✓ Completed</span></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SCREEN: CALENDAR ═══ -->
+    <div class="screen" id="screen-calendar" role="main" aria-label="Calendar">
+      <div class="scroll-content">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+          <button class="btn ghost" style="height:32px">←</button>
+          <h2 style="font-size:18px;font-weight:800;color:var(--t1);letter-spacing:-.3px">October 2021</h2>
+          <button class="btn ghost" style="height:32px">→</button>
+          <div style="display:flex;gap:6px;margin-left:10px">
+            <button class="btn primary" style="height:30px;font-size:12px;border-radius:15px" aria-pressed="true">Month</button>
+            <button class="btn ghost"   style="height:30px;font-size:12px;border-radius:15px" aria-pressed="false">Week</button>
+            <button class="btn ghost"   style="height:30px;font-size:12px;border-radius:15px" aria-pressed="false">Agenda</button>
+          </div>
+          <div style="display:flex;gap:10px;margin-left:auto;font-size:12px;color:var(--t3);align-items:center">
+            <div style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#dbeafe;border:1.5px solid var(--blue);display:inline-block"></span>Court</div>
+            <div style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#fee2e2;border:1.5px solid var(--red);display:inline-block"></span>Deadline</div>
+            <div style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:#f0fdf4;border:1.5px solid var(--green);display:inline-block"></span>Meeting</div>
+          </div>
+          <button class="btn primary">+ Event</button>
+        </div>
+        <div class="cal-grid" role="grid" aria-label="October 2021">
+          <div class="cal-hdr" role="columnheader">Sun</div><div class="cal-hdr" role="columnheader">Mon</div><div class="cal-hdr" role="columnheader">Tue</div><div class="cal-hdr" role="columnheader">Wed</div><div class="cal-hdr" role="columnheader">Thu</div><div class="cal-hdr" role="columnheader">Fri</div><div class="cal-hdr" role="columnheader">Sat</div>
+          <div class="cal-day oth" role="gridcell" aria-label="Sep 26"><div class="cal-day-n">26</div></div>
+          <div class="cal-day oth" role="gridcell" aria-label="Sep 27"><div class="cal-day-n">27</div></div>
+          <div class="cal-day oth" role="gridcell" aria-label="Sep 28"><div class="cal-day-n">28</div></div>
+          <div class="cal-day oth" role="gridcell" aria-label="Sep 29"><div class="cal-day-n">29</div></div>
+          <div class="cal-day oth" role="gridcell" aria-label="Sep 30"><div class="cal-day-n">30</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 1"><div class="cal-day-n">1</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 2"><div class="cal-day-n">2</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 3"><div class="cal-day-n">3</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 4, Client Call meeting"><div class="cal-day-n">4</div><div class="cal-evt meeting">Meeting: Client Call</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 5"><div class="cal-day-n">5</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 6"><div class="cal-day-n">6</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 7, Medical Records deadline"><div class="cal-day-n">7</div><div class="cal-evt deadline">Deadline: Med Records</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 8"><div class="cal-day-n">8</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 9"><div class="cal-day-n">9</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 10"><div class="cal-day-n">10</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 11"><div class="cal-day-n">11</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 12"><div class="cal-day-n">12</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 13"><div class="cal-day-n">13</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 14"><div class="cal-day-n">14</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 15"><div class="cal-day-n">15</div></div>
+          <div class="cal-day today" role="gridcell" aria-current="date" aria-label="Oct 16, today, Hearing 9AM"><div class="cal-day-n">16</div><div class="cal-evt court">Court: Hearing 9AM</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 17"><div class="cal-day-n">17</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 18"><div class="cal-day-n">18</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 19"><div class="cal-day-n">19</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 20"><div class="cal-day-n">20</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 21, DDS meeting"><div class="cal-day-n">21</div><div class="cal-evt meeting">Meeting: DDS</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 22"><div class="cal-day-n">22</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 23"><div class="cal-day-n">23</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 24"><div class="cal-day-n">24</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 25"><div class="cal-day-n">25</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 26"><div class="cal-day-n">26</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 27"><div class="cal-day-n">27</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 28, Appeal deadline"><div class="cal-day-n">28</div><div class="cal-evt deadline">Deadline: Appeal</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 29"><div class="cal-day-n">29</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 30"><div class="cal-day-n">30</div></div>
+          <div class="cal-day" role="gridcell" aria-label="Oct 31"><div class="cal-day-n">31</div></div>
+          <div class="cal-day oth" role="gridcell" aria-label="Nov 1"><div class="cal-day-n">1</div></div>
+          <div class="cal-day oth" role="gridcell" aria-label="Nov 2"><div class="cal-day-n">2</div></div>
+          <div class="cal-day oth" role="gridcell" aria-label="Nov 3"><div class="cal-day-n">3</div></div>
+          <div class="cal-day oth" role="gridcell" aria-label="Nov 4"><div class="cal-day-n">4</div></div>
+          <div class="cal-day oth" role="gridcell" aria-label="Nov 5"><div class="cal-day-n">5</div></div>
+          <div class="cal-day oth" role="gridcell" aria-label="Nov 6"><div class="cal-day-n">6</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+const screenMap = {
+  general:   'Client Overview — General | Wings Legal',
+  filings:   'Filings & Appeals | Wings Legal',
+  awards:    'Awards & Payments | Wings Legal',
+  intake:    'Intake I | Wings Legal',
+  doctors:   'Doctor Records | Wings Legal',
+  documents: 'Documents | Wings Legal',
+  tasks:     'Tasks & Reminders | Wings Legal',
+  calendar:  'Calendar | Wings Legal',
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.setAttribute('aria-hidden','true');
+  });
+  document.querySelectorAll('.sb-item').forEach(b => {
+    b.classList.remove('active');
+    b.removeAttribute('aria-current');
+  });
+
+  const screen = document.getElementById('screen-' + id);
+  if (screen) {
+    screen.classList.add('active');
+    screen.removeAttribute('aria-hidden');
+  }
+
+  document.querySelectorAll('.sb-item').forEach(b => {
+    if (b.getAttribute('onclick') === `showScreen('${id}')`) {
+      b.classList.add('active');
+      b.setAttribute('aria-current','page');
+    }
+  });
+
+  document.title = screenMap[id] || 'Wings Legal';
+
+  const main = document.getElementById('main-content');
+  if (main) { main.focus(); }
+}
+
+// Inline editing
+function editCell(cell) {
+  // Close any other open cells first
+  document.querySelectorAll('.data-cell.editing').forEach(c => {
+    if (c !== cell) saveCell(c.querySelector('.inline-input'));
+  });
+  cell.classList.add('editing');
+  const input = cell.querySelector('.inline-input');
+  if (input) {
+    input.style.display = 'block';
+    input.focus();
+    input.select();
+  }
+}
+
+function saveCell(input) {
+  if (!input) return;
+  const cell = input.closest('.data-cell');
+  if (!cell) return;
+  const val = input.value.trim();
+  const display = cell.querySelector('.dc-value');
+  if (display) {
+    if (val) {
+      display.textContent = val;
+      display.classList.remove('empty');
+    } else {
+      display.textContent = display.getAttribute('data-placeholder') || '— Not set —';
+      display.classList.add('empty');
+    }
+  }
+  cell.classList.remove('editing');
+}
+
+function cellKeydown(e, input) {
+  if (e.key === 'Enter') { saveCell(input); }
+  if (e.key === 'Escape') {
+    const cell = input.closest('.data-cell');
+    if (cell) cell.classList.remove('editing');
+  }
+}
+
+// Keyboard: space/enter on data-cell
+document.querySelectorAll('.data-cell[tabindex]').forEach(cell => {
+  cell.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      editCell(cell);
+    }
+  });
+});
+
+// Init: mark inactive screens
+document.querySelectorAll('.screen:not(.active)').forEach(s => {
+  s.setAttribute('aria-hidden','true');
+});
+
+// ── AI Summary Modal ──────────────────────────────────
+function openAISummary() {
+  const modal = document.getElementById('ai-modal');
+  const loading = document.getElementById('ai-loading');
+  const result  = document.getElementById('ai-result');
+  const footer  = document.getElementById('ai-footer');
+
+  modal.style.display = 'flex';
+  loading.style.display = 'block';
+  result.style.display  = 'none';
+  footer.style.display  = 'none';
+
+  document.body.style.overflow = 'hidden';
+
+  setTimeout(() => {
+    loading.style.display = 'none';
+    result.style.display  = 'block';
+    footer.style.display  = 'flex';
+
+    result.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px">
+        <span style="color:#16a34a;font-size:14px">✓</span>
+        <span style="font-size:12.5px;font-weight:600;color:#15803d">Summary generated from 2 providers · 1 record pending (Rainey, David)</span>
+      </div>
+
+      <div class="ai-section" style="margin-bottom:18px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t4);margin-bottom:8px">Primary Diagnoses</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="padding:10px 14px;background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:6px">
+            <div style="font-size:13.5px;font-weight:700;color:var(--t1)">Rheumatoid Arthritis <span style="font-size:11px;font-weight:500;color:var(--t3)">(Primary)</span></div>
+            <div style="font-size:12.5px;color:var(--t2);margin-top:4px;line-height:1.5">Chronic inflammatory joint disease affecting bilateral hands, wrists, and knees. Documented progressive functional decline. Unable to sustain repetitive hand motions or prolonged standing. <span style="color:var(--t3)">Source: Van Helsing (07/1998–07/2019)</span></div>
+          </div>
+          <div style="padding:10px 14px;background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:6px">
+            <div style="font-size:13.5px;font-weight:700;color:var(--t1)">Chronic Migraines <span style="font-size:11px;font-weight:500;color:var(--t3)">(Secondary)</span></div>
+            <div style="font-size:12.5px;color:var(--t2);margin-top:4px;line-height:1.5">Recurring migraines occurring 3–4 times per week, lasting 4–18 hours. Light and sound sensitivity documented. Episodes significantly impair concentration and daily function. <span style="color:var(--t3)">Source: Van Helsing (07/1998–07/2019)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-section" style="margin-bottom:18px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t4);margin-bottom:8px">Treatment History</div>
+        <div style="font-size:13px;color:var(--t2);line-height:1.7;padding:12px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px">
+          Patient has been managed with NSAIDs, DMARDs (methotrexate), and periodic corticosteroid injections for arthritis. Migraine management includes triptans and prophylactic beta-blockers. No surgical interventions on record. Compliance with treatment noted as consistent per Dr. Van Helsing's records. Records from Dr. Rainey covering 01/2006–01/2020 are still pending and may contain additional treatment history.
+        </div>
+      </div>
+
+      <div class="ai-section" style="margin-bottom:18px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t4);margin-bottom:8px">Functional Limitations Documented</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;font-size:12.5px;color:#991b1b;font-weight:500">✗ Sustained grip or fine motor tasks</div>
+          <div style="padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;font-size:12.5px;color:#991b1b;font-weight:500">✗ Standing or walking &gt;20 min</div>
+          <div style="padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;font-size:12.5px;color:#991b1b;font-weight:500">✗ Concentration during migraine episodes</div>
+          <div style="padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;font-size:12.5px;color:#991b1b;font-weight:500">✗ Overhead reaching (bilateral shoulder involvement)</div>
+        </div>
+      </div>
+
+      <div class="ai-section">
+        <div style="padding:12px 14px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:6px;display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:15px;flex-shrink:0">⚠️</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:4px">Gap in Records</div>
+            <div style="font-size:12.5px;color:#92400e;line-height:1.5">Records from Dr. Rainey (01/2006–01/2020) have not been received. This 14-year period may contain significant treatment history relevant to the hearing. Consider following up before Oct 16.</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }, 1800);
+}
+
+function closeAISummary() {
+  document.getElementById('ai-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Close modal on backdrop click
+document.getElementById('ai-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeAISummary();
+});
+</script>
+</body>
+</html>
