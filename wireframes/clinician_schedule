@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Schedule — Clinician View</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #f4f6fa;
+    --surface:   #ffffff;
+    --surface2:  #f0f2f7;
+    --surface3:  #e6eaf3;
+    --border:    #d0d6e8;
+    --border2:   #b8c2d8;
+    --accent:    #2b7de9;
+    --accent-dk: #1a5fb8;
+    --accent-lt: #1a5fb8;
+    --green:     #1fa86e;
+    --green-dk:  #15784d;
+    --amber:     #c4780a;
+    --red:       #c8324c;
+    --purple:    #7254cc;
+    --teal:      #1a9e92;
+    --text:      #1a2035;
+    --text-2:    #4a5878;
+    --text-3:    #7a8aaa;
+    --tag-bg:    #e8edf8;
+    --font:      'IBM Plex Sans', sans-serif;
+    --mono:      'IBM Plex Mono', monospace;
+    --cond:      'IBM Plex Sans Condensed', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font); background: var(--bg); color: var(--text);
+    font-size: 13px; line-height: 1.4; min-height: 100vh;
+  }
+
+  .app-shell { display: grid; grid-template-rows: 44px 1fr; height: 100vh; overflow: hidden; }
+
+  /* ── Top bar ── */
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 16px; gap: 0; z-index: 100;
+  }
+  .topbar-logo {
+    font-family: var(--cond); font-weight: 600; font-size: 14px; letter-spacing: 0.08em;
+    color: var(--accent-lt); padding-right: 16px; border-right: 1px solid var(--border);
+    margin-right: 16px; text-transform: uppercase;
+  }
+  .topbar-spacer { flex: 1; }
+  .topbar-date-nav {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 14px; border-right: 1px solid var(--border); margin-right: 14px;
+  }
+  .date-nav-btn {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 4px;
+    color: var(--text-2); padding: 3px 8px; font-size: 12px; cursor: pointer;
+  }
+  .date-nav-btn:hover { background: var(--surface3); }
+  .date-current {
+    font-family: var(--cond); font-size: 13px; font-weight: 600; color: var(--text);
+    min-width: 170px; text-align: center;
+  }
+  .today-btn {
+    background: var(--accent); color: #fff; border: none; border-radius: 4px;
+    padding: 3px 10px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: var(--font);
+  }
+  .topbar-user {
+    display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2);
+  }
+  .user-avatar {
+    width: 26px; height: 26px; background: var(--green-dk); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff;
+  }
+  .unsigned-pill {
+    display: flex; align-items: center; gap: 5px; padding: 4px 10px;
+    background: rgba(196,120,10,0.08); border: 1px solid rgba(196,120,10,0.3);
+    border-radius: 4px; font-size: 11px; color: var(--amber); cursor: pointer;
+    font-weight: 600; margin-right: 10px;
+  }
+
+  /* ── Main layout ── */
+  .main { display: grid; grid-template-columns: 1fr 320px; overflow: hidden; }
+
+  /* ── Schedule zone ── */
+  .schedule-zone { display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Toolbar */
+  .sz-toolbar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-bottom: 1px solid var(--border);
+    background: var(--surface); flex-shrink: 0;
+  }
+  .view-toggle {
+    display: flex; gap: 1px; background: var(--surface3);
+    border: 1px solid var(--border); border-radius: 5px; padding: 2px;
+  }
+  .vt-btn {
+    padding: 3px 10px; border-radius: 3px; font-size: 11px;
+    cursor: pointer; color: var(--text-2); transition: all 0.1s;
+  }
+  .vt-btn.active { background: var(--accent); color: #fff; font-weight: 600; }
+
+  .session-tabs {
+    display: flex; gap: 2px; background: var(--surface3);
+    border: 1px solid var(--border); border-radius: 5px; padding: 2px; margin-left: 4px;
+  }
+  .session-tab {
+    padding: 3px 10px; border-radius: 3px; font-size: 11px;
+    cursor: pointer; color: var(--text-2); transition: all 0.1s;
+  }
+  .session-tab.active { background: var(--surface); color: var(--text); font-weight: 600; border: 1px solid var(--border); }
+
+  .sz-spacer { flex: 1; }
+  .btn-sm {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 10px; border-radius: 4px; font-family: var(--font);
+    font-size: 11px; font-weight: 500; cursor: pointer; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text-2); transition: all 0.1s;
+  }
+  .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Day summary — compact single row */
+  .day-summary {
+    display: flex; border-bottom: 1px solid var(--border);
+    background: var(--surface); flex-shrink: 0; padding: 0;
+  }
+  .ds-cell {
+    padding: 7px 16px; border-right: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .ds-cell:last-child { border-right: none; margin-left: auto; }
+  .ds-num {
+    font-family: var(--mono); font-size: 17px; font-weight: 600; line-height: 1;
+  }
+  .ds-label { font-size: 10px; color: var(--text-3); line-height: 1.2; }
+
+  /* ── Compact schedule table ── */
+  .sched-scroll { flex: 1; overflow-y: auto; }
+
+  /* Column header row */
+  .sched-col-header {
+    display: grid;
+    grid-template-columns: 56px 1fr 120px 105px 90px;
+    background: var(--surface2); border-bottom: 2px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .sch {
+    padding: 7px 10px; font-family: var(--mono); font-size: 9px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3);
+    border-right: 1px solid var(--border);
+  }
+  .sch:last-child { border-right: none; }
+
+  /* Appointment row */
+  .appt-row {
+    display: grid;
+    grid-template-columns: 56px 1fr 120px 105px 90px;
+    border-bottom: 1px solid var(--border);
+    min-height: 48px;
+    cursor: pointer;
+    transition: background 0.1s;
+    background: var(--surface);
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+  .appt-row:hover { background: var(--surface2); }
+  .appt-row.selected { background: rgba(43,125,233,0.05); border-left-color: var(--accent); }
+
+  /* Status stripe on left */
+  .appt-row.st-seen       { border-left-color: var(--teal); }
+  .appt-row.st-roomed     { border-left-color: var(--green); background: rgba(31,168,110,0.03); }
+  .appt-row.st-checked-in { border-left-color: var(--amber); background: rgba(196,120,10,0.03); }
+  .appt-row.st-scheduled  { border-left-color: #d0d6e8; }
+  .appt-row.st-no-show    { border-left-color: var(--red); opacity: 0.55; }
+  .appt-row.st-lunch      { background: var(--surface2); cursor: default; border-left-color: transparent; }
+
+  /* Now indicator row */
+  .appt-row.now-row { background: rgba(43,125,233,0.04); }
+  .now-marker {
+    position: absolute; left: 0; right: 0; top: -1px; height: 2px;
+    background: var(--red); z-index: 5;
+  }
+  .now-marker::before {
+    content: 'NOW'; position: absolute; left: 58px; top: -9px;
+    font-family: var(--mono); font-size: 8px; font-weight: 700;
+    color: var(--red); letter-spacing: 0.1em;
+    background: rgba(200,50,76,0.08); border: 1px solid rgba(200,50,76,0.3);
+    border-radius: 2px; padding: 1px 4px;
+  }
+
+  /* Cell styles */
+  .ar-time {
+    padding: 0 10px; display: flex; align-items: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    color: var(--text-3); border-right: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .ar-patient {
+    padding: 5px 10px; display: flex; align-items: center; gap: 8px;
+    border-right: 1px solid var(--border); min-width: 0; overflow: hidden; flex-wrap: nowrap;
+  }
+  .ar-avatar {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: #fff;
+  }
+  .ar-pt-info { flex: 1; min-width: 0; overflow: hidden; }
+  .ar-name {
+    font-size: 12px; font-weight: 600; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+  }
+  .ar-meta { font-size: 10px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Flags move into visit type column */
+  .ar-type {
+    padding: 0 10px; display: flex; align-items: center;
+    font-size: 11px; color: var(--text-2); border-right: 1px solid var(--border);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* Flags inline */
+  .ar-flags { display: flex; gap: 3px; align-items: center; flex-wrap: wrap; flex-shrink: 0; margin-left: 6px; }
+  .ar-flag {
+    font-size: 9px; padding: 1px 5px; border-radius: 8px; white-space: nowrap;
+    border: 1px solid; font-weight: 600; flex-shrink: 0;
+  }
+  .af-alert { color: var(--red); border-color: rgba(200,50,76,0.3); background: rgba(200,50,76,0.07); }
+  .af-warn  { color: var(--amber); border-color: rgba(196,120,10,0.3); background: rgba(196,120,10,0.07); }
+  .af-ok    { color: var(--green); border-color: rgba(31,168,110,0.3); background: rgba(31,168,110,0.07); }
+  .af-info  { color: var(--text-3); border-color: var(--border); background: var(--surface2); }
+  .ar-status {
+    padding: 0 8px; display: flex; align-items: center;
+    border-right: 1px solid var(--border); overflow: hidden;
+  }
+  .status-pill {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.04em; padding: 3px 7px; border-radius: 10px;
+    white-space: nowrap; display: inline-block;
+  }
+  .sp-seen       { background: rgba(26,158,146,0.12); color: var(--teal); }
+  .sp-roomed     { background: rgba(31,168,110,0.12); color: var(--green); }
+  .sp-checked-in { background: rgba(196,120,10,0.10); color: var(--amber); }
+  .sp-scheduled  { background: rgba(100,110,140,0.10); color: var(--text-3); }
+  .sp-no-show    { background: rgba(200,50,76,0.10); color: var(--red); }
+
+  .ar-actions {
+    padding: 0 6px; display: flex; align-items: center; gap: 4px; justify-content: flex-start;
+  }
+  .act-btn {
+    padding: 4px 8px; border-radius: 4px; font-family: var(--font);
+    font-size: 10px; font-weight: 500; cursor: pointer; border: none;
+    white-space: nowrap; transition: all 0.1s;
+  }
+  .ab-open { background: var(--accent); color: #fff; }
+  .ab-open:hover { background: var(--accent-dk); }
+  .ab-view { background: var(--surface3); border: 1px solid var(--border2); color: var(--text-2); }
+  .ab-view:hover { border-color: var(--accent); color: var(--accent); }
+  .ab-sign { background: rgba(196,120,10,0.10); border: 1px solid rgba(196,120,10,0.3); color: var(--amber); }
+  .ab-sign:hover { background: rgba(196,120,10,0.18); }
+
+  /* Lunch row special */
+  .lunch-cell {
+    grid-column: 1 / -1; padding: 8px 14px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 11px; color: var(--text-3);
+    font-style: italic;
+  }
+  .lunch-line { flex: 1; height: 1px; background: var(--border); }
+
+  /* Unsigned note warning inline */
+  .unsigned-row {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    border-bottom: 1px solid rgba(196,120,10,0.2);
+    background: rgba(196,120,10,0.04);
+    min-height: 28px;
+  }
+  .unsigned-cell {
+    grid-column: 2 / -1; padding: 4px 10px;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--amber);
+  }
+
+  /* Pending result inline warning */
+  .pending-row {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    border-bottom: 1px solid rgba(200,50,76,0.2);
+    background: rgba(200,50,76,0.03);
+    min-height: 24px;
+  }
+  .pending-cell {
+    grid-column: 2 / -1; padding: 3px 10px 3px 47px;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--red);
+  }
+
+  /* ── Right panel ── */
+  .right-panel {
+    background: var(--surface); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .rp-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .rp-tab {
+    flex: 1; padding: 10px 4px; text-align: center; font-size: 11px; font-weight: 500;
+    cursor: pointer; color: var(--text-2); border-bottom: 2px solid transparent; transition: all 0.1s;
+  }
+  .rp-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .rp-badge {
+    display: inline-block; background: var(--red); color: #fff;
+    border-radius: 8px; padding: 0 5px; font-size: 9px; margin-left: 3px; vertical-align: middle;
+  }
+
+  .rp-body { flex: 1; overflow-y: auto; padding: 12px 14px; }
+
+  /* Patient detail */
+  .pd-header {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 12px;
+  }
+  .pd-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .pd-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .pd-meta { font-size: 11px; color: var(--text-2); }
+  .pd-time { font-family: var(--mono); font-size: 10px; color: var(--text-3); margin-top: 3px; }
+
+  .rp-section { margin-bottom: 14px; }
+  .rp-label {
+    font-family: var(--mono); font-size: 9px; color: var(--text-3);
+    text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .rp-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .vrb { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 8px 10px; }
+  .vrb-label { font-size: 9px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+  .vrb-text { font-size: 12px; font-weight: 500; }
+
+  .prob-item {
+    display: flex; align-items: center; gap: 7px;
+    padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 11px;
+  }
+  .prob-item:last-child { border-bottom: none; }
+  .prob-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .prob-name { flex: 1; }
+  .prob-code { font-family: var(--mono); font-size: 9px; color: var(--text-3); }
+
+  .med-item {
+    display: flex; align-items: center; gap: 7px;
+    padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 11px;
+  }
+  .med-item:last-child { border-bottom: none; }
+  .med-name { flex: 1; }
+  .med-route {
+    font-size: 9px; color: var(--text-3); background: var(--surface3);
+    border-radius: 3px; padding: 1px 4px;
+  }
+
+  .result-row {
+    display: flex; align-items: center; gap: 7px;
+    padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 11px;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-name { flex: 1; }
+  .result-val { font-family: var(--mono); font-size: 11px; font-weight: 600; }
+  .result-val.abn { color: var(--amber); }
+  .result-val.crit { color: var(--red); }
+  .result-date { font-size: 9px; color: var(--text-3); }
+  .new-b { font-size: 8px; font-weight: 700; background: rgba(31,168,110,0.12); color: var(--green); border-radius: 3px; padding: 1px 4px; }
+
+  .quick-actions { display: flex; flex-direction: column; gap: 5px; }
+  .qa-btn {
+    width: 100%; padding: 7px 10px; border-radius: 5px; font-family: var(--font);
+    font-size: 11px; font-weight: 500; cursor: pointer; text-align: center;
+    border: 1px solid var(--border2); background: var(--surface2); color: var(--text);
+    transition: all 0.1s;
+  }
+  .qa-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .qa-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .qa-btn.primary:hover { background: var(--accent-dk); }
+
+  /* Inbox */
+  .inbox-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 8px 10px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 5px; margin-bottom: 6px; cursor: pointer;
+    border-left: 3px solid transparent; transition: all 0.1s;
+  }
+  .inbox-item:hover { border-color: var(--border2); }
+  .inbox-item.unread { border-left-color: var(--accent); }
+  .inbox-item.crit { border-left-color: var(--red); }
+  .ii-icon { font-size: 13px; flex-shrink: 0; }
+  .ii-body { flex: 1; }
+  .ii-title { font-weight: 600; font-size: 11px; margin-bottom: 2px; }
+  .ii-meta { font-size: 10px; color: var(--text-3); }
+  .ii-action { font-size: 10px; color: var(--accent); cursor: pointer; white-space: nowrap; font-weight: 600; }
+
+  /* Story ref */
+  .story-ref {
+    display: inline-block; font-family: var(--mono); font-size: 9px;
+    background: var(--surface3); border: 1px solid var(--border2);
+    border-radius: 3px; padding: 1px 4px; color: var(--accent-lt);
+  }
+
+  /* Legend */
+  .legend {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 5px 16px; display: flex; align-items: center; gap: 14px; z-index: 200; flex-wrap: wrap;
+  }
+  .legend-title {
+    font-family: var(--cond); font-size: 9px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3);
+  }
+  .legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text-2); }
+  .legend-swatch { width: 8px; height: 8px; border-radius: 2px; }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">My Schedule</div>
+    <div class="topbar-spacer"></div>
+    <div class="unsigned-pill" title="2 unsigned notes require action">⚠ 2 unsigned notes</div>
+    <div class="topbar-date-nav">
+      <div class="date-nav-btn">‹</div>
+      <div class="date-current">Wednesday, March 4, 2026</div>
+      <div class="date-nav-btn">›</div>
+      <div class="today-btn">Today</div>
+    </div>
+    <div class="topbar-user">
+      <div class="user-avatar">MS</div>
+      M. Snyder, PA-C
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- LEFT: Schedule -->
+    <div class="schedule-zone">
+
+      <!-- Toolbar -->
+      <div class="sz-toolbar">
+        <div class="view-toggle">
+          <div class="vt-btn active">Day</div>
+          <div class="vt-btn">Week</div>
+        </div>
+        <div class="session-tabs">
+          <div class="session-tab active">AM</div>
+          <div class="session-tab">PM</div>
+          <div class="session-tab">All</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-3);margin-left:8px;">
+          12 appointments &nbsp;·&nbsp; <span style="color:var(--green);font-weight:600;">3 seen</span> &nbsp;·&nbsp; <span style="color:var(--amber);font-weight:600;">1 roomed</span>
+        </div>
+        <div class="sz-spacer"></div>
+        <button class="btn-sm">📋 Print Sheet</button>
+      </div>
+
+      <!-- Compact stats bar -->
+      <div class="day-summary">
+        <div class="ds-cell">
+          <div class="ds-num">12</div>
+          <div class="ds-label">Total<br>Today</div>
+        </div>
+        <div class="ds-cell" style="border-left:none;">
+          <div class="ds-num" style="color:var(--teal)">3</div>
+          <div class="ds-label">Checked Out<br>Complete</div>
+        </div>
+        <div class="ds-cell">
+          <div class="ds-num" style="color:var(--green)">1</div>
+          <div class="ds-label">Roomed<br>Now</div>
+        </div>
+        <div class="ds-cell">
+          <div class="ds-num" style="color:var(--amber)">2</div>
+          <div class="ds-label">Checked<br>In</div>
+        </div>
+        <div class="ds-cell">
+          <div class="ds-num" style="color:var(--text-2)">5</div>
+          <div class="ds-label">Upcoming<br>AM</div>
+        </div>
+        <div class="ds-cell">
+          <div class="ds-num" style="color:var(--red)">1</div>
+          <div class="ds-label">No-Show<br>Today</div>
+        </div>
+        <div class="ds-cell" style="margin-left:auto;border-left:1px solid var(--border);">
+          <div class="ds-num" style="color:var(--amber)">2</div>
+          <div class="ds-label">Unsigned<br>Notes</div>
+        </div>
+      </div>
+
+      <!-- Schedule table -->
+      <div class="sched-scroll">
+
+        <!-- Column headers -->
+        <div class="sched-col-header">
+          <div class="sch">Time</div>
+          <div class="sch">Patient &amp; Flags</div>
+          <div class="sch">Visit Type</div>
+          <div class="sch">Status</div>
+          <div class="sch" style="border-right:none;">Actions</div>
+          
+        </div>
+
+        <!-- 8:00 — SEEN, note signed -->
+        <div class="appt-row st-seen" data-id="1">
+          <div class="ar-time">8:00</div>
+          <div class="ar-patient">
+            <div class="ar-avatar" style="background:var(--teal)">DW</div>
+            <div class="ar-pt-info">
+              <div class="ar-name">Washington, Diane</div>
+              <div class="ar-meta">F, 64y · MRN 00183022</div>
+            </div>
+          <div class="ar-flags"><span class="ar-flag af-ok">Signed</span></div></div>
+          <div class="ar-type">Follow-up HTN</div>
+          <div class="ar-status"><span class="status-pill sp-seen">Checked Out</span></div>
+          <div class="ar-actions">
+            <button class="act-btn ab-view">View Note</button>
+          </div>
+        </div>
+
+        <!-- 8:20 — SEEN, note signed -->
+        <div class="appt-row st-seen" data-id="2">
+          <div class="ar-time">8:20</div>
+          <div class="ar-patient">
+            <div class="ar-avatar" style="background:#7254cc">LT</div>
+            <div class="ar-pt-info">
+              <div class="ar-name">Torres, Luis</div>
+              <div class="ar-meta">M, 31y · MRN 00304918</div>
+            </div>
+          <div class="ar-flags"><span class="ar-flag af-ok">Signed</span></div></div>
+          <div class="ar-type">Anxiety F/U</div>
+          <div class="ar-status"><span class="status-pill sp-seen">Checked Out</span></div>
+          <div class="ar-actions">
+            <button class="act-btn ab-view">View Note</button>
+          </div>
+        </div>
+
+        <!-- 8:40 — SEEN, note UNSIGNED -->
+        <div class="appt-row st-seen" data-id="3">
+          <div class="ar-time">8:40</div>
+          <div class="ar-patient">
+            <div class="ar-avatar" style="background:#546080">RC</div>
+            <div class="ar-pt-info">
+              <div class="ar-name">Chen, Robert</div>
+              <div class="ar-meta">M, 36y · MRN 00394711</div>
+            </div>
+          <div class="ar-flags"><span class="ar-flag af-warn">⚠ Unsigned</span></div></div>
+          <div class="ar-type">Sick Visit</div>
+          <div class="ar-status"><span class="status-pill sp-seen">Checked Out</span></div>
+          <div class="ar-actions">
+            <button class="act-btn ab-sign">Sign Note</button>
+          </div>
+        </div>
+
+        <!-- 9:00 — ROOMED (NOW) -->
+        <div class="appt-row st-roomed now-row selected" data-id="4" id="row-ramirez">
+          <div class="now-marker"></div>
+          <div class="ar-time" style="color:var(--red);font-weight:600;">9:00</div>
+          <div class="ar-patient">
+            <div class="ar-avatar" style="background:var(--purple)">CR</div>
+            <div class="ar-pt-info">
+              <div class="ar-name">Ramirez, Carlos</div>
+              <div class="ar-meta">M, 46y · MRN 00471829</div>
+            </div>
+          <div class="ar-flags"><span class="ar-flag af-alert">CKD4</span>
+              <span class="ar-flag af-alert">PCN⚠</span>
+              <span class="ar-flag af-warn">Cr↑</span></div></div>
+          <div class="ar-type">Intake Review</div>
+          <div class="ar-status"><span class="status-pill sp-roomed">🟢 Roomed</span></div>
+          <div class="ar-actions">
+            <button class="act-btn ab-open">Open →</button>
+          </div>
+        </div>
+        <!-- Pending results sub-row -->
+        <div class="pending-row">
+          <div class="ar-time" style="border-right:1px solid var(--border);padding:0 10px;display:flex;align-items:center;font-family:var(--mono);font-size:10px;color:var(--text-3);"></div>
+          <div class="pending-cell">
+            ⚠ Critical: Creatinine 3.8↑ &nbsp;·&nbsp; eGFR 22↓ &nbsp;·&nbsp; HbA1c 8.9% — unreviewed results
+            <span class="story-ref" style="margin-left:6px;">ONC SAFER</span>
+          </div>
+        </div>
+
+        <!-- 9:20 — CHECKED IN -->
+        <div class="appt-row st-checked-in" data-id="5">
+          <div class="ar-time">9:20</div>
+          <div class="ar-patient">
+            <div class="ar-avatar" style="background:var(--amber);color:#1a2035">MN</div>
+            <div class="ar-pt-info">
+              <div class="ar-name">Nguyen, Minh</div>
+              <div class="ar-meta">M, 54y · MRN 00281944</div>
+            </div>
+          <div class="ar-flags"><span class="ar-flag af-warn">⚠ Unsigned prior</span>
+              <span class="ar-flag af-warn">LDL↑</span></div></div>
+          <div class="ar-type">Annual Physical</div>
+          <div class="ar-status"><span class="status-pill sp-checked-in">Checked In</span></div>
+          <div class="ar-actions">
+            <button class="act-btn ab-open">Open →</button>
+            <button class="act-btn ab-sign">Sign Prior</button>
+          </div>
+        </div>
+
+        <!-- 9:40 — CHECKED IN -->
+        <div class="appt-row st-checked-in" data-id="6">
+          <div class="ar-time">9:40</div>
+          <div class="ar-patient">
+            <div class="ar-avatar" style="background:#2a6bc8">PA</div>
+            <div class="ar-pt-info">
+              <div class="ar-name">Adams, Patricia</div>
+              <div class="ar-meta">F, 68y · MRN 00102938</div>
+            </div>
+          <div class="ar-flags"><span class="ar-flag af-alert">CKD3</span></div></div>
+          <div class="ar-type">CKD Follow-up</div>
+          <div class="ar-status"><span class="status-pill sp-checked-in">Checked In</span></div>
+          <div class="ar-actions">
+            <button class="act-btn ab-open">Open →</button>
+          </div>
+        </div>
+
+        <!-- 10:00 — SCHEDULED -->
+        <div class="appt-row st-scheduled" data-id="7">
+          <div class="ar-time">10:00</div>
+          <div class="ar-patient">
+            <div class="ar-avatar" style="background:#2b7de9">JW</div>
+            <div class="ar-pt-info">
+              <div class="ar-name">Wilson, James</div>
+              <div class="ar-meta">M, 30y · MRN 00507321</div>
+            </div>
+          <div class="ar-flags"><span class="ar-flag af-info">New problem</span></div></div>
+          <div class="ar-type">Sick Visit</div>
+          <div class="ar-status"><span class="status-pill sp-scheduled">Scheduled</span></div>
+          <div class="ar-actions">
+            <button class="act-btn ab-view">Preview</button>
+          </div>
+        </div>
+
+        <!-- 10:20 — SCHEDULED -->
+        <div class="appt-row st-scheduled" data-id="8">
+          <div class="ar-time">10:20</div>
+          <div class="ar-patient">
+            <div class="ar-avatar" style="background:#c8324c">LH</div>
+            <div class="ar-pt-info">
+              <div class="ar-name">Harris, Linda</div>
+              <div class="ar-meta">F, 58y · MRN 00218745</div>
+            </div>
+          <div class="ar-flags"><span class="ar-flag af-alert">K+↑ CRIT</span></div></div>
+          <div class="ar-type">Lab Follow-up</div>
+          <div class="ar-status"><span class="status-pill sp-scheduled">Scheduled</span></div>
+          <div class="ar-actions">
+            <button class="act-btn ab-view">Review Result</button>
+          </div>
+        </div>
+        <!-- Critical result sub-row -->
+        <div class="pending-row">
+          <div class="ar-time" style="border-right:1px solid var(--border);padding:0 10px;display:flex;align-items:center;font-family:var(--mono);font-size:10px;color:var(--text-3);"></div>
+          <div class="pending-cell">
+            🔴 Critical unreviewed: K+ 6.2 mEq/L — received 9:41 AM
+          </div>
+        </div>
+
+        <!-- 10:40 — SCHEDULED -->
+        <div class="appt-row st-scheduled" data-id="9">
+          <div class="ar-time">10:40</div>
+          <div class="ar-patient">
+            <div class="ar-avatar" style="background:#9b7fe8">KJ</div>
+            <div class="ar-pt-info">
+              <div class="ar-name">Jensen, Kari</div>
+              <div class="ar-meta">F, 42y · MRN 00381029</div>
+            </div>
+          <div class="ar-flags"><span class="ar-flag af-info">New patient</span></div></div>
+          <div class="ar-type">New Patient Intake</div>
+          <div class="ar-status"><span class="status-pill sp-scheduled">Scheduled</span></div>
+          <div class="ar-actions">
+            <button class="act-btn ab-view">Preview</button>
+          </div>
+        </div>
+
+        <!-- 11:00 — NO SHOW -->
+        <div class="appt-row st-no-show" data-id="10">
+          <div class="ar-time">11:00</div>
+          <div class="ar-patient">
+            <div class="ar-avatar" style="background:#7a8aaa">BM</div>
+            <div class="ar-pt-info">
+              <div class="ar-name">Martinez, Ben</div>
+              <div class="ar-meta">M, 52y · MRN 00449102</div>
+            </div>
+          <div class="ar-flags"><span class="ar-flag" style="color:var(--red);border-color:rgba(200,50,76,0.3);background:rgba(200,50,76,0.07);">No-Show</span></div></div>
+          <div class="ar-type">Medication Refill</div>
+          <div class="ar-status"><span class="status-pill sp-no-show">No-Show</span></div>
+          <div class="ar-actions">
+            <button class="act-btn ab-view">Contact</button>
+          </div>
+        </div>
+
+        <!-- 11:20 — SCHEDULED -->
+        <div class="appt-row st-scheduled" data-id="11">
+          <div class="ar-time">11:20</div>
+          <div class="ar-patient">
+            <div class="ar-avatar" style="background:#1a9e92">GP</div>
+            <div class="ar-pt-info">
+              <div class="ar-name">Patel, Deepa</div>
+              <div class="ar-meta">F, 49y · MRN 00293847</div>
+            </div>
+          <div class="ar-flags"><span class="ar-flag af-warn">A1c due</span></div></div>
+          <div class="ar-type">DM Type 2 F/U</div>
+          <div class="ar-status"><span class="status-pill sp-scheduled">Scheduled</span></div>
+          <div class="ar-actions">
+            <button class="act-btn ab-view">Preview</button>
+          </div>
+        </div>
+
+        <!-- 11:40 — SCHEDULED -->
+        <div class="appt-row st-scheduled" data-id="12">
+          <div class="ar-time">11:40</div>
+          <div class="ar-patient">
+            <div class="ar-avatar" style="background:#15784d">DM</div>
+            <div class="ar-pt-info">
+              <div class="ar-name">Moore, DeShawn</div>
+              <div class="ar-meta">M, 45y · MRN 00319201</div>
+            </div>
+          <div class="ar-flags"><span class="ar-flag af-info">Referral note in</span></div></div>
+          <div class="ar-type">Nephrology F/U</div>
+          <div class="ar-status"><span class="status-pill sp-scheduled">Scheduled</span></div>
+          <div class="ar-actions">
+            <button class="act-btn ab-view">Preview</button>
+          </div>
+        </div>
+
+        <!-- LUNCH -->
+        <div class="appt-row st-lunch">
+          <div class="lunch-cell">
+            <div class="lunch-line"></div>
+            <span>12:00 PM — Lunch Break</span>
+            <div class="lunch-line"></div>
+          </div>
+        </div>
+
+      </div><!-- /sched-scroll -->
+    </div><!-- /schedule-zone -->
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+      <div class="rp-tabs">
+        <div class="rp-tab active" id="tabPatient">Patient Context</div>
+        <div class="rp-tab" id="tabInbox">In-Basket <span class="rp-badge">5</span></div>
+      </div>
+
+      <div class="rp-body" id="rpBody">
+        <div id="panelPatient">
+
+          <!-- Header for selected patient (Ramirez) -->
+          <div class="pd-header">
+            <div class="pd-avatar" style="background:var(--purple)">CR</div>
+            <div>
+              <div class="pd-name">Ramirez, Carlos</div>
+              <div class="pd-meta">M, 46y · MRN 00471829 · DOB 03/12/78</div>
+              <div class="pd-time">9:00 AM · Intake Review · 20 min · <span style="color:var(--green);font-weight:600;">Roomed</span></div>
+            </div>
+          </div>
+
+          <!-- Visit reason -->
+          <div class="rp-section">
+            <div class="rp-label">Today's Visit</div>
+            <div class="vrb">
+              <div class="vrb-label">Chief Complaint</div>
+              <div class="vrb-text">Intake Review — CKD, DM Type 2, HTN</div>
+            </div>
+          </div>
+
+          <!-- Active Problems -->
+          <div class="rp-section">
+            <div class="rp-label">Active Problems</div>
+            <div class="prob-item">
+              <div class="prob-dot" style="background:var(--red)"></div>
+              <div class="prob-name">CKD, Stage 4</div>
+              <div class="prob-code">N18.4</div>
+            </div>
+            <div class="prob-item">
+              <div class="prob-dot"></div>
+              <div class="prob-name">DM Type 2, uncontrolled</div>
+              <div class="prob-code">E11.65</div>
+            </div>
+            <div class="prob-item">
+              <div class="prob-dot"></div>
+              <div class="prob-name">Diverticulitis, large intestine</div>
+              <div class="prob-code">K57.30</div>
+            </div>
+            <div class="prob-item">
+              <div class="prob-dot"></div>
+              <div class="prob-name">Essential Hypertension</div>
+              <div class="prob-code">I10</div>
+            </div>
+          </div>
+
+          <!-- Recent Results -->
+          <div class="rp-section">
+            <div class="rp-label">Recent Results</div>
+            <div class="result-row">
+              <div class="result-name">Creatinine</div>
+              <div class="result-val crit">3.8 mg/dL ↑</div>
+              <span class="new-b">NEW</span>
+            </div>
+            <div class="result-row">
+              <div class="result-name">eGFR</div>
+              <div class="result-val crit">22 mL/min ↓</div>
+              <span class="new-b">NEW</span>
+            </div>
+            <div class="result-row">
+              <div class="result-name">HbA1c</div>
+              <div class="result-val abn">8.9%</div>
+              <div class="result-date">10/10/25</div>
+            </div>
+            <div class="result-row">
+              <div class="result-name">Lipid Panel</div>
+              <div class="result-val">Complete</div>
+              <div class="result-date">10/10/25</div>
+            </div>
+          </div>
+
+          <!-- Active Meds -->
+          <div class="rp-section">
+            <div class="rp-label">Active Medications</div>
+            <div class="med-item"><div class="med-name">Lisinopril 10 mg</div><span class="med-route">PO daily</span></div>
+            <div class="med-item"><div class="med-name">Atorvastatin 20 mg</div><span class="med-route">PO nightly</span></div>
+            <div class="med-item"><div class="med-name">Metformin 500 mg</div><span class="med-route">PO BID</span></div>
+            <div class="med-item" style="color:var(--red)"><div class="med-name">⚠ Allergy: Penicillin — Severe</div></div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="rp-section">
+            <div class="rp-label">Actions</div>
+            <div class="quick-actions">
+              <button class="qa-btn primary">Open Encounter →</button>
+              <button class="qa-btn">Add Order</button>
+              <button class="qa-btn">Message Patient</button>
+            </div>
+          </div>
+
+        </div><!-- /panelPatient -->
+      </div><!-- /rp-body -->
+    </div><!-- /right-panel -->
+
+  </div><!-- /main -->
+</div><!-- /app-shell -->
+
+<!-- LEGEND -->
+<div class="legend">
+  <span class="legend-title">Story Refs</span>
+  <div class="legend-item"><span class="legend-swatch" style="background:var(--green)"></span> Roomed (S-02.4.1)</div>
+  <div class="legend-item"><span class="legend-swatch" style="background:var(--amber)"></span> Checked In (S-02.4.1)</div>
+  <div class="legend-item"><span class="legend-swatch" style="background:var(--teal)"></span> Checked Out (S-02.4.1)</div>
+  <div class="legend-item"><span class="legend-swatch" style="background:var(--red)"></span> Critical / ONC SAFER alerts</div>
+  <div class="legend-item"><span class="legend-swatch" style="background:var(--border2)"></span> Scheduled (S-02.7.1)</div>
+  <div class="legend-item"><span class="legend-swatch" style="background:var(--accent)"></span> E-27 In-Basket</div>
+</div>
+
+<script>
+  // Row selection → update right panel
+  const patients = {
+    1: { name:'Washington, Diane', meta:'F, 64y · MRN 00183022', time:'8:00 AM · Follow-up HTN · 20 min', status:'Checked Out', statusCls:'sp-seen', color:'var(--teal)', initials:'DW',
+         cc:'Follow-up Hypertension', probs:[['HTN','I10'],['Hyperlipidemia','E78.5']], results:[['BP','148/92',true,'today'],['Lipid Panel','Complete',false,'2/10']], meds:['Lisinopril 10mg PO daily','Atorvastatin 20mg PO nightly'], allergy:null },
+    2: { name:'Torres, Luis', meta:'M, 31y · MRN 00304918', time:'8:20 AM · Anxiety F/U · 20 min', status:'Checked Out', statusCls:'sp-seen', color:'var(--purple)', initials:'LT',
+         cc:'Anxiety disorder follow-up, med management', probs:[['Generalized Anxiety','F41.1'],['Major Depressive Disorder','F33.0']], results:[['PHQ-9','8',true,'today']], meds:['Sertraline 100mg PO daily','Buspirone 10mg PO BID'], allergy:null },
+    3: { name:'Chen, Robert', meta:'M, 36y · MRN 00394711', time:'8:40 AM · Sick Visit · 20 min', status:'Note Pending', statusCls:'sp-checked-in', color:'#546080', initials:'RC',
+         cc:'Acute URI, cough 4 days', probs:[['URI','J06.9']], results:[], meds:['None active'], allergy:'Sulfa drugs — Moderate' },
+    4: { name:'Ramirez, Carlos', meta:'M, 46y · MRN 00471829 · DOB 03/12/78', time:'9:00 AM · Intake Review · 20 min · Roomed', status:'Roomed', statusCls:'sp-roomed', color:'var(--purple)', initials:'CR',
+         cc:'Intake Review — CKD, DM Type 2, HTN', probs:[['CKD Stage 4','N18.4'],['DM Type 2','E11.65'],['Diverticulitis','K57.30'],['Hypertension','I10']], results:[['Creatinine','3.8 mg/dL ↑',true,'NEW'],['eGFR','22 mL/min ↓',true,'NEW'],['HbA1c','8.9%',true,'10/10/25'],['Lipid Panel','Complete',false,'10/10/25']], meds:['Lisinopril 10mg PO daily','Atorvastatin 20mg PO nightly','Metformin 500mg PO BID'], allergy:'Penicillin — Severe' },
+    5: { name:'Nguyen, Minh', meta:'M, 54y · MRN 00281944', time:'9:20 AM · Annual Physical · 20 min', status:'Checked In', statusCls:'sp-checked-in', color:null, initials:'MN', avatarBg:'var(--amber)',
+         cc:'Annual physical exam, preventive care', probs:[['Hyperlipidemia','E78.5'],['HTN','I10']], results:[['LDL','158 mg/dL',true,'today'],['BP','136/88',true,'today']], meds:['Atorvastatin 10mg PO nightly'], allergy:null },
+    6: { name:'Adams, Patricia', meta:'F, 68y · MRN 00102938', time:'9:40 AM · CKD Follow-up · 20 min', status:'Checked In', statusCls:'sp-checked-in', color:'#2a6bc8', initials:'PA',
+         cc:'CKD Stage 3b — quarterly monitoring', probs:[['CKD Stage 3b','N18.3'],['DM Type 2','E11.9'],['HTN','I10']], results:[['eGFR','38 mL/min',true,'today'],['Creatinine','2.1',true,'today']], meds:['Lisinopril 5mg','Furosemide 20mg'], allergy:null },
+    7: { name:'Wilson, James', meta:'M, 30y · MRN 00507321', time:'10:00 AM · Sick Visit · 20 min', status:'Scheduled', statusCls:'sp-scheduled', color:'#2b7de9', initials:'JW',
+         cc:'New problem — knee pain after running injury', probs:[['None documented',' ']], results:[], meds:['None active'], allergy:'NSAIDs — Mild GI upset' },
+    8: { name:'Harris, Linda', meta:'F, 58y · MRN 00218745', time:'10:20 AM · Lab Follow-up · 20 min', status:'Scheduled', statusCls:'sp-scheduled', color:'var(--red)', initials:'LH',
+         cc:'Critical lab result follow-up — hyperkalemia', probs:[['CKD Stage 4','N18.4'],['HTN','I10'],['DM Type 2','E11.9']], results:[['K+','6.2 mEq/L',true,'CRITICAL'],['Creatinine','3.4',true,'today'],['BUN','42',true,'today']], meds:['Lisinopril 10mg — HOLD pending K+'], allergy:null },
+    9: { name:'Jensen, Kari', meta:'F, 42y · MRN 00381029', time:'10:40 AM · New Patient · 20 min', status:'Scheduled', statusCls:'sp-scheduled', color:'#9b7fe8', initials:'KJ',
+         cc:'New patient intake — fatigue, headaches x 3 weeks', probs:[['New complaints — TBD',' ']], results:[], meds:['OCP — unknown brand'], allergy:null },
+    10:{ name:'Martinez, Ben', meta:'M, 52y · MRN 00449102', time:'11:00 AM · Medication Refill · 20 min', status:'No-Show', statusCls:'sp-no-show', color:'#7a8aaa', initials:'BM',
+         cc:'Medication refill — chronic pain management', probs:[['Chronic low back pain','M54.5'],['HTN','I10']], results:[], meds:['Gabapentin 300mg TID','Lisinopril 10mg'], allergy:null },
+    11:{ name:'Patel, Deepa', meta:'F, 49y · MRN 00293847', time:'11:20 AM · DM Follow-up · 20 min', status:'Scheduled', statusCls:'sp-scheduled', color:'var(--teal)', initials:'GP',
+         cc:'Diabetes Type 2 quarterly follow-up, HbA1c due', probs:[['DM Type 2','E11.9'],['Obesity','E66.01']], results:[['Last HbA1c','7.8%',false,'6mo ago']], meds:['Metformin 1000mg PO BID','Ozempic 0.5mg weekly'], allergy:null },
+    12:{ name:'Moore, DeShawn', meta:'M, 45y · MRN 00319201', time:'11:40 AM · Nephrology F/U · 20 min', status:'Scheduled', statusCls:'sp-scheduled', color:'#15784d', initials:'DM',
+         cc:'Post-nephrology referral follow-up, CKD management', probs:[['CKD Stage 3a','N18.3'],['HTN','I10']], results:[['eGFR','48',false,'2 wks ago']], meds:['Amlodipine 5mg','Losartan 50mg'], allergy:null },
+  };
+
+  function renderPatient(id) {
+    const p = patients[id];
+    if (!p) return;
+    const bg = p.avatarBg || p.color || '#546080';
+    const probs = p.probs.map(([n,c]) => `<div class="prob-item"><div class="prob-dot"></div><div class="prob-name">${n}</div><div class="prob-code">${c}</div></div>`).join('');
+    const results = p.results.length ? p.results.map(([n,v,abn,d]) => `<div class="result-row"><div class="result-name">${n}</div><div class="result-val${abn?' crit':''}">${v}</div><div class="result-date">${d}</div></div>`).join('') : '<div style="font-size:11px;color:var(--text-3);padding:4px 0;">No recent results</div>';
+    const meds = p.meds.map(m => `<div class="med-item"><div class="med-name">${m}</div></div>`).join('');
+    const allergy = p.allergy ? `<div class="med-item" style="color:var(--red)"><div class="med-name">⚠ Allergy: ${p.allergy}</div></div>` : '';
+
+    document.getElementById('panelPatient').innerHTML = `
+      <div class="pd-header">
+        <div class="pd-avatar" style="background:${bg}">${p.initials}</div>
+        <div>
+          <div class="pd-name">${p.name}</div>
+          <div class="pd-meta">${p.meta}</div>
+          <div class="pd-time">${p.time}</div>
+        </div>
+      </div>
+      <div class="rp-section">
+        <div class="rp-label">Today's Visit</div>
+        <div class="vrb"><div class="vrb-label">Chief Complaint</div><div class="vrb-text">${p.cc}</div></div>
+      </div>
+      <div class="rp-section">
+        <div class="rp-label">Active Problems</div>
+        ${probs}
+      </div>
+      <div class="rp-section">
+        <div class="rp-label">Recent Results</div>
+        ${results}
+      </div>
+      <div class="rp-section">
+        <div class="rp-label">Medications &amp; Allergies</div>
+        ${meds}${allergy}
+      </div>
+      <div class="rp-section">
+        <div class="rp-label">Actions</div>
+        <div class="quick-actions">
+          <button class="qa-btn primary">Open Encounter →</button>
+          <button class="qa-btn">Add Order</button>
+          <button class="qa-btn">Message Patient</button>
+        </div>
+      </div>
+    `;
+  }
+
+  document.querySelectorAll('.appt-row:not(.st-lunch)').forEach(row => {
+    row.addEventListener('click', () => {
+      document.querySelectorAll('.appt-row').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+      const id = parseInt(row.dataset.id);
+      renderPatient(id);
+      document.getElementById('tabPatient').click();
+    });
+  });
+
+  document.querySelectorAll('.vt-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.view-toggle').querySelectorAll('.vt-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.session-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.session-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  const tabPatient = document.getElementById('tabPatient');
+  const tabInbox   = document.getElementById('tabInbox');
+  const rpBody     = document.getElementById('rpBody');
+
+  tabPatient.addEventListener('click', () => {
+    tabPatient.classList.add('active'); tabInbox.classList.remove('active');
+  });
+
+  tabInbox.addEventListener('click', () => {
+    tabInbox.classList.add('active'); tabPatient.classList.remove('active');
+    rpBody.innerHTML = `
+      <div>
+        <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+          <div style="font-family:var(--cond);font-size:14px;font-weight:600;">In-Basket</div>
+          <span class="story-ref">E-27</span>
+          <span style="font-size:11px;color:var(--text-3)">5 unread</span>
+        </div>
+        <div class="inbox-item crit unread">
+          <span class="ii-icon">🔴</span>
+          <div class="ii-body">
+            <div class="ii-title">Critical Result — Harris, Linda</div>
+            <div class="ii-meta">K+ 6.2 mEq/L — received 9:41 AM · Unreviewed</div>
+          </div>
+          <span class="ii-action">Review →</span>
+        </div>
+        <div class="inbox-item unread">
+          <span class="ii-icon">💊</span>
+          <div class="ii-body">
+            <div class="ii-title">eMAR Refusal — Torres, Luis</div>
+            <div class="ii-meta">Patient refused Sertraline 8:00 AM dose</div>
+          </div>
+          <span class="ii-action">Acknowledge</span>
+        </div>
+        <div class="inbox-item unread">
+          <span class="ii-icon">📋</span>
+          <div class="ii-body">
+            <div class="ii-title">Referral Note — Moore, DeShawn</div>
+            <div class="ii-meta">Nephrology consult note available for review</div>
+          </div>
+          <span class="ii-action">View</span>
+        </div>
+        <div class="inbox-item">
+          <span class="ii-icon">📩</span>
+          <div class="ii-body">
+            <div class="ii-title">Patient Message — Nguyen, Minh</div>
+            <div class="ii-meta">Re: medication side effects · Sent 3/3</div>
+          </div>
+          <span class="ii-action">Reply</span>
+        </div>
+        <div class="inbox-item">
+          <span class="ii-icon">✍️</span>
+          <div class="ii-body">
+            <div class="ii-title">Co-sign Request — Resident note</div>
+            <div class="ii-meta">Washington, Diane · Visit 2/28/26</div>
+          </div>
+          <span class="ii-action">Sign</span>
+        </div>
+      </div>
+    `;
+  });
+
+  // Init with Ramirez selected
+  document.getElementById('row-ramirez').classList.add('selected');
+</script>
+</body>
+</html>
