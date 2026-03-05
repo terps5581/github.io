@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scheduler — Front Desk View</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #f4f6fa;
+  --surf:    #ffffff;
+  --surf2:   #f0f2f7;
+  --surf3:   #e6eaf3;
+  --bdr:     #d0d6e8;
+  --bdr2:    #b8c2d8;
+  --blue:    #2b7de9;
+  --blue-dk: #1a5fb8;
+  --green:   #1fa86e;
+  --green-dk:#15784d;
+  --amber:   #c4780a;
+  --red:     #c8324c;
+  --purple:  #7254cc;
+  --teal:    #1a9e92;
+  --text:    #1a2035;
+  --text2:   #4a5878;
+  --text3:   #7a8aaa;
+  --font:    'IBM Plex Sans', sans-serif;
+  --mono:    'IBM Plex Mono', monospace;
+  --cond:    'IBM Plex Sans Condensed', sans-serif;
+
+  /* Provider colors */
+  --c1: #2b7de9;   /* Snyder PA-C   — blue   */
+  --c2: #7254cc;   /* Okafor MD     — purple  */
+  --c3: #1fa86e;   /* Patel NP      — green   */
+  --c4: #1a9e92;   /* Rivera LCSW   — teal    */
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: var(--font); font-size: 13px; color: var(--text); background: var(--bg); overflow: hidden; }
+
+/* ─── Shell ─────────────────────────────────────────────────────── */
+.shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* ─── Topbar ────────────────────────────────────────────────────── */
+.topbar {
+  flex: 0 0 44px; display: flex; align-items: center; padding: 0 16px; gap: 12px;
+  background: var(--surf); border-bottom: 1px solid var(--bdr); z-index: 50;
+}
+.tb-logo { font-family: var(--cond); font-weight: 600; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); padding-right: 14px; border-right: 1px solid var(--bdr); }
+.tb-mod  { font-family: var(--cond); font-weight: 600; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--text); padding-left: 2px; }
+.tb-space { flex: 1; }
+.tb-date { display: flex; align-items: center; gap: 8px; padding: 0 12px; border-right: 1px solid var(--bdr); }
+.tb-nav  { background: var(--surf2); border: 1px solid var(--bdr); border-radius: 4px; color: var(--text2); padding: 3px 9px; font-size: 12px; cursor: pointer; }
+.tb-nav:hover { background: var(--surf3); }
+.tb-cur  { font-family: var(--cond); font-size: 13px; font-weight: 600; min-width: 175px; text-align: center; }
+.tb-today { background: var(--blue); color: #fff; border: none; border-radius: 4px; padding: 3px 10px; font-size: 11px; font-weight: 600; cursor: pointer; }
+.tb-user { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+.tb-av   { width: 26px; height: 26px; border-radius: 50%; background: var(--blue-dk); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; }
+.tb-btn  { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 4px; border: 1px solid var(--bdr); background: var(--surf); font-size: 11px; font-weight: 500; color: var(--text2); cursor: pointer; }
+.tb-btn:hover { border-color: var(--blue); color: var(--blue); }
+.tb-btn.pri   { background: var(--blue); border-color: var(--blue); color: #fff; }
+.tb-btn.pri:hover { background: var(--blue-dk); }
+
+/* ─── Main: left + center + right ──────────────────────────────── */
+.main { flex: 1 1 0; display: flex; overflow: hidden; min-height: 0; }
+
+/* ─── Left panel ────────────────────────────────────────────────── */
+.left-panel { flex: 0 0 240px; display: flex; flex-direction: column; background: var(--surf); border-right: 1px solid var(--bdr); overflow: hidden; }
+.lp-sec { padding: 10px 14px; border-bottom: 1px solid var(--bdr); }
+.lp-lbl { font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); margin-bottom: 7px; }
+
+/* Mini cal */
+.mcal-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
+.mcal-title { font-size: 12px; font-weight: 600; }
+.mcal-nav { color: var(--text3); cursor: pointer; font-size: 14px; }
+.mcal-nav:hover { color: var(--text); }
+.mcal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 1px; text-align: center; }
+.cdow { font-family: var(--mono); font-size: 9px; color: var(--text3); padding: 2px 0; }
+.cday { font-size: 11px; padding: 4px 2px; border-radius: 3px; cursor: pointer; color: var(--text2); }
+.cday:hover { background: var(--surf3); }
+.cday.today { background: var(--blue); color: #fff; font-weight: 600; border-radius: 50%; }
+.cday.dot { position: relative; }
+.cday.dot::after { content:''; position:absolute; bottom:1px; left:50%; transform:translateX(-50%); width:4px; height:4px; border-radius:50%; background:var(--green); }
+.cday.om { color:var(--text3); opacity:.4; }
+
+/* Provider filter */
+.pf-list { overflow-y: auto; flex: 0 0 auto; }
+.pf-item { display: flex; align-items: center; gap: 7px; padding: 6px 14px; cursor: pointer; border-left: 2px solid transparent; }
+.pf-item:hover { background: var(--surf2); }
+.pf-item.on { border-left-color: var(--blue); background: var(--surf2); }
+.pf-chk { width: 14px; height: 14px; border: 1.5px solid var(--bdr2); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
+.pf-chk.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+.pf-sw { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.pf-name { font-size: 12px; color: var(--text); flex: 1; }
+.pf-ct { font-family: var(--mono); font-size: 10px; color: var(--text3); background: var(--surf3); border-radius: 3px; padding: 1px 5px; }
+
+/* Waitlist */
+.wl-list { overflow-y: auto; flex: 1; }
+.wl-item { display: flex; align-items: flex-start; gap: 7px; padding: 7px 0; border-bottom: 1px solid var(--bdr); font-size: 11px; cursor: pointer; }
+.wl-item:last-child { border-bottom: none; }
+.wl-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.wl-name { font-weight: 500; }
+.wl-meta { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.wl-tag { margin-left: auto; font-size: 9px; font-weight: 600; padding: 1px 5px; border-radius: 3px; white-space: nowrap; background: var(--surf3); color: var(--text3); }
+
+/* ─── Center ────────────────────────────────────────────────────── */
+.center { flex: 1 1 0; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+
+.toolbar {
+  flex: 0 0 40px; display: flex; align-items: center; gap: 8px;
+  padding: 0 14px; background: var(--surf); border-bottom: 1px solid var(--bdr);
+}
+.vtog { display: flex; gap: 1px; background: var(--surf3); border: 1px solid var(--bdr); border-radius: 5px; padding: 2px; }
+.vb   { padding: 3px 10px; border-radius: 3px; font-size: 11px; cursor: pointer; color: var(--text2); }
+.vb.on { background: var(--blue); color: #fff; font-weight: 600; }
+.srch { position: relative; flex: 1; max-width: 260px; }
+.srch-ico { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 12px; pointer-events: none; }
+.srch input { width: 100%; background: var(--surf2); border: 1px solid var(--bdr); border-radius: 5px; padding: 5px 10px 5px 28px; color: var(--text); font-family: var(--font); font-size: 12px; outline: none; }
+.srch input:focus { border-color: var(--blue); }
+.srch input::placeholder { color: var(--text3); }
+.tl-sp { flex: 1; }
+
+/* Provider column headers */
+.col-heads {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 52px repeat(4,1fr);
+  background: var(--surf); border-bottom: 2px solid var(--bdr);
+}
+.ch-gap { border-right: 1px solid var(--bdr); }
+.ch-col {
+  padding: 8px 12px; border-left: 1px solid var(--bdr);
+  display: flex; align-items: center; gap: 8px;
+}
+.ch-sw { width: 6px; border-radius: 2px; align-self: stretch; flex-shrink: 0; }
+.ch-info { flex: 1; min-width: 0; }
+.ch-name { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ch-sub  { font-size: 9px; color: var(--text3); margin-top: 1px; }
+.ch-ct   { font-family: var(--mono); font-size: 10px; color: var(--text3); background: var(--surf3); border: 1px solid var(--bdr); border-radius: 3px; padding: 1px 5px; white-space: nowrap; flex-shrink: 0; }
+
+/* ─── Pixel-time grid ───────────────────────────────────────────── */
+/* 7:30am start. 1 min = 2px. Grid height covers 7:30–5pm = 570min = 1140px */
+.grid-area { flex: 1 1 0; display: flex; overflow: hidden; min-height: 0; }
+
+.tg { flex: 0 0 52px; overflow-y: scroll; scrollbar-width: none; background: var(--surf2); border-right: 1px solid var(--bdr); }
+.tg::-webkit-scrollbar { display: none; }
+.tg-inner { position: relative; height: 1140px; }
+.tl { position: absolute; right: 6px; font-family: var(--mono); font-size: 9px; color: var(--text3); transform: translateY(-50%); white-space: nowrap; user-select: none; }
+.tl.h { font-weight: 600; color: var(--text2); }
+
+.scheds { flex: 1; overflow-y: auto; overflow-x: hidden; }
+.scheds-inner { display: grid; grid-template-columns: repeat(4,1fr); height: 1140px; position: relative; }
+
+.sc { position: relative; border-right: 1px solid var(--bdr); overflow: hidden; }
+.sc:last-child { border-right: none; }
+
+/* Gridlines */
+.hl { position: absolute; left: 0; right: 0; height: 1px; background: var(--bdr); pointer-events: none; z-index: 0; }
+.hl.hf { background: #eaeff8; }
+
+/* NOW line at 10:15am: 10:15 - 7:30 = 165min × 2 = 330px */
+.now { position: absolute; left: 0; right: 0; height: 2px; background: var(--red); z-index: 8; pointer-events: none; }
+.now::before { content:''; position:absolute; left:-1px; top:-3px; width:7px; height:7px; border-radius:50%; background:var(--red); }
+
+/* ── Block types ─────────────────────────────────────────────────── */
+/* Booked appointment */
+.ab {
+  position: absolute; left: 3px; right: 3px; border-radius: 4px;
+  padding: 3px 6px; cursor: pointer; border-left: 3px solid transparent;
+  overflow: hidden; z-index: 2; transition: box-shadow .12s, filter .12s;
+}
+.ab:hover { z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,.14); filter: brightness(.97); }
+.ab.sel  { z-index: 12; box-shadow: 0 0 0 2px var(--blue); }
+.ab-name { font-size: 10px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+.ab-sub  { font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .8; line-height: 1.3; }
+.ab-dem  { font-family: var(--mono); font-size: 8px; color: inherit; opacity: .7; margin-left: 2px; }
+
+/* appointment status colors */
+.st-sch  { background: rgba(43,125,233,.10); border-left-color: var(--blue);   color: #0d1f40; }
+.st-in   { background: rgba(196,120,10,.12); border-left-color: var(--amber);  color: #2e1800; }
+.st-room { background: rgba(31,168,110,.14); border-left-color: var(--green);  color: #0a2618; }
+.st-out  { background: rgba(26,158,146,.10); border-left-color: var(--teal);   color: #0d2e2b; }
+.st-ns   { background: rgba(200,50,76,.08);  border-left-color: var(--red);    color: #350a14; opacity: .6; }
+
+/* Open slot — typed */
+.os {
+  position: absolute; left: 3px; right: 3px; border-radius: 4px;
+  cursor: pointer; overflow: hidden; z-index: 1;
+  display: flex; align-items: center; padding: 0 7px; gap: 5px;
+  font-size: 9px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase;
+  border: 1.5px dashed; transition: all .12s;
+}
+.os:hover { filter: brightness(.95); z-index: 5; }
+.os-lbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.os-icon { font-size: 10px; flex-shrink: 0; }
+
+/* open slot types */
+.os-well  { background: rgba(31,168,110,.06);  border-color: rgba(31,168,110,.35); color: var(--green);  }
+.os-sick  { background: rgba(196,120,10,.06);  border-color: rgba(196,120,10,.35); color: var(--amber);  }
+.os-fu    { background: rgba(43,125,233,.06);  border-color: rgba(43,125,233,.35); color: var(--blue);   }
+.os-any   { background: rgba(114,84,204,.05);  border-color: rgba(114,84,204,.30); color: var(--purple); }
+
+/* Block: lunch / admin — striped */
+.blk {
+  position: absolute; left: 0; right: 0; z-index: 1;
+  background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,.03) 4px, rgba(0,0,0,.03) 8px);
+  border-top: 1px solid var(--bdr); border-bottom: 1px solid var(--bdr);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: var(--text3); font-style: italic; letter-spacing: .02em;
+}
+/* Pre-start: greyed out */
+.pre {
+  position: absolute; left: 0; right: 0; top: 0; z-index: 1;
+  background: var(--surf2);
+  border-bottom: 2px solid var(--bdr2);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 4px;
+  font-size: 9px; color: var(--text3); font-style: italic;
+}
+
+/* ─── Right panel ────────────────────────────────────────────────── */
+.rp { flex: 0 0 280px; display: flex; flex-direction: column; background: var(--surf); border-left: 1px solid var(--bdr); overflow: hidden; }
+.rp-tabs { flex: 0 0 auto; display: flex; border-bottom: 1px solid var(--bdr); }
+.rp-tab  { flex: 1; padding: 9px 4px; text-align: center; font-size: 11px; font-weight: 500; cursor: pointer; color: var(--text2); border-bottom: 2px solid transparent; }
+.rp-tab.on { color: var(--blue); border-bottom-color: var(--blue); }
+.rp-body { flex: 1; overflow-y: auto; padding: 12px 14px; }
+.rp-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 180px; color: var(--text3); gap: 8px; text-align: center; }
+.rp-empty-ico { font-size: 26px; opacity: .3; }
+.rp-empty-txt { font-size: 11px; }
+
+/* New appt form */
+.f-row { margin-bottom: 11px; }
+.f-lbl { font-family: var(--mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 4px; display: block; }
+.f-inp, .f-sel {
+  width: 100%; background: var(--surf2); border: 1px solid var(--bdr2);
+  border-radius: 5px; padding: 7px 10px; color: var(--text);
+  font-family: var(--font); font-size: 12px; outline: none;
+}
+.f-inp:focus, .f-sel:focus { border-color: var(--blue); }
+.f-inp::placeholder { color: var(--text3); }
+.f-sub { width: 100%; background: var(--green); color: #fff; border: none; border-radius: 5px; padding: 9px; font-family: var(--font); font-size: 12px; font-weight: 600; cursor: pointer; margin-top: 4px; }
+.f-sub:hover { background: var(--green-dk); }
+
+/* Detail view */
+.d-head { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; }
+.d-bar  { width: 4px; border-radius: 2px; align-self: stretch; flex-shrink: 0; }
+.d-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.d-meta { font-size: 11px; color: var(--text2); }
+.d-sec  { margin-bottom: 12px; }
+.d-lbl  { font-family: var(--mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: .12em; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+.d-lbl::after { content:''; flex:1; height:1px; background:var(--bdr); }
+.d-row  { display: flex; gap: 6px; padding: 4px 0; border-bottom: 1px solid var(--bdr); font-size: 11px; }
+.d-row:last-child { border-bottom: none; }
+.d-key  { color: var(--text3); font-size: 10px; min-width: 76px; flex-shrink: 0; }
+.d-val  { color: var(--text); font-weight: 500; flex: 1; }
+.d-val.r { color: var(--red); }
+.d-val.a { color: var(--amber); }
+.d-val.g { color: var(--green); }
+.d-acts { display: flex; flex-direction: column; gap: 5px; }
+.da-b   { width: 100%; padding: 7px 10px; border-radius: 5px; font-size: 11px; font-weight: 500; cursor: pointer; border: 1px solid var(--bdr2); background: var(--surf2); color: var(--text); text-align: center; transition: all .1s; }
+.da-b:hover { border-color: var(--blue); color: var(--blue); }
+.da-b.g   { background: var(--green); border-color: var(--green); color: #fff; }
+.da-b.g:hover { background: var(--green-dk); }
+.da-b.bl  { background: var(--blue); border-color: var(--blue); color: #fff; }
+.da-b.bl:hover { background: var(--blue-dk); }
+.da-b.a   { background: rgba(196,120,10,.1); border-color: rgba(196,120,10,.4); color: var(--amber); }
+
+/* status pills */
+.s-pills { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
+.sp { padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+.sp.sch  { background: rgba(43,125,233,.10); color: var(--blue);   border-color: rgba(43,125,233,.3); }
+.sp.in   { background: rgba(196,120,10,.10); color: var(--amber);  border-color: rgba(196,120,10,.3); }
+.sp.room { background: rgba(31,168,110,.10); color: var(--green);  border-color: rgba(31,168,110,.3); }
+.sp.ns   { background: rgba(200,50,76,.10);  color: var(--red);    border-color: rgba(200,50,76,.3); }
+
+/* Open slot detail */
+.os-detail { padding: 10px; background: var(--surf2); border: 1px dashed var(--bdr2); border-radius: 6px; margin-bottom: 10px; }
+.os-type-label { font-size: 11px; font-weight: 600; margin-bottom: 4px; }
+.os-hint { font-size: 10px; color: var(--text3); }
+
+/* Stats bar */
+.stats { flex: 0 0 auto; display: flex; border-top: 1px solid var(--bdr); background: var(--surf); }
+.st-c { flex: 1; padding: 7px 12px; border-right: 1px solid var(--bdr); }
+.st-c:last-child { border-right: none; }
+.st-n { font-family: var(--mono); font-size: 16px; font-weight: 500; color: var(--text); }
+.st-n.g { color: var(--green); }
+.st-n.a { color: var(--amber); }
+.st-n.r { color: var(--red); }
+.st-l { font-size: 10px; color: var(--text3); }
+
+/* Legend */
+.legend { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surf); border-top: 1px solid var(--bdr); padding: 5px 16px; display: flex; align-items: center; gap: 14px; z-index: 200; flex-wrap: wrap; }
+.lg-t { font-family: var(--cond); font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); }
+.lg-i { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--text2); }
+.lg-sw { width: 8px; height: 8px; border-radius: 2px; }
+.lg-dsh { width: 14px; height: 0; border-top: 2px dashed; flex-shrink: 0; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bdr2); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-logo">AxeCap</div>
+  <div class="tb-mod">Scheduler</div>
+  <div class="tb-space"></div>
+  <div class="tb-date">
+    <div class="tb-nav">‹</div>
+    <div class="tb-cur">Wednesday, March 4, 2026</div>
+    <div class="tb-nav">›</div>
+    <div class="tb-today">Today</div>
+  </div>
+  <div class="tb-btn">📋 Print</div>
+  <div class="tb-btn">⚙ Templates</div>
+  <div class="tb-btn pri" id="newApptBtn">+ New Appointment</div>
+  <div class="tb-user">
+    <div class="tb-av">JL</div>
+    J. Lopez, Front Desk
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="lp-sec">
+      <div class="lp-lbl">March 2026</div>
+      <div class="mcal-hdr"><div class="mcal-nav">‹</div><div class="mcal-title">March 2026</div><div class="mcal-nav">›</div></div>
+      <div class="mcal-grid">
+        <div class="cdow">SU</div><div class="cdow">MO</div><div class="cdow">TU</div><div class="cdow">WE</div><div class="cdow">TH</div><div class="cdow">FR</div><div class="cdow">SA</div>
+        <div class="cday om">22</div><div class="cday om">23</div><div class="cday om">24</div><div class="cday om">25</div><div class="cday om">26</div><div class="cday om">27</div><div class="cday om">28</div>
+        <div class="cday">1</div><div class="cday dot">2</div><div class="cday dot">3</div><div class="cday today" id="calToday">4</div><div class="cday dot">5</div><div class="cday dot">6</div><div class="cday">7</div>
+        <div class="cday">8</div><div class="cday dot">9</div><div class="cday dot">10</div><div class="cday dot">11</div><div class="cday dot">12</div><div class="cday dot">13</div><div class="cday">14</div>
+        <div class="cday">15</div><div class="cday dot">16</div><div class="cday dot">17</div><div class="cday dot">18</div><div class="cday dot">19</div><div class="cday dot">20</div><div class="cday">21</div>
+        <div class="cday">22</div><div class="cday dot">23</div><div class="cday dot">24</div><div class="cday dot">25</div><div class="cday">26</div><div class="cday dot">27</div><div class="cday">28</div>
+        <div class="cday">29</div><div class="cday">30</div><div class="cday">31</div><div class="cday om">1</div><div class="cday om">2</div><div class="cday om">3</div><div class="cday om">4</div>
+      </div>
+    </div>
+
+    <div class="lp-sec"><div class="lp-lbl">Providers</div></div>
+    <div class="pf-list">
+      <div class="pf-item on"><div class="pf-chk on">✓</div><div class="pf-sw" style="background:var(--text3)"></div><div class="pf-name">All Providers</div><div class="pf-ct">34</div></div>
+      <div class="pf-item"><div class="pf-chk on">✓</div><div class="pf-sw" style="background:var(--c1)"></div><div class="pf-name">M. Snyder, PA-C</div><div class="pf-ct">10</div></div>
+      <div class="pf-item"><div class="pf-chk on">✓</div><div class="pf-sw" style="background:var(--c2)"></div><div class="pf-name">Dr. T. Okafor, MD</div><div class="pf-ct">11</div></div>
+      <div class="pf-item"><div class="pf-chk on">✓</div><div class="pf-sw" style="background:var(--c3)"></div><div class="pf-name">R. Patel, NP</div><div class="pf-ct">9</div></div>
+      <div class="pf-item"><div class="pf-chk on">✓</div><div class="pf-sw" style="background:var(--c4)"></div><div class="pf-name">K. Rivera, LCSW</div><div class="pf-ct">4</div></div>
+    </div>
+
+    <div class="lp-sec"><div class="lp-lbl">Waitlist &nbsp;<span style="color:var(--amber);font-weight:600;">3 waiting</span></div></div>
+    <div class="wl-list" style="padding:0 14px;">
+      <div class="wl-item"><div class="wl-dot" style="background:var(--red)"></div><div><div class="wl-name">Martinez, Jose</div><div class="wl-meta">Chest pain · Any provider</div></div><div class="wl-tag" style="color:var(--red)">URGENT</div></div>
+      <div class="wl-item"><div class="wl-dot" style="background:var(--amber)"></div><div><div class="wl-name">Gupta, Priya</div><div class="wl-meta">Med refill · Snyder</div></div><div class="wl-tag">ROUTINE</div></div>
+      <div class="wl-item"><div class="wl-dot" style="background:var(--text3)"></div><div><div class="wl-name">Thompson, Dale</div><div class="wl-meta">Follow-up · Any</div></div><div class="wl-tag">ROUTINE</div></div>
+    </div>
+  </div><!-- /left -->
+
+  <!-- CENTER -->
+  <div class="center">
+    <div class="toolbar">
+      <div class="vtog">
+        <div class="vb">Day</div><div class="vb on">Multi</div><div class="vb">Week</div>
+      </div>
+      <div class="srch"><span class="srch-ico">🔍</span><input type="text" placeholder="Search patient (name, DOB, MRN…)"></div>
+      <div class="tl-sp"></div>
+    </div>
+
+    <!-- Column headers -->
+    <div class="col-heads">
+      <div class="ch-gap"></div>
+      <div class="ch-col">
+        <div class="ch-sw" style="background:var(--c1)"></div>
+        <div class="ch-info">
+          <div class="ch-name">M. Snyder, PA-C</div>
+          <div class="ch-sub">Starts 8:00 AM · Rm 5 &amp; 6</div>
+        </div>
+        <div class="ch-ct">10 appts</div>
+      </div>
+      <div class="ch-col">
+        <div class="ch-sw" style="background:var(--c2)"></div>
+        <div class="ch-info">
+          <div class="ch-name">Dr. T. Okafor, MD</div>
+          <div class="ch-sub">Starts 7:30 AM · Rm 1 &amp; 2</div>
+        </div>
+        <div class="ch-ct">11 appts</div>
+      </div>
+      <div class="ch-col">
+        <div class="ch-sw" style="background:var(--c3)"></div>
+        <div class="ch-info">
+          <div class="ch-name">R. Patel, NP</div>
+          <div class="ch-sub">Starts 7:30 AM · Rm 3 &amp; 4</div>
+        </div>
+        <div class="ch-ct">9 appts</div>
+      </div>
+      <div class="ch-col">
+        <div class="ch-sw" style="background:var(--c4)"></div>
+        <div class="ch-info">
+          <div class="ch-name">K. Rivera, LCSW</div>
+          <div class="ch-sub">Starts 8:00 AM · Rm 9</div>
+        </div>
+        <div class="ch-ct">4 appts</div>
+      </div>
+    </div>
+
+    <!-- Pixel-time grid -->
+    <!--
+      Base: 7:30 AM = 0px.  1 min = 2px.
+      7:30=0  8:00=60  8:20=100  8:40=140
+      9:00=180  9:20=220  9:40=260
+      10:00=300  10:20=340  10:40=380
+      11:00=420  11:20=460  11:40=500
+      12:00=540  12:30=600  1:00=660
+      1:20=700  1:40=740  2:00=780
+      2:20=820  2:40=860  3:00=900
+      3:20=940  3:40=980  4:00=1020
+      NOW = 10:15am = 165min from 7:30 = 330px
+    -->
+    <div class="grid-area">
+      <div class="tg" id="tg">
+        <div class="tg-inner">
+          <div class="tl h"  style="top:0">7:30</div>
+          <div class="tl h"  style="top:60px">8 AM</div>
+          <div class="tl"    style="top:100px">8:20</div>
+          <div class="tl"    style="top:140px">8:40</div>
+          <div class="tl h"  style="top:180px">9 AM</div>
+          <div class="tl"    style="top:220px">9:20</div>
+          <div class="tl"    style="top:260px">9:40</div>
+          <div class="tl h"  style="top:300px">10 AM</div>
+          <div class="tl"    style="top:340px">10:20</div>
+          <div class="tl"    style="top:380px">10:40</div>
+          <div class="tl h"  style="top:420px">11 AM</div>
+          <div class="tl"    style="top:460px">11:20</div>
+          <div class="tl"    style="top:500px">11:40</div>
+          <div class="tl h"  style="top:540px">12 PM</div>
+          <div class="tl"    style="top:580px">12:20</div>
+          <div class="tl"    style="top:620px">12:40</div>
+          <div class="tl h"  style="top:660px">1 PM</div>
+          <div class="tl"    style="top:700px">1:20</div>
+          <div class="tl"    style="top:740px">1:40</div>
+          <div class="tl h"  style="top:780px">2 PM</div>
+          <div class="tl"    style="top:820px">2:20</div>
+          <div class="tl"    style="top:860px">2:40</div>
+          <div class="tl h"  style="top:900px">3 PM</div>
+          <div class="tl"    style="top:940px">3:20</div>
+          <div class="tl"    style="top:980px">3:40</div>
+          <div class="tl h"  style="top:1020px">4 PM</div>
+          <div class="tl"    style="top:1060px">4:20</div>
+          <div class="tl"    style="top:1100px">4:40</div>
+        </div>
+      </div>
+
+      <div class="scheds" id="scheds">
+        <div class="scheds-inner">
+
+          <!-- Gridlines helper: hour every 120px from 0, half-hour every 60px -->
+          <!-- Each col repeats these -->
+
+          <!-- ═══════════════════════════════════════════
+               COL 1: M. SNYDER PA-C
+               Starts 8:00 AM (60px from top)
+               Lunch 12:00–1:00 (540–660)
+               Admin 4:00–4:30 (1020–1080)
+               ═══════════════════════════════════════════ -->
+          <div class="sc">
+            <div class="hl" style="top:0"></div><div class="hl hf" style="top:60px"></div>
+            <div class="hl" style="top:120px"></div><div class="hl hf" style="top:180px"></div>
+            <div class="hl" style="top:240px"></div><div class="hl hf" style="top:300px"></div>
+            <div class="hl" style="top:360px"></div><div class="hl hf" style="top:420px"></div>
+            <div class="hl" style="top:480px"></div><div class="hl hf" style="top:540px"></div>
+            <div class="hl" style="top:600px"></div><div class="hl hf" style="top:660px"></div>
+            <div class="hl" style="top:720px"></div><div class="hl hf" style="top:780px"></div>
+            <div class="hl" style="top:840px"></div><div class="hl hf" style="top:900px"></div>
+            <div class="hl" style="top:960px"></div><div class="hl hf" style="top:1020px"></div>
+            <div class="hl" style="top:1080px"></div>
+            <div class="now" style="top:330px"></div>
+            <!-- Pre-start: 7:30–8:00 = 0–60px -->
+            <div class="pre" style="height:60px;">Not started · 8:00 AM</div>
+            <!-- 8:00 Ramirez – Roomed (8:00=60, h=38) -->
+            <div class="ab st-room" style="top:62px;height:36px;" data-id="s1"><div class="ab-name">Ramirez, C. <span class="ab-dem">46/M</span></div><div class="ab-sub">● Roomed · Intake Review</div></div>
+            <!-- 8:20 Open well -->
+            <div class="os os-well" style="top:102px;height:36px;" data-id="os-s1"><span class="os-icon">🌿</span><span class="os-lbl">Well Visit</span></div>
+            <!-- 8:40 Torres checked in -->
+            <div class="ab st-in" style="top:142px;height:36px;" data-id="s2"><div class="ab-name">Torres, L. <span class="ab-dem">29/M</span></div><div class="ab-sub">Checked In · Anxiety F/U</div></div>
+            <!-- 9:00 Nguyen scheduled -->
+            <div class="ab st-sch" style="top:182px;height:36px;" data-id="s3"><div class="ab-name">Nguyen, M. <span class="ab-dem">54/M</span></div><div class="ab-sub">Scheduled · Annual Exam</div></div>
+            <!-- 9:20 Open sick -->
+            <div class="os os-sick" style="top:222px;height:36px;" data-id="os-s2"><span class="os-icon">🤒</span><span class="os-lbl">Sick Visit</span></div>
+            <!-- 9:40 Chen no-show -->
+            <div class="ab st-ns" style="top:262px;height:36px;" data-id="s4"><div class="ab-name">Chen, R. <span class="ab-dem">36/M</span></div><div class="ab-sub">No-Show · Sick Visit</div></div>
+            <!-- 10:00 Wilson scheduled -->
+            <div class="ab st-sch" style="top:302px;height:36px;" data-id="s5"><div class="ab-name">Wilson, J. <span class="ab-dem">42/F</span></div><div class="ab-sub">Scheduled · DM F/U</div></div>
+            <!-- 10:20 Open follow-up -->
+            <div class="os os-fu" style="top:342px;height:36px;" data-id="os-s3"><span class="os-icon">↩</span><span class="os-lbl">Follow-Up</span></div>
+            <!-- 10:40 Harris scheduled -->
+            <div class="ab st-sch" style="top:382px;height:36px;" data-id="s6"><div class="ab-name">Harris, L. <span class="ab-dem">58/F</span></div><div class="ab-sub">Scheduled · Lab Results</div></div>
+            <!-- 11:00 Moore scheduled -->
+            <div class="ab st-sch" style="top:422px;height:36px;" data-id="s7"><div class="ab-name">Moore, D. <span class="ab-dem">71/F</span></div><div class="ab-sub">Scheduled · Nephrology F/U</div></div>
+            <!-- 11:20 Open sick -->
+            <div class="os os-sick" style="top:462px;height:36px;" data-id="os-s4"><span class="os-icon">🤒</span><span class="os-lbl">Sick Visit</span></div>
+            <!-- 11:40 Patel scheduled -->
+            <div class="ab st-sch" style="top:502px;height:36px;" data-id="s8"><div class="ab-name">Patel, D. <span class="ab-dem">59/M</span></div><div class="ab-sub">Scheduled · DM F/U</div></div>
+            <!-- Lunch 12:00–1:00 = 540–660px (120px) -->
+            <div class="blk" style="top:540px;height:120px;">Lunch  12:00 – 1:00 PM</div>
+            <!-- 1:00 Garcia scheduled -->
+            <div class="ab st-sch" style="top:662px;height:36px;" data-id="s9"><div class="ab-name">Garcia, M. <span class="ab-dem">52/F</span></div><div class="ab-sub">Scheduled · HTN Check</div></div>
+            <!-- 1:20 Open well -->
+            <div class="os os-well" style="top:702px;height:36px;" data-id="os-s5"><span class="os-icon">🌿</span><span class="os-lbl">Well Visit</span></div>
+            <!-- 1:40 Kim scheduled -->
+            <div class="ab st-sch" style="top:742px;height:36px;" data-id="s10"><div class="ab-name">Kim, J. <span class="ab-dem">4mo/M</span></div><div class="ab-sub">Scheduled · Well Child</div></div>
+            <!-- 2:00 Lopez scheduled -->
+            <div class="ab st-sch" style="top:782px;height:36px;" data-id="s11"><div class="ab-name">Lopez, A. <span class="ab-dem">38/F</span></div><div class="ab-sub">Scheduled · Sick Visit</div></div>
+            <!-- 2:20 Open follow-up -->
+            <div class="os os-fu" style="top:822px;height:36px;" data-id="os-s6"><span class="os-icon">↩</span><span class="os-lbl">Follow-Up</span></div>
+            <!-- Admin 4:00–4:30 = 1020–1080px -->
+            <div class="blk" style="top:1020px;height:60px;">Admin / Chart Review  4:00–4:30</div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════
+               COL 2: DR. T. OKAFOR MD
+               Starts 7:30 AM (0px)
+               Lunch 12:30–1:30 (600–720)
+               Admin 3:00–3:20 (900–940)
+               ═══════════════════════════════════════════ -->
+          <div class="sc">
+            <div class="hl" style="top:0"></div><div class="hl hf" style="top:60px"></div>
+            <div class="hl" style="top:120px"></div><div class="hl hf" style="top:180px"></div>
+            <div class="hl" style="top:240px"></div><div class="hl hf" style="top:300px"></div>
+            <div class="hl" style="top:360px"></div><div class="hl hf" style="top:420px"></div>
+            <div class="hl" style="top:480px"></div><div class="hl hf" style="top:540px"></div>
+            <div class="hl" style="top:600px"></div><div class="hl hf" style="top:660px"></div>
+            <div class="hl" style="top:720px"></div><div class="hl hf" style="top:780px"></div>
+            <div class="hl" style="top:840px"></div><div class="hl hf" style="top:900px"></div>
+            <div class="hl" style="top:960px"></div>
+            <div class="now" style="top:330px"></div>
+            <!-- 7:30 Washington checked in -->
+            <div class="ab st-out" style="top:2px;height:36px;" data-id="o1"><div class="ab-name">Washington, D. <span class="ab-dem">64/F</span></div><div class="ab-sub">Checked Out · HTN F/U</div></div>
+            <!-- 7:50 Open well -->
+            <div class="os os-well" style="top:42px;height:36px;" data-id="os-o1"><span class="os-icon">🌿</span><span class="os-lbl">Well Visit</span></div>
+            <!-- 8:10 Adams roomed -->
+            <div class="ab st-room" style="top:82px;height:36px;" data-id="o2"><div class="ab-name">Adams, P. <span class="ab-dem">61/F</span></div><div class="ab-sub">● Roomed · CKD F/U</div></div>
+            <!-- 8:30 Open sick -->
+            <div class="os os-sick" style="top:122px;height:36px;" data-id="os-o2"><span class="os-icon">🤒</span><span class="os-lbl">Sick Visit</span></div>
+            <!-- 8:50 Brown checked in -->
+            <div class="ab st-in" style="top:162px;height:36px;" data-id="o3"><div class="ab-name">Brown, L. <span class="ab-dem">67/F</span></div><div class="ab-sub">Checked In · DM F/U</div></div>
+            <!-- 9:10 Jensen scheduled -->
+            <div class="ab st-sch" style="top:202px;height:36px;" data-id="o4"><div class="ab-name">Jensen, K. <span class="ab-dem">34/F</span></div><div class="ab-sub">Scheduled · New Patient</div></div>
+            <!-- 9:30 Open follow-up -->
+            <div class="os os-fu" style="top:242px;height:36px;" data-id="os-o3"><span class="os-icon">↩</span><span class="os-lbl">Follow-Up</span></div>
+            <!-- 9:50 Evans scheduled -->
+            <div class="ab st-sch" style="top:282px;height:36px;" data-id="o5"><div class="ab-name">Evans, R. <span class="ab-dem">44/M</span></div><div class="ab-sub">Scheduled · Chest Pain F/U</div></div>
+            <!-- 10:10 Open sick -->
+            <div class="os os-sick" style="top:322px;height:36px;" data-id="os-o4"><span class="os-icon">🤒</span><span class="os-lbl">Sick Visit</span></div>
+            <!-- 10:30 Foster scheduled -->
+            <div class="ab st-sch" style="top:362px;height:36px;" data-id="o6"><div class="ab-name">Foster, C. <span class="ab-dem">7/M</span></div><div class="ab-sub">Scheduled · Well Child</div></div>
+            <!-- 10:50 Open follow-up -->
+            <div class="os os-fu" style="top:402px;height:36px;" data-id="os-o5"><span class="os-icon">↩</span><span class="os-lbl">Follow-Up</span></div>
+            <!-- 11:10 Hall scheduled -->
+            <div class="ab st-sch" style="top:442px;height:36px;" data-id="o7"><div class="ab-name">Hall, M. <span class="ab-dem">55/M</span></div><div class="ab-sub">Scheduled · HTN Check</div></div>
+            <!-- 11:30 Open well -->
+            <div class="os os-well" style="top:482px;height:36px;" data-id="os-o6"><span class="os-icon">🌿</span><span class="os-lbl">Well Visit</span></div>
+            <!-- 11:50 Irwin scheduled -->
+            <div class="ab st-sch" style="top:522px;height:36px;" data-id="o8"><div class="ab-name">Irwin, D. <span class="ab-dem">73/M</span></div><div class="ab-sub">Scheduled · HTN F/U</div></div>
+            <!-- Lunch 12:30–1:30 = 600–720px -->
+            <div class="blk" style="top:600px;height:120px;">Lunch  12:30 – 1:30 PM</div>
+            <!-- 1:30 Green scheduled -->
+            <div class="ab st-sch" style="top:722px;height:36px;" data-id="o9"><div class="ab-name">Green, A. <span class="ab-dem">7/F</span></div><div class="ab-sub">Scheduled · Sick Visit</div></div>
+            <!-- 1:50 Open follow-up -->
+            <div class="os os-fu" style="top:762px;height:36px;" data-id="os-o7"><span class="os-icon">↩</span><span class="os-lbl">Follow-Up</span></div>
+            <!-- 2:10 James scheduled -->
+            <div class="ab st-sch" style="top:802px;height:36px;" data-id="o10"><div class="ab-name">James, K. <span class="ab-dem">49/F</span></div><div class="ab-sub">Scheduled · DM F/U</div></div>
+            <!-- 2:30 Open sick -->
+            <div class="os os-sick" style="top:842px;height:36px;" data-id="os-o8"><span class="os-icon">🤒</span><span class="os-lbl">Sick Visit</span></div>
+            <!-- Admin 3:00–3:20 = 900–940 -->
+            <div class="blk" style="top:900px;height:40px;">Admin  3:00–3:20</div>
+            <!-- 3:20 King scheduled -->
+            <div class="ab st-sch" style="top:942px;height:36px;" data-id="o11"><div class="ab-name">King, S. <span class="ab-dem">22/F</span></div><div class="ab-sub">Scheduled · Annual</div></div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════
+               COL 3: R. PATEL NP
+               Starts 7:30 AM (0px)
+               Lunch 12:00–12:30 (540–600)
+               Admin 3:40–4:00 (980–1020)
+               ═══════════════════════════════════════════ -->
+          <div class="sc">
+            <div class="hl" style="top:0"></div><div class="hl hf" style="top:60px"></div>
+            <div class="hl" style="top:120px"></div><div class="hl hf" style="top:180px"></div>
+            <div class="hl" style="top:240px"></div><div class="hl hf" style="top:300px"></div>
+            <div class="hl" style="top:360px"></div><div class="hl hf" style="top:420px"></div>
+            <div class="hl" style="top:480px"></div><div class="hl hf" style="top:540px"></div>
+            <div class="hl" style="top:600px"></div><div class="hl hf" style="top:660px"></div>
+            <div class="hl" style="top:720px"></div><div class="hl hf" style="top:780px"></div>
+            <div class="hl" style="top:840px"></div><div class="hl hf" style="top:900px"></div>
+            <div class="hl" style="top:960px"></div>
+            <div class="now" style="top:330px"></div>
+            <!-- 7:30 Diaz checked out -->
+            <div class="ab st-out" style="top:2px;height:36px;" data-id="p1"><div class="ab-name">Diaz, M. <span class="ab-dem">38/F</span></div><div class="ab-sub">Checked Out · Med Refill</div></div>
+            <!-- 7:50 Open follow-up -->
+            <div class="os os-fu" style="top:42px;height:36px;" data-id="os-p1"><span class="os-icon">↩</span><span class="os-lbl">Follow-Up</span></div>
+            <!-- 8:10 Scott checked out -->
+            <div class="ab st-out" style="top:82px;height:36px;" data-id="p2"><div class="ab-name">Scott, T. <span class="ab-dem">31/F</span></div><div class="ab-sub">Checked Out · Anxiety</div></div>
+            <!-- 8:30 Open well -->
+            <div class="os os-well" style="top:122px;height:36px;" data-id="os-p2"><span class="os-icon">🌿</span><span class="os-lbl">Well Visit</span></div>
+            <!-- 8:50 Lewis checked in -->
+            <div class="ab st-in" style="top:162px;height:36px;" data-id="p3"><div class="ab-name">Lewis, B. <span class="ab-dem">58/M</span></div><div class="ab-sub">Checked In · CKD F/U</div></div>
+            <!-- 9:10 Open sick -->
+            <div class="os os-sick" style="top:202px;height:36px;" data-id="os-p3"><span class="os-icon">🤒</span><span class="os-lbl">Sick Visit</span></div>
+            <!-- 9:30 Hughes scheduled – 40 min slot = 80px -->
+            <div class="ab st-sch" style="top:242px;height:76px;" data-id="p4"><div class="ab-name">Hughes, P. <span class="ab-dem">29/F</span></div><div class="ab-sub">Scheduled · New Patient · 40 min</div></div>
+            <!-- 10:30 Open follow-up -->
+            <div class="os os-fu" style="top:362px;height:36px;" data-id="os-p4"><span class="os-icon">↩</span><span class="os-lbl">Follow-Up</span></div>
+            <!-- 10:50 Morgan scheduled -->
+            <div class="ab st-sch" style="top:402px;height:36px;" data-id="p5"><div class="ab-name">Morgan, T. <span class="ab-dem">14/M</span></div><div class="ab-sub">Scheduled · Follow-up</div></div>
+            <!-- 11:10 Open sick -->
+            <div class="os os-sick" style="top:442px;height:36px;" data-id="os-p5"><span class="os-icon">🤒</span><span class="os-lbl">Sick Visit</span></div>
+            <!-- 11:30 Nguyen scheduled -->
+            <div class="ab st-sch" style="top:482px;height:36px;" data-id="p6"><div class="ab-name">Nguyen, T. <span class="ab-dem">67/F</span></div><div class="ab-sub">Scheduled · Annual</div></div>
+            <!-- 11:50 Open well -->
+            <div class="os os-well" style="top:522px;height:36px;" data-id="os-p6"><span class="os-icon">🌿</span><span class="os-lbl">Well Visit</span></div>
+            <!-- Lunch 12:00–12:30 = 540–600 (short lunch) -->
+            <div class="blk" style="top:540px;height:60px;">Lunch  12:00–12:30</div>
+            <!-- 12:30 Park scheduled -->
+            <div class="ab st-sch" style="top:602px;height:36px;" data-id="p7"><div class="ab-name">Park, C. <span class="ab-dem">45/M</span></div><div class="ab-sub">Scheduled · HTN Check</div></div>
+            <!-- 12:50 Open follow-up -->
+            <div class="os os-fu" style="top:642px;height:36px;" data-id="os-p7"><span class="os-icon">↩</span><span class="os-lbl">Follow-Up</span></div>
+            <!-- 1:10 Reed scheduled -->
+            <div class="ab st-sch" style="top:682px;height:36px;" data-id="p8"><div class="ab-name">Reed, E. <span class="ab-dem">52/F</span></div><div class="ab-sub">Scheduled · DM Annual</div></div>
+            <!-- 1:30 Open sick -->
+            <div class="os os-sick" style="top:722px;height:36px;" data-id="os-p8"><span class="os-icon">🤒</span><span class="os-lbl">Sick Visit</span></div>
+            <!-- Admin 3:40–4:00 = 980–1020 -->
+            <div class="blk" style="top:980px;height:40px;">Admin  3:40–4:00</div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════
+               COL 4: K. RIVERA LCSW
+               Starts 8:00 AM (60px)
+               Lunch 1:00–2:00 (660–780) – BH providers often eat late
+               50-min BH sessions shown as 100px tall
+               ═══════════════════════════════════════════ -->
+          <div class="sc">
+            <div class="hl" style="top:0"></div><div class="hl hf" style="top:60px"></div>
+            <div class="hl" style="top:120px"></div><div class="hl hf" style="top:180px"></div>
+            <div class="hl" style="top:240px"></div><div class="hl hf" style="top:300px"></div>
+            <div class="hl" style="top:360px"></div><div class="hl hf" style="top:420px"></div>
+            <div class="hl" style="top:480px"></div><div class="hl hf" style="top:540px"></div>
+            <div class="hl" style="top:600px"></div><div class="hl hf" style="top:660px"></div>
+            <div class="hl" style="top:720px"></div><div class="hl hf" style="top:780px"></div>
+            <div class="hl" style="top:840px"></div><div class="hl hf" style="top:900px"></div>
+            <div class="now" style="top:330px"></div>
+            <!-- Pre-start: 7:30–8:00 = 0–60px -->
+            <div class="pre" style="height:60px;">Not started · 8:00 AM</div>
+            <!-- 8:00 Kim – 50 min BH = 100px -->
+            <div class="ab st-out" style="top:62px;height:96px;" data-id="r1"><div class="ab-name">Kim, S.</div><div class="ab-sub">Checked Out · Intake BH · 50 min</div></div>
+            <!-- 8:50 Open – any type for BH -->
+            <div class="os os-any" style="top:162px;height:96px;" data-id="os-r1"><span class="os-icon">💬</span><span class="os-lbl">BH Session</span></div>
+            <!-- 9:40 Torres – 50 min -->
+            <div class="ab st-in" style="top:262px;height:96px;" data-id="r2"><div class="ab-name">Torres, L.</div><div class="ab-sub">Checked In · Anxiety · 50 min</div></div>
+            <!-- 10:30 Hall – 50 min -->
+            <div class="ab st-sch" style="top:362px;height:96px;" data-id="r3"><div class="ab-name">Hall, M.</div><div class="ab-sub">Scheduled · Depression F/U · 50 min</div></div>
+            <!-- 11:20 Open BH -->
+            <div class="os os-any" style="top:462px;height:96px;" data-id="os-r2"><span class="os-icon">💬</span><span class="os-lbl">BH Session</span></div>
+            <!-- Lunch 1:00–2:00 = 660–780 -->
+            <div class="blk" style="top:660px;height:120px;">Lunch  1:00–2:00 PM</div>
+            <!-- 2:00 Garcia – 50 min -->
+            <div class="ab st-sch" style="top:782px;height:96px;" data-id="r4"><div class="ab-name">Garcia, E.</div><div class="ab-sub">Scheduled · Group · 50 min</div></div>
+            <!-- 2:50 Admin -->
+            <div class="blk" style="top:882px;height:80px;">Admin / Notes  2:50–4:00</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats">
+      <div class="st-c"><div class="st-n">34</div><div class="st-l">Total Today</div></div>
+      <div class="st-c"><div class="st-n g">11</div><div class="st-l">Seen / Out</div></div>
+      <div class="st-c"><div class="st-n" style="color:var(--green)">3</div><div class="st-l">Roomed</div></div>
+      <div class="st-c"><div class="st-n a">4</div><div class="st-l">Checked In</div></div>
+      <div class="st-c"><div class="st-n">14</div><div class="st-l">Upcoming</div></div>
+      <div class="st-c"><div class="st-n r">1</div><div class="st-l">No-Show</div></div>
+      <div class="st-c"><div class="st-n" style="color:var(--blue)">15</div><div class="st-l">Open Slots</div></div>
+    </div>
+  </div><!-- /center -->
+
+  <!-- RIGHT PANEL -->
+  <div class="rp">
+    <div class="rp-tabs">
+      <div class="rp-tab on" id="tabNew">New Appt</div>
+      <div class="rp-tab"    id="tabDet">Detail</div>
+    </div>
+    <div class="rp-body" id="rpBody">
+      <!-- New appt form (default) -->
+      <div id="formView">
+        <div class="f-row">
+          <label class="f-lbl">Patient Search</label>
+          <input class="f-inp" type="text" placeholder="Name, DOB, or MRN…">
+        </div>
+        <div class="f-row">
+          <label class="f-lbl">Provider</label>
+          <select class="f-sel">
+            <option>M. Snyder, PA-C</option>
+            <option>Dr. T. Okafor, MD</option>
+            <option>R. Patel, NP</option>
+            <option>K. Rivera, LCSW</option>
+          </select>
+        </div>
+        <div class="f-row">
+          <label class="f-lbl">Visit Type</label>
+          <select class="f-sel">
+            <option>-- Select --</option>
+            <option>Well Visit / Annual</option>
+            <option>Sick Visit</option>
+            <option>Follow-Up</option>
+            <option>New Patient</option>
+            <option>BH Session</option>
+            <option>Lab Review</option>
+          </select>
+        </div>
+        <div class="f-row">
+          <label class="f-lbl">Date &amp; Time</label>
+          <input class="f-inp" type="text" value="Wed, Mar 4, 2026">
+        </div>
+        <div class="f-row">
+          <label class="f-lbl">Duration</label>
+          <select class="f-sel">
+            <option>20 minutes</option>
+            <option>40 minutes</option>
+            <option>50 minutes (BH)</option>
+            <option>60 minutes</option>
+          </select>
+        </div>
+        <div class="f-row">
+          <label class="f-lbl">Reason for Visit</label>
+          <input class="f-inp" type="text" placeholder="Brief description…">
+        </div>
+        <button class="f-sub">Book Appointment</button>
+      </div>
+
+      <!-- Detail view (shown on click) -->
+      <div id="detView" style="display:none;">
+        <div id="detContent"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- LEGEND -->
+<div class="legend">
+  <span class="lg-t">Status</span>
+  <div class="lg-i"><span class="lg-sw" style="background:var(--teal)"></span>Checked Out</div>
+  <div class="lg-i"><span class="lg-sw" style="background:var(--green)"></span>Roomed</div>
+  <div class="lg-i"><span class="lg-sw" style="background:var(--amber)"></span>Checked In</div>
+  <div class="lg-i"><span class="lg-sw" style="background:var(--blue)"></span>Scheduled</div>
+  <div class="lg-i"><span class="lg-sw" style="background:var(--red)"></span>No-Show</div>
+  <span class="lg-t" style="margin-left:10px;">Open Slots</span>
+  <div class="lg-i"><span class="lg-dsh" style="border-color:var(--green);opacity:.6"></span>Well Visit</div>
+  <div class="lg-i"><span class="lg-dsh" style="border-color:var(--amber);opacity:.6"></span>Sick Visit</div>
+  <div class="lg-i"><span class="lg-dsh" style="border-color:var(--blue);opacity:.6"></span>Follow-Up</div>
+  <div class="lg-i"><span class="lg-dsh" style="border-color:var(--purple);opacity:.6"></span>BH Session</div>
+  <div class="lg-i" style="margin-left:8px;color:var(--text3);">Striped = Lunch / Admin</div>
+</div>
+
+<script>
+// ── Patient data ─────────────────────────────────────────────────
+const appts = {
+  s1:  { name:'Ramirez, Carlos',   dem:'46/M', prov:'M. Snyder, PA-C', pc:'var(--c1)', time:'8:00 AM', type:'Intake Review', status:'Roomed', sc:'var(--green)', acts:['pri:Open Encounter →','Room Status','View Chart'] },
+  s2:  { name:'Torres, Luis',      dem:'29/M', prov:'M. Snyder, PA-C', pc:'var(--c1)', time:'8:40 AM', type:'Anxiety F/U',   status:'Checked In', sc:'var(--amber)', acts:['g:Check In','Open Encounter →','Reschedule'] },
+  s3:  { name:'Nguyen, Minh',      dem:'54/M', prov:'M. Snyder, PA-C', pc:'var(--c1)', time:'9:00 AM', type:'Annual Exam',   status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  s4:  { name:'Chen, Robert',      dem:'36/M', prov:'M. Snyder, PA-C', pc:'var(--c1)', time:'9:40 AM', type:'Sick Visit',    status:'No-Show',   sc:'var(--red)',   acts:['Mark No-Show','Reschedule','View Chart'] },
+  s5:  { name:'Wilson, Janet',     dem:'42/F', prov:'M. Snyder, PA-C', pc:'var(--c1)', time:'10:00 AM',type:'DM Follow-Up',  status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  s6:  { name:'Harris, Linda',     dem:'58/F', prov:'M. Snyder, PA-C', pc:'var(--c1)', time:'10:40 AM',type:'Lab Results',   status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  s7:  { name:'Moore, Dorothy',    dem:'71/F', prov:'M. Snyder, PA-C', pc:'var(--c1)', time:'11:00 AM',type:'Nephrology F/U',status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  s8:  { name:'Patel, Dev',        dem:'59/M', prov:'M. Snyder, PA-C', pc:'var(--c1)', time:'11:40 AM',type:'DM F/U',        status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  s9:  { name:'Garcia, Maria',     dem:'52/F', prov:'M. Snyder, PA-C', pc:'var(--c1)', time:'1:00 PM', type:'HTN Check',     status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  s10: { name:'Kim, James',        dem:'4mo/M',prov:'M. Snyder, PA-C', pc:'var(--c1)', time:'1:40 PM', type:'Well Child',    status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  s11: { name:'Lopez, Ana',        dem:'38/F', prov:'M. Snyder, PA-C', pc:'var(--c1)', time:'2:00 PM', type:'Sick Visit',    status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  o1:  { name:'Washington, Diane', dem:'64/F', prov:'Dr. T. Okafor, MD',pc:'var(--c2)',time:'7:30 AM', type:'HTN F/U',       status:'Checked Out',sc:'var(--teal)', acts:['View Note','View Chart'] },
+  o2:  { name:'Adams, Patricia',   dem:'61/F', prov:'Dr. T. Okafor, MD',pc:'var(--c2)',time:'8:10 AM', type:'CKD F/U',       status:'Roomed',    sc:'var(--green)', acts:['pri:Open Encounter →','Room Status','View Chart'] },
+  o3:  { name:'Brown, Latoya',     dem:'67/F', prov:'Dr. T. Okafor, MD',pc:'var(--c2)',time:'8:50 AM', type:'DM F/U',        status:'Checked In', sc:'var(--amber)', acts:['g:Check In','Open Encounter →','Reschedule'] },
+  o4:  { name:'Jensen, Kari',      dem:'34/F', prov:'Dr. T. Okafor, MD',pc:'var(--c2)',time:'9:10 AM', type:'New Patient',   status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  o5:  { name:'Evans, Robert',     dem:'44/M', prov:'Dr. T. Okafor, MD',pc:'var(--c2)',time:'9:50 AM', type:'Chest Pain F/U',status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  o6:  { name:'Foster, Carl',      dem:'7/M',  prov:'Dr. T. Okafor, MD',pc:'var(--c2)',time:'10:30 AM',type:'Well Child',    status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  o7:  { name:'Hall, Marcus',      dem:'55/M', prov:'Dr. T. Okafor, MD',pc:'var(--c2)',time:'11:10 AM',type:'HTN Check',     status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  o8:  { name:'Irwin, Donald',     dem:'73/M', prov:'Dr. T. Okafor, MD',pc:'var(--c2)',time:'11:50 AM',type:'HTN F/U',       status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  o9:  { name:'Green, Anna',       dem:'7/F',  prov:'Dr. T. Okafor, MD',pc:'var(--c2)',time:'1:30 PM', type:'Sick Visit',    status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  o10: { name:'James, Karen',      dem:'49/F', prov:'Dr. T. Okafor, MD',pc:'var(--c2)',time:'2:10 PM', type:'DM F/U',        status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  o11: { name:'King, Sandra',      dem:'22/F', prov:'Dr. T. Okafor, MD',pc:'var(--c2)',time:'3:20 PM', type:'Annual',        status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  p1:  { name:'Diaz, Maria',       dem:'38/F', prov:'R. Patel, NP',    pc:'var(--c3)', time:'7:30 AM', type:'Med Refill',    status:'Checked Out',sc:'var(--teal)', acts:['View Note','View Chart'] },
+  p2:  { name:'Scott, Tamara',     dem:'31/F', prov:'R. Patel, NP',    pc:'var(--c3)', time:'8:10 AM', type:'Anxiety',       status:'Checked Out',sc:'var(--teal)', acts:['View Note','View Chart'] },
+  p3:  { name:'Lewis, Barry',      dem:'58/M', prov:'R. Patel, NP',    pc:'var(--c3)', time:'8:50 AM', type:'CKD F/U',       status:'Checked In', sc:'var(--amber)', acts:['g:Check In','View Chart','Reschedule'] },
+  p4:  { name:'Hughes, Patricia',  dem:'29/F', prov:'R. Patel, NP',    pc:'var(--c3)', time:'9:30 AM', type:'New Patient · 40 min', status:'Scheduled', sc:'var(--blue)', acts:['g:Check In','View Chart','Reschedule'] },
+  p5:  { name:'Morgan, Tyler',     dem:'14/M', prov:'R. Patel, NP',    pc:'var(--c3)', time:'10:50 AM',type:'Follow-up',     status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  p6:  { name:'Nguyen, Thi',       dem:'67/F', prov:'R. Patel, NP',    pc:'var(--c3)', time:'11:30 AM',type:'Annual',        status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  p7:  { name:'Park, Charles',     dem:'45/M', prov:'R. Patel, NP',    pc:'var(--c3)', time:'12:30 PM',type:'HTN Check',     status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  p8:  { name:'Reed, Eleanor',     dem:'52/F', prov:'R. Patel, NP',    pc:'var(--c3)', time:'1:10 PM', type:'DM Annual',     status:'Scheduled', sc:'var(--blue)',  acts:['g:Check In','View Chart','Reschedule'] },
+  r1:  { name:'Kim, Sarah',        dem:null,   prov:'K. Rivera, LCSW', pc:'var(--c4)', time:'8:00 AM', type:'BH Intake · 50 min', status:'Checked Out', sc:'var(--teal)', acts:['View Note','View Chart'] },
+  r2:  { name:'Torres, Luis',      dem:null,   prov:'K. Rivera, LCSW', pc:'var(--c4)', time:'9:40 AM', type:'Anxiety · 50 min',   status:'Checked In',  sc:'var(--amber)', acts:['g:Check In','Open Encounter →','Reschedule'] },
+  r3:  { name:'Hall, Marcus',      dem:null,   prov:'K. Rivera, LCSW', pc:'var(--c4)', time:'10:30 AM',type:'Depression F/U · 50 min', status:'Scheduled', sc:'var(--blue)', acts:['g:Check In','View Chart','Reschedule'] },
+  r4:  { name:'Garcia, Elena',     dem:null,   prov:'K. Rivera, LCSW', pc:'var(--c4)', time:'2:00 PM', type:'Group Session · 50 min', status:'Scheduled', sc:'var(--blue)', acts:['g:Check In','View Chart','Reschedule'] },
+};
+
+const openSlots = {
+  'os-s1': { label:'Open — Well Visit', type:'well',   prov:'M. Snyder, PA-C', time:'8:20 AM',  hint:'Suitable for: Annual exams, preventive care, physicals' },
+  'os-s2': { label:'Open — Sick Visit', type:'sick',   prov:'M. Snyder, PA-C', time:'9:20 AM',  hint:'Suitable for: Acute illness, urgent concerns' },
+  'os-s3': { label:'Open — Follow-Up',  type:'fu',     prov:'M. Snyder, PA-C', time:'10:20 AM', hint:'Suitable for: Lab reviews, chronic disease F/U' },
+  'os-s4': { label:'Open — Sick Visit', type:'sick',   prov:'M. Snyder, PA-C', time:'11:20 AM', hint:'Suitable for: Acute illness, urgent concerns' },
+  'os-s5': { label:'Open — Well Visit', type:'well',   prov:'M. Snyder, PA-C', time:'1:20 PM',  hint:'Suitable for: Annual exams, preventive care' },
+  'os-s6': { label:'Open — Follow-Up',  type:'fu',     prov:'M. Snyder, PA-C', time:'2:20 PM',  hint:'Suitable for: Lab reviews, chronic disease F/U' },
+  'os-o1': { label:'Open — Well Visit', type:'well',   prov:'Dr. T. Okafor, MD',time:'7:50 AM', hint:'Suitable for: Annual exams, preventive care, physicals' },
+  'os-o2': { label:'Open — Sick Visit', type:'sick',   prov:'Dr. T. Okafor, MD',time:'8:30 AM', hint:'Suitable for: Acute illness, urgent concerns' },
+  'os-o3': { label:'Open — Follow-Up',  type:'fu',     prov:'Dr. T. Okafor, MD',time:'9:30 AM', hint:'Suitable for: Lab reviews, chronic disease F/U' },
+  'os-o4': { label:'Open — Sick Visit', type:'sick',   prov:'Dr. T. Okafor, MD',time:'10:10 AM',hint:'Suitable for: Acute illness, urgent concerns' },
+  'os-o5': { label:'Open — Follow-Up',  type:'fu',     prov:'Dr. T. Okafor, MD',time:'10:50 AM',hint:'Suitable for: Lab reviews, chronic disease F/U' },
+  'os-o6': { label:'Open — Well Visit', type:'well',   prov:'Dr. T. Okafor, MD',time:'11:30 AM',hint:'Suitable for: Annual exams, preventive care' },
+  'os-o7': { label:'Open — Follow-Up',  type:'fu',     prov:'Dr. T. Okafor, MD',time:'1:50 PM', hint:'Suitable for: Lab reviews, chronic disease F/U' },
+  'os-o8': { label:'Open — Sick Visit', type:'sick',   prov:'Dr. T. Okafor, MD',time:'2:30 PM', hint:'Suitable for: Acute illness, urgent concerns' },
+  'os-p1': { label:'Open — Follow-Up',  type:'fu',     prov:'R. Patel, NP',    time:'7:50 AM',  hint:'Suitable for: Lab reviews, chronic disease F/U' },
+  'os-p2': { label:'Open — Well Visit', type:'well',   prov:'R. Patel, NP',    time:'8:30 AM',  hint:'Suitable for: Annual exams, preventive care' },
+  'os-p3': { label:'Open — Sick Visit', type:'sick',   prov:'R. Patel, NP',    time:'9:10 AM',  hint:'Suitable for: Acute illness, urgent concerns' },
+  'os-p4': { label:'Open — Follow-Up',  type:'fu',     prov:'R. Patel, NP',    time:'10:30 AM', hint:'Suitable for: Lab reviews, chronic disease F/U' },
+  'os-p5': { label:'Open — Sick Visit', type:'sick',   prov:'R. Patel, NP',    time:'11:10 AM', hint:'Suitable for: Acute illness, urgent concerns' },
+  'os-p6': { label:'Open — Well Visit', type:'well',   prov:'R. Patel, NP',    time:'11:50 AM', hint:'Suitable for: Annual exams, preventive care' },
+  'os-p7': { label:'Open — Follow-Up',  type:'fu',     prov:'R. Patel, NP',    time:'12:50 PM', hint:'Suitable for: Lab reviews, chronic disease F/U' },
+  'os-p8': { label:'Open — Sick Visit', type:'sick',   prov:'R. Patel, NP',    time:'1:30 PM',  hint:'Suitable for: Acute illness, urgent concerns' },
+  'os-r1': { label:'Open — BH Session', type:'bh',     prov:'K. Rivera, LCSW', time:'8:50 AM',  hint:'50-minute behavioral health session slot' },
+  'os-r2': { label:'Open — BH Session', type:'bh',     prov:'K. Rivera, LCSW', time:'11:20 AM', hint:'50-minute behavioral health session slot' },
+};
+
+const typeLabels = { well:'Well Visit', sick:'Sick Visit', fu:'Follow-Up', bh:'BH Session', any:'Any' };
+const typeColors = { well:'var(--green)', sick:'var(--amber)', fu:'var(--blue)', bh:'var(--purple)', any:'var(--purple)' };
+
+const rpBody   = document.getElementById('rpBody');
+const formView = document.getElementById('formView');
+const detView  = document.getElementById('detView');
+const detContent = document.getElementById('detContent');
+const tabNew   = document.getElementById('tabNew');
+const tabDet   = document.getElementById('tabDet');
+
+function showDetail() { formView.style.display='none'; detView.style.display='block'; tabDet.classList.add('on'); tabNew.classList.remove('on'); }
+function showForm()   { detView.style.display='none'; formView.style.display='block'; tabNew.classList.add('on'); tabDet.classList.remove('on'); }
+
+tabNew.addEventListener('click', showForm);
+tabDet.addEventListener('click', () => { if(detContent.innerHTML) showDetail(); });
+
+function selectBlock(el) { document.querySelectorAll('.ab,.os').forEach(a=>a.classList.remove('sel')); el.classList.add('sel'); }
+
+// Appointment click
+document.querySelectorAll('.ab').forEach(el => {
+  el.addEventListener('click', () => {
+    const d = appts[el.dataset.id]; if(!d) return;
+    selectBlock(el);
+    const actsHtml = (d.acts||[]).map(a => {
+      const isPri = a.startsWith('pri:') || a.startsWith('g:');
+      const cls   = a.startsWith('pri:') ? 'bl' : a.startsWith('g:') ? 'g' : '';
+      const label = a.replace(/^(pri:|g:)/,'');
+      return `<button class="da-b ${cls}">${label}</button>`;
+    }).join('');
+    detContent.innerHTML = `
+      <div class="d-head">
+        <div class="d-bar" style="background:${d.pc}"></div>
+        <div><div class="d-name">${d.name}</div><div class="d-meta">${d.dem ? d.dem+' · ' : ''}${d.prov}</div></div>
+      </div>
+      <div class="s-pills">
+        <div class="sp sch">Scheduled</div>
+        <div class="sp in">Checked In</div>
+        <div class="sp room">Roomed</div>
+        <div class="sp ns">No-Show</div>
+      </div>
+      <div class="d-sec">
+        <div class="d-lbl">Visit Info</div>
+        <div class="d-row"><div class="d-key">Time</div><div class="d-val">${d.time}</div></div>
+        <div class="d-row"><div class="d-key">Type</div><div class="d-val">${d.type}</div></div>
+        <div class="d-row"><div class="d-key">Status</div><div class="d-val" style="color:${d.sc};font-weight:700;">${d.status}</div></div>
+        <div class="d-row"><div class="d-key">Provider</div><div class="d-val">${d.prov}</div></div>
+      </div>
+      <div class="d-sec">
+        <div class="d-lbl">Actions</div>
+        <div class="d-acts">${actsHtml}</div>
+      </div>`;
+    showDetail();
+  });
+});
+
+// Open slot click
+document.querySelectorAll('.os').forEach(el => {
+  el.addEventListener('click', () => {
+    const d = openSlots[el.dataset.id]; if(!d) return;
+    selectBlock(el);
+    const tc = typeColors[d.type] || 'var(--blue)';
+    detContent.innerHTML = `
+      <div class="os-detail" style="border-color:${tc}30;">
+        <div class="os-type-label" style="color:${tc};">${d.label}</div>
+        <div class="d-row" style="border:none;padding:2px 0;"><div class="d-key">Provider</div><div class="d-val">${d.prov}</div></div>
+        <div class="d-row" style="border:none;padding:2px 0;"><div class="d-key">Time</div><div class="d-val">${d.time} · 20 min</div></div>
+        <div class="os-hint" style="margin-top:6px;">${d.hint}</div>
+      </div>
+      <div class="d-sec">
+        <div class="d-lbl">Book This Slot</div>
+        <div class="f-row"><label class="f-lbl">Patient Search</label><input class="f-inp" type="text" placeholder="Name, DOB, or MRN…"></div>
+        <div class="f-row"><label class="f-lbl">Reason for Visit</label><input class="f-inp" type="text" placeholder="Brief description…"></div>
+        <button class="f-sub" style="background:${tc};">Book ${typeLabels[d.type]||'Slot'}</button>
+      </div>`;
+    showDetail();
+  });
+});
+
+// New appt button
+document.getElementById('newApptBtn').addEventListener('click', showForm);
+
+// Scroll sync
+const scheds = document.getElementById('scheds');
+const tg     = document.getElementById('tg');
+scheds.addEventListener('scroll', () => { tg.scrollTop = scheds.scrollTop; });
+
+// Scroll to 8am on load (60px) and show current time area
+setTimeout(() => { scheds.scrollTop = 40; }, 100);
+
+// View toggle
+document.querySelectorAll('.vb').forEach(b => {
+  b.addEventListener('click', () => { document.querySelectorAll('.vb').forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
+});
+</script>
+</body>
+</html>
