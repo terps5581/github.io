@@ -737,6 +737,11 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .scroll-content { overflow-y: auto; flex: 1; padding: 16px 20px; }
 
+/* Tab panes */
+.tab-pane { display: none; flex: 1; flex-direction: column; min-height: 0; }
+.tab-pane.active-tab { display: flex; flex: 1; flex-direction: column; }
+.sub-tab { cursor: pointer; }
+
 /* Focus states */
 .data-cell:focus { outline: 2px solid var(--blue); outline-offset: -2px; }
 *:focus-visible  { outline: 2px solid var(--blue); outline-offset: 2px; }
@@ -754,10 +759,10 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 
   <!-- ═══════════ SIDEBAR ═══════════ -->
   <nav class="sidebar" aria-label="Primary navigation">
-    <div class="sb-brand">
-      <div class="sb-logo">W</div>
+    <div class="sb-brand" style="padding:12px 14px 10px;gap:8px">
+      <img src="data:image/png;base64,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" alt="Wings logo" style="width:38px;height:38px;object-fit:contain;flex-shrink:0;background:white;border-radius:6px;padding:2px">
       <div>
-        <div class="sb-name">Wings</div>
+        <div class="sb-name" style="letter-spacing:.06em">WINGS</div>
         <div class="sb-sub">Legal Management</div>
       </div>
     </div>
@@ -783,14 +788,16 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
     <button class="sb-item" onclick="showScreen('intake')">
       <span class="icon">📝</span> Intake I
     </button>
+    <button class="sb-item">
+      <span class="icon">📝</span> Intake II
+    </button>
     <button class="sb-item" onclick="showScreen('doctors')">
       <span class="icon">🏥</span> Medical Records
     </button>
 
     <div class="sb-section">Tools</div>
     <button class="sb-item" onclick="showScreen('documents')">
-      <span class="icon">📁</span> Documents
-      <span class="sb-badge blue" aria-label="14 documents">14</span>
+      <span class="icon">📄</span> Doc Templates
     </button>
     <button class="sb-item" onclick="showScreen('tasks')">
       <span class="icon">✅</span> Tasks
@@ -802,6 +809,12 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
     <button class="sb-item">
       <span class="icon">💬</span> Messages
       <span class="sb-badge" aria-label="3 unread messages">3</span>
+    </button>
+    <button class="sb-item">
+      <span class="icon">📊</span> Reports
+    </button>
+    <button class="sb-item">
+      <span class="icon">🗨</span> Chat
     </button>
 
     <div class="sb-footer">
@@ -835,21 +848,23 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
     <!-- ═══ SCREEN: GENERAL ═══ -->
     <div class="screen active" id="screen-general" role="main" aria-label="General — Client Overview">
       <div class="sub-nav" role="tablist" aria-label="General sub-sections">
-        <div class="sub-tab active" role="tab" aria-selected="true">Overview</div>
-        <div class="sub-tab" role="tab" aria-selected="false">Contact &amp; Address</div>
-        <div class="sub-tab" role="tab" aria-selected="false">Case Notes</div>
-        <div class="sub-tab" role="tab" aria-selected="false">History</div>
+        <div class="sub-tab active" role="tab" aria-selected="true" onclick="showTab('snapshot')">Snapshot</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('client-docs')">Documents</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('demographics')">Demographics</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('address-book')">Address Book</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('notes')">Notes</div>
       </div>
 
-      <div class="content">
+      <div class="content" id="tab-content">
+        <!-- ── SNAPSHOT TAB ── -->
+        <div id="tab-snapshot" class="tab-pane active-tab">
         <!-- Client identity strip -->
         <div class="client-header">
-          <div class="ch-avatar" aria-hidden="true">RD</div>
+          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIj4KICA8ZGVmcz4KICAgIDxjbGlwUGF0aCBpZD0icm5kIj48cmVjdCB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHJ4PSIxMCIvPjwvY2xpcFBhdGg+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNiZGQwZWEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjN2FhZmQ0Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJza2luIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNkNDk1NmEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjYjg3MDQwIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8ZyBjbGlwLXBhdGg9InVybCgjcm5kKSI+CiAgICA8cmVjdCB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIGZpbGw9InVybCgjYmcpIi8+CiAgICA8IS0tIGJvZHkvc2hpcnQgLS0+CiAgICA8ZWxsaXBzZSBjeD0iMjUiIGN5PSI1NiIgcng9IjIwIiByeT0iMTYiIGZpbGw9IiMxZTNhNWYiLz4KICAgIDwhLS0gbmVjayAtLT4KICAgIDxyZWN0IHg9IjIxIiB5PSIzMiIgd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsbD0idXJsKCNza2luKSIvPgogICAgPCEtLSBoZWFkIC0tPgogICAgPGVsbGlwc2UgY3g9IjI1IiBjeT0iMjYiIHJ4PSIxMSIgcnk9IjEzIiBmaWxsPSJ1cmwoI3NraW4pIi8+CiAgICA8IS0tIGhhaXIgLS0+CiAgICA8ZWxsaXBzZSBjeD0iMjUiIGN5PSIxNSIgcng9IjExIiByeT0iNyIgZmlsbD0iIzNiMmExYSIvPgogICAgPHJlY3QgeD0iMTQiIHk9IjE0IiB3aWR0aD0iMjIiIGhlaWdodD0iNiIgZmlsbD0iIzNiMmExYSIvPgogICAgPCEtLSBlYXJzIC0tPgogICAgPGVsbGlwc2UgY3g9IjE0IiBjeT0iMjYiIHJ4PSIyLjUiIHJ5PSIzIiBmaWxsPSJ1cmwoI3NraW4pIi8+CiAgICA8ZWxsaXBzZSBjeD0iMzYiIGN5PSIyNiIgcng9IjIuNSIgcnk9IjMiIGZpbGw9InVybCgjc2tpbikiLz4KICAgIDwhLS0gZXllcyAtLT4KICAgIDxlbGxpcHNlIGN4PSIyMSIgY3k9IjI1IiByeD0iMiIgcnk9IjIuMiIgZmlsbD0iIzJhMWEwYSIvPgogICAgPGVsbGlwc2UgY3g9IjI5IiBjeT0iMjUiIHJ4PSIyIiByeT0iMi4yIiBmaWxsPSIjMmExYTBhIi8+CiAgICA8Y2lyY2xlIGN4PSIyMS43IiBjeT0iMjQuMyIgcj0iLjciIGZpbGw9IndoaXRlIi8+CiAgICA8Y2lyY2xlIGN4PSIyOS43IiBjeT0iMjQuMyIgcj0iLjciIGZpbGw9IndoaXRlIi8+CiAgICA8IS0tIHN1YnRsZSBzbWlsZSAtLT4KICAgIDxwYXRoIGQ9Ik0yMSAzMSBRMjUgMzMuNSAyOSAzMSIgc3Ryb2tlPSIjYTA2MDQwIiBzdHJva2Utd2lkdGg9IjEuMiIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPC9nPgo8L3N2Zz4=" alt="Photo of Ryan L. Dykins" style="width:50px;height:50px;border-radius:10px;object-fit:cover;flex-shrink:0;border:2px solid var(--border)">
           <div>
             <div class="ch-name">Ryan L. Dykins</div>
             <div class="ch-ids">
-              <span class="ch-id"><span class="ch-id-label">SSN</span>&nbsp;271-06-1691</span>
-              <span class="ch-id"><span class="ch-id-label">DOB</span>&nbsp;10/12/1971 · Age 52</span>
+              <span class="ch-id"><span class="ch-id-label">Age/Sex</span>&nbsp;52 / M</span>
               <span class="ch-id"><span class="ch-id-label">File</span>&nbsp;123-45HS</span>
               <span class="ch-id"><span class="ch-id-label">Since</span>&nbsp;01/23/1999</span>
             </div>
@@ -1044,6 +1059,110 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 
           </div>
         </div>
+        </div><!-- /tab-snapshot -->
+
+        <!-- ── CLIENT DOCUMENTS TAB ── -->
+        <div id="tab-client-docs" class="tab-pane">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-size:13px;color:var(--t3)">14 documents on file for <strong style="color:var(--t1)">Ryan L. Dykins</strong></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn ghost">🔀 Merge</button>
+              <button class="btn primary">⬆ Upload</button>
+            </div>
+          </div>
+          <div class="card" style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+            <div class="card-header">
+              <span class="card-title">Client Documents</span>
+              <div style="margin-left:auto">
+                <input type="text" placeholder="Search documents…" style="height:28px;padding:0 10px;border:1.5px solid var(--border);border-radius:5px;font-size:12px;font-family:var(--sans);color:var(--t2);background:var(--bg);outline:none;width:180px">
+              </div>
+            </div>
+            <div style="overflow-y:auto;flex:1">
+              <table style="width:100%;border-collapse:collapse">
+                <thead><tr style="background:var(--surface-2);border-bottom:1px solid var(--border)">
+                  <th scope="col" style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Document</th>
+                  <th scope="col" style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Type</th>
+                  <th scope="col" style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Date</th>
+                  <th scope="col" style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Added By</th>
+                  <th scope="col" style="padding:9px 14px"></th>
+                </tr></thead>
+                <tbody>
+                  <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px"><div style="font-size:13px;font-weight:600;color:var(--t1)">DR Letter Med Request</div><div style="font-size:11.5px;color:var(--t3)">v4 · PDF</div></td><td style="padding:10px 14px"><span class="tag blue" style="height:22px;font-size:11.5px">Medical</span></td><td style="padding:10px 14px;font-size:13px;color:var(--t2)">01/06/2020</td><td style="padding:10px 14px;font-size:13px;color:var(--t2)">Marc Hanes</td><td style="padding:10px 14px"><div style="display:flex;gap:6px"><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">View</button><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">⬇</button></div></td></tr>
+                  <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px"><div style="font-size:13px;font-weight:600;color:var(--t1)">Fee Agreement — Signed</div><div style="font-size:11.5px;color:var(--t3)">v1 · PDF</div></td><td style="padding:10px 14px"><span class="tag green" style="height:22px;font-size:11.5px">Legal</span></td><td style="padding:10px 14px;font-size:13px;color:var(--t2)">05/28/2015</td><td style="padding:10px 14px;font-size:13px;color:var(--t2)">Chris Olinsky</td><td style="padding:10px 14px"><div style="display:flex;gap:6px"><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">View</button><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">⬇</button></div></td></tr>
+                  <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px"><div style="font-size:13px;font-weight:600;color:var(--t1)">Form 1695 — Rep Appointment</div><div style="font-size:11.5px;color:var(--t3)">v1 · PDF</div></td><td style="padding:10px 14px"><span class="tag green" style="height:22px;font-size:11.5px">Legal</span></td><td style="padding:10px 14px;font-size:13px;color:var(--t2)">01/26/2016</td><td style="padding:10px 14px;font-size:13px;color:var(--t2)">Albert Daley</td><td style="padding:10px 14px"><div style="display:flex;gap:6px"><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">View</button><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">⬇</button></div></td></tr>
+                  <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px"><div style="font-size:13px;font-weight:600;color:var(--t1)">Initial Application — SSA</div><div style="font-size:11.5px;color:var(--t3)">v2 · PDF</div></td><td style="padding:10px 14px"><span class="tag amber" style="height:22px;font-size:11.5px">Filing</span></td><td style="padding:10px 14px;font-size:13px;color:var(--t2)">05/28/2015</td><td style="padding:10px 14px;font-size:13px;color:var(--t2)">Chris Olinsky</td><td style="padding:10px 14px"><div style="display:flex;gap:6px"><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">View</button><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">⬇</button></div></td></tr>
+                  <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 14px"><div style="font-size:13px;font-weight:600;color:var(--t1)">Medical Records — Van Helsing</div><div style="font-size:11.5px;color:var(--t3)">v1 · PDF</div></td><td style="padding:10px 14px"><span class="tag blue" style="height:22px;font-size:11.5px">Medical</span></td><td style="padding:10px 14px;font-size:13px;color:var(--t2)">09/13/2019</td><td style="padding:10px 14px;font-size:13px;color:var(--t2)">Marc Hanes</td><td style="padding:10px 14px"><div style="display:flex;gap:6px"><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">View</button><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">⬇</button></div></td></tr>
+                  <tr><td style="padding:10px 14px"><div style="font-size:13px;font-weight:600;color:var(--t1)">Hearing Prep Checklist</div><div style="font-size:11.5px;color:var(--t3)">v1 · DOCX</div></td><td style="padding:10px 14px"><span class="tag slate" style="height:22px;font-size:11.5px">Internal</span></td><td style="padding:10px 14px;font-size:13px;color:var(--t2)">10/01/2021</td><td style="padding:10px 14px;font-size:13px;color:var(--t2)">Chris Olinsky</td><td style="padding:10px 14px"><div style="display:flex;gap:6px"><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">View</button><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">⬇</button></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div><!-- /tab-client-docs -->
+
+        <!-- ── DEMOGRAPHICS TAB ── -->
+        <div id="tab-demographics" class="tab-pane">
+          <div style="max-width:700px">
+            <div class="card">
+              <div class="card-header"><span class="card-title">Demographics</span><span style="font-size:11px;color:var(--t4);margin-left:4px">Click any field to edit</span><button class="card-action">Save</button></div>
+              <div class="card-body" style="padding:10px 12px">
+                <div class="data-grid cols-3">
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">First Name</div><div class="dc-value">Ryan</div><input class="inline-input" value="Ryan" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Middle Name</div><div class="dc-value">L.</div><input class="inline-input" value="L." onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Last Name</div><div class="dc-value">Dykins</div><input class="inline-input" value="Dykins" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Date of Birth</div><div class="dc-value">10/12/1971</div><input class="inline-input" value="10/12/1971" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">SSN</div><div class="dc-value">271-06-1691</div><input class="inline-input" value="271-06-1691" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Sex</div><div class="dc-value">Male</div><input class="inline-input" value="Male" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Marital Status</div><div class="dc-value">Single</div><input class="inline-input" value="Single" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Phone</div><div class="dc-value">(336) 555-0194</div><input class="inline-input" value="(336) 555-0194" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Email</div><div class="dc-value empty">Not on file</div><input class="inline-input" value="" placeholder="email@example.com" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Language</div><div class="dc-value">English</div><input class="inline-input" value="English" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Interpreter Needed</div><div class="dc-value" style="color:var(--red);font-weight:700">Yes</div><input class="inline-input" value="Yes" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Citizenship</div><div class="dc-value">US Citizen</div><input class="inline-input" value="US Citizen" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /tab-demographics -->
+
+        <!-- ── ADDRESS BOOK TAB ── -->
+        <div id="tab-address-book" class="tab-pane">
+          <div style="max-width:700px">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn primary">+ Add Contact</button></div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Address &amp; Contacts</span></div>
+              <div class="card-body" style="padding:10px 12px">
+                <div class="data-grid cols-2" style="margin-bottom:10px">
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Street Address</div><div class="dc-value">114 Oak Street</div><input class="inline-input" value="114 Oak Street" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Apt / Unit</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">City</div><div class="dc-value">Winston-Salem</div><input class="inline-input" value="Winston-Salem" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">State / ZIP</div><div class="dc-value">NC 27101</div><input class="inline-input" value="NC 27101" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                </div>
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t4);margin:12px 0 8px">Emergency Contact</div>
+                <div class="data-grid cols-3">
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Name</div><div class="dc-value">Sandra Dykins</div><input class="inline-input" value="Sandra Dykins" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Relationship</div><div class="dc-value">Sister</div><input class="inline-input" value="Sister" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Phone</div><div class="dc-value">(336) 555-0271</div><input class="inline-input" value="(336) 555-0271" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /tab-address-book -->
+
+        <!-- ── NOTES TAB ── -->
+        <div id="tab-notes" class="tab-pane">
+          <div style="max-width:800px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <div style="font-size:13px;color:var(--t3)">3 notes on file</div>
+              <button class="btn primary">+ Add Note</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div style="font-size:12px;color:var(--t3)">Chris Olinsky · 10/01/2021</div><span class="tag amber" style="height:20px;font-size:11px">Flag</span></div><div style="font-size:13.5px;color:var(--t1);line-height:1.6">Client needs interpreter for all appointments. Confirm Spanish interpreter is booked for Oct 16 hearing. Also follow up on Rainey records — outstanding since Jan 2020.</div></div></div>
+              <div class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div style="font-size:12px;color:var(--t3)">Marc Hanes · 07/15/2021</div><span class="tag slate" style="height:20px;font-size:11px">General</span></div><div style="font-size:13.5px;color:var(--t1);line-height:1.6">Called client to confirm hearing date. Client acknowledged. Reminded client to bring all current medication bottles to hearing.</div></div></div>
+              <div class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div style="font-size:12px;color:var(--t3)">Chris Olinsky · 01/10/2020</div><span class="tag blue" style="height:20px;font-size:11px">Medical</span></div><div style="font-size:13.5px;color:var(--t1);line-height:1.6">Requested records from Dr. Rainey. No response after 30 days. Second request sent 02/10/2020. Still pending as of this date.</div></div></div>
+            </div>
+          </div>
+        </div><!-- /tab-notes -->
+
       </div>
     </div>
 
@@ -1217,9 +1336,9 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
     </div>
 
     <!-- ═══ SCREEN: DOCUMENTS ═══ -->
-    <div class="screen" id="screen-documents" role="main" aria-label="Documents">
+    <div class="screen" id="screen-documents" role="main" aria-label="Doc Templates">
       <div class="scroll-content" style="display:flex;align-items:center;justify-content:center;height:100%">
-        <div style="text-align:center;color:var(--t3)"><div style="font-size:36px;margin-bottom:12px">📁</div><div style="font-size:16px;font-weight:700;color:var(--t2)">Documents &amp; Templates</div><div style="font-size:13px;margin-top:6px">14 documents on file for Ryan L. Dykins</div><div style="margin-top:14px;display:flex;gap:8px;justify-content:center"><button class="btn ghost">🔀 Merge</button><button class="btn primary">⬆ Upload</button></div></div>
+        <div style="text-align:center;color:var(--t3)"><div style="font-size:36px;margin-bottom:12px">📁</div><div style="font-size:16px;font-weight:700;color:var(--t2)">Document Templates</div><div style="font-size:13px;margin-top:6px">Manage firm-wide document templates</div><div style="margin-top:14px;display:flex;gap:8px;justify-content:center"><button class="btn ghost">🔀 Merge</button><button class="btn primary">⬆ Upload</button></div></div>
       </div>
     </div>
 
@@ -1320,7 +1439,7 @@ const screenMap = {
   awards:    'Awards & Payments | Wings Legal',
   intake:    'Intake I | Wings Legal',
   doctors:   'Doctor Records | Wings Legal',
-  documents: 'Documents | Wings Legal',
+  documents: 'Doc Templates | Wings Legal',
   tasks:     'Tasks & Reminders | Wings Legal',
   calendar:  'Calendar | Wings Legal',
 };
@@ -1409,6 +1528,27 @@ document.querySelectorAll('.data-cell[tabindex]').forEach(cell => {
 document.querySelectorAll('.screen:not(.active)').forEach(s => {
   s.setAttribute('aria-hidden','true');
 });
+
+// ── Tab switching within General screen ──
+function showTab(tabId) {
+  // Update panes
+  document.querySelectorAll('.tab-pane').forEach(p => {
+    p.style.display = 'none';
+    p.classList.remove('active-tab');
+  });
+  const pane = document.getElementById('tab-' + tabId);
+  if (pane) {
+    pane.style.display = 'flex';
+    pane.classList.add('active-tab');
+  }
+  // Update tab indicators
+  document.querySelectorAll('.sub-tab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected','false');
+  });
+  event.currentTarget.classList.add('active');
+  event.currentTarget.setAttribute('aria-selected','true');
+}
 
 // ── AI Summary Modal ──────────────────────────────────
 function openAISummary() {
