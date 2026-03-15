@@ -617,7 +617,11 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
   border-bottom: 1px solid var(--border);
   padding: 0 20px;
   flex-shrink: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.sub-nav::-webkit-scrollbar { display: none; }
 .sub-tab {
   height: 42px; padding: 0 14px;
   display: flex; align-items: center; gap: 6px;
@@ -847,12 +851,17 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 
     <!-- ═══ SCREEN: GENERAL ═══ -->
     <div class="screen active" id="screen-general" role="main" aria-label="General — Client Overview">
-      <div class="sub-nav" role="tablist" aria-label="General sub-sections">
+      <div class="sub-nav" role="tablist" aria-label="Client record navigation" style="overflow-x:auto;flex-wrap:nowrap">
         <div class="sub-tab active" role="tab" aria-selected="true" onclick="showTab('snapshot')">Snapshot</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('filings-tab')">Filings &amp; Appeals</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('awards-tab')">Awards &amp; Payments</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('intake1-tab')">Intake I</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('intake2-tab')">Intake II</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('medical-tab')">Medical Records</div>
         <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('client-docs')">Documents</div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('demographics')">Demographics</div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('address-book')">Address Book</div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('notes')">Notes</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('contacts-tab')">Contacts</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('notes-tab')">Notes</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('tasks-tab')">Tasks</div>
       </div>
 
       <div class="content" id="tab-content">
@@ -1124,32 +1133,10 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
           </div>
         </div><!-- /tab-demographics -->
 
-        <!-- ── ADDRESS BOOK TAB ── -->
-        <div id="tab-address-book" class="tab-pane">
-          <div style="max-width:700px">
-            <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn primary">+ Add Contact</button></div>
-            <div class="card">
-              <div class="card-header"><span class="card-title">Address &amp; Contacts</span></div>
-              <div class="card-body" style="padding:10px 12px">
-                <div class="data-grid cols-2" style="margin-bottom:10px">
-                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Street Address</div><div class="dc-value">114 Oak Street</div><input class="inline-input" value="114 Oak Street" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
-                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Apt / Unit</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
-                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">City</div><div class="dc-value">Winston-Salem</div><input class="inline-input" value="Winston-Salem" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
-                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">State / ZIP</div><div class="dc-value">NC 27101</div><input class="inline-input" value="NC 27101" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
-                </div>
-                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t4);margin:12px 0 8px">Emergency Contact</div>
-                <div class="data-grid cols-3">
-                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Name</div><div class="dc-value">Sandra Dykins</div><input class="inline-input" value="Sandra Dykins" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
-                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Relationship</div><div class="dc-value">Sister</div><input class="inline-input" value="Sister" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
-                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Phone</div><div class="dc-value">(336) 555-0271</div><input class="inline-input" value="(336) 555-0271" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div><!-- /tab-address-book -->
+        <!-- Address Book tab removed — moved to sidebar Firm Tools -->
 
         <!-- ── NOTES TAB ── -->
-        <div id="tab-notes" class="tab-pane">
+        <div id="tab-notes-tab" class="tab-pane">
           <div style="max-width:800px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div style="font-size:13px;color:var(--t3)">3 notes on file</div>
@@ -1162,6 +1149,88 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
             </div>
           </div>
         </div><!-- /tab-notes -->
+
+        <!-- ── FILINGS TAB (within client record) ── -->
+        <div id="tab-filings-tab" class="tab-pane">
+          <div class="scroll-content" style="padding:0">
+            <iframe-placeholder data-screen="filings" style="width:100%;border:none;flex:1"></iframe-placeholder>
+          </div>
+        </div>
+
+        <!-- ── AWARDS TAB (within client record) ── -->
+        <div id="tab-awards-tab" class="tab-pane">
+          <div class="scroll-content" style="padding:0">
+            <iframe-placeholder data-screen="awards" style="width:100%;border:none;flex:1"></iframe-placeholder>
+          </div>
+        </div>
+
+        <!-- ── INTAKE I TAB ── -->
+        <div id="tab-intake1-tab" class="tab-pane">
+          <div class="scroll-content" style="padding:0">
+            <iframe-placeholder data-screen="intake" style="width:100%;border:none;flex:1"></iframe-placeholder>
+          </div>
+        </div>
+
+        <!-- ── INTAKE II TAB ── -->
+        <div id="tab-intake2-tab" class="tab-pane">
+          <div style="display:flex;align-items:center;justify-content:center;flex:1;height:100%">
+            <div style="text-align:center;color:var(--t3)">
+              <div style="font-size:32px;margin-bottom:10px">📝</div>
+              <div style="font-size:15px;font-weight:700;color:var(--t2)">Intake II</div>
+              <div style="font-size:13px;margin-top:6px">Work restrictions, limitations, job history, listings &amp; grids</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── MEDICAL RECORDS TAB ── -->
+        <div id="tab-medical-tab" class="tab-pane">
+          <div class="scroll-content" style="padding:0">
+            <iframe-placeholder data-screen="doctors" style="width:100%;border:none;flex:1"></iframe-placeholder>
+          </div>
+        </div>
+
+        <!-- ── CONTACTS TAB ── -->
+        <div id="tab-contacts-tab" class="tab-pane">
+          <div style="max-width:700px;padding:16px 20px">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn primary">+ Add Contact</button></div>
+            <div class="card" style="margin-bottom:12px">
+              <div class="card-header"><span class="card-title">Address &amp; Phone</span><button class="card-action">Edit</button></div>
+              <div class="card-body" style="padding:10px 12px">
+                <div class="data-grid cols-2">
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Street Address</div><div class="dc-value">114 Oak Street</div><input class="inline-input" value="114 Oak Street" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">City / State / ZIP</div><div class="dc-value">Winston-Salem, NC 27101</div><input class="inline-input" value="Winston-Salem, NC 27101" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Phone</div><div class="dc-value">(336) 768-3004</div><input class="inline-input" value="(336) 768-3004" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Cell</div><div class="dc-value">(336) 908-2757</div><input class="inline-input" value="(336) 908-2757" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Email</div><div class="dc-value empty">Not on file</div><input class="inline-input" value="" placeholder="email@example.com" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">County</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">Contacts</span><button class="card-action">+ Add</button></div>
+              <table style="width:100%;border-collapse:collapse">
+                <thead><tr style="background:var(--surface-2);border-bottom:1px solid var(--border)">
+                  <th scope="col" style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Name</th>
+                  <th scope="col" style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Type</th>
+                  <th scope="col" style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Relationship</th>
+                  <th scope="col" style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Phone</th>
+                  <th scope="col" style="padding:8px 14px"></th>
+                </tr></thead>
+                <tbody>
+                  <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 14px;font-weight:600;color:var(--t1)">Sandra Dykins</td><td style="padding:9px 14px;font-size:13px;color:var(--t2)">Emergency</td><td style="padding:9px 14px;font-size:13px;color:var(--t2)">Sister</td><td style="padding:9px 14px;font-size:13px;color:var(--t2)">(336) 555-0271</td><td style="padding:9px 14px"><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">Edit</button></td></tr>
+                  <tr><td style="padding:9px 14px;font-weight:600;color:var(--t1)">Robert Thompson</td><td style="padding:9px 14px;font-size:13px;color:var(--t2)">Family</td><td style="padding:9px 14px;font-size:13px;color:var(--t2)">Brother</td><td style="padding:9px 14px;font-size:13px;color:var(--t2)">—</td><td style="padding:9px 14px"><button class="btn ghost" style="height:28px;font-size:12px;padding:0 10px">Edit</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div><!-- /tab-contacts -->
+
+        <!-- ── TASKS TAB (within client record) ── -->
+        <div id="tab-tasks-tab" class="tab-pane">
+          <div class="scroll-content" style="padding:0">
+            <iframe-placeholder data-screen="tasks" style="width:100%;border:none;flex:1"></iframe-placeholder>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -1529,25 +1598,80 @@ document.querySelectorAll('.screen:not(.active)').forEach(s => {
   s.setAttribute('aria-hidden','true');
 });
 
-// ── Tab switching within General screen ──
+// ── Tab switching within client record ──
+// Maps tab IDs to existing screen IDs for tabs that reuse screen content
+const TAB_SCREEN_MAP = {
+  'filings-tab': 'filings',
+  'awards-tab':  'awards',
+  'intake1-tab': 'intake',
+  'intake2-tab': null,
+  'medical-tab': 'doctors',
+  'tasks-tab':   'tasks',
+};
+
 function showTab(tabId) {
-  // Update panes
-  document.querySelectorAll('.tab-pane').forEach(p => {
-    p.style.display = 'none';
-    p.classList.remove('active-tab');
-  });
-  const pane = document.getElementById('tab-' + tabId);
-  if (pane) {
-    pane.style.display = 'flex';
-    pane.classList.add('active-tab');
+  // If this tab maps to a full screen, delegate to showScreen
+  if (TAB_SCREEN_MAP.hasOwnProperty(tabId)) {
+    const screenId = TAB_SCREEN_MAP[tabId];
+    if (screenId) {
+      // Hide all tab panes, show the mapped screen content inline
+      document.querySelectorAll('.tab-pane').forEach(p => {
+        p.style.display = 'none';
+        p.classList.remove('active-tab');
+      });
+      // Show a passthrough pane that embeds the screen
+      const pane = document.getElementById('tab-' + tabId);
+      if (pane) {
+        // Render the screen content inside this pane
+        const targetScreen = document.getElementById('screen-' + screenId);
+        if (targetScreen) {
+          pane.style.display = 'flex';
+          pane.style.flexDirection = 'column';
+          pane.style.flex = '1';
+          pane.style.overflow = 'hidden';
+          pane.classList.add('active-tab');
+          // Clone the inner content of the target screen (minus sub-nav)
+          if (!pane.dataset.loaded) {
+            const inner = targetScreen.querySelector('.scroll-content, .content');
+            if (inner) {
+              const clone = inner.cloneNode(true);
+              pane.innerHTML = '';
+              pane.appendChild(clone);
+              pane.dataset.loaded = '1';
+            }
+          }
+        }
+      }
+    } else {
+      // No screen mapping — just show the pane (e.g. intake2)
+      document.querySelectorAll('.tab-pane').forEach(p => {
+        p.style.display = 'none';
+        p.classList.remove('active-tab');
+      });
+      const pane = document.getElementById('tab-' + tabId);
+      if (pane) { pane.style.display = 'flex'; pane.classList.add('active-tab'); }
+    }
+  } else {
+    // Standard tab pane switching
+    document.querySelectorAll('.tab-pane').forEach(p => {
+      p.style.display = 'none';
+      p.classList.remove('active-tab');
+    });
+    const pane = document.getElementById('tab-' + tabId);
+    if (pane) {
+      pane.style.display = 'flex';
+      pane.classList.add('active-tab');
+    }
   }
   // Update tab indicators
   document.querySelectorAll('.sub-tab').forEach(t => {
     t.classList.remove('active');
     t.setAttribute('aria-selected','false');
   });
-  event.currentTarget.classList.add('active');
-  event.currentTarget.setAttribute('aria-selected','true');
+  if (event && event.currentTarget) {
+    event.currentTarget.classList.add('active');
+    event.currentTarget.setAttribute('aria-selected','true');
+  }
 }
 
 // ── AI Summary Modal ──────────────────────────────────
