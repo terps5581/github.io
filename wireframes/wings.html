@@ -766,6 +766,20 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 .sub-tab { cursor: pointer; }
 
 .group-body { overflow: hidden; }
+
+/* More tab dropdown */
+.more-menu-item {
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--t1);
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background .12s;
+  white-space: nowrap;
+}
+.more-menu-item:hover { background: var(--blue-light); color: var(--blue); }
+#more-tab-btn.active-more { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
 /* Focus states */
 .data-cell:focus { outline: 2px solid var(--blue); outline-offset: -2px; }
 *:focus-visible  { outline: 2px solid var(--blue); outline-offset: 2px; }
@@ -873,7 +887,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 
     <!-- ═══ SCREEN: GENERAL ═══ -->
     <div class="screen active" id="screen-general" role="main" aria-label="General — Client Overview">
-      <div class="sub-nav" role="tablist" aria-label="Client record navigation" style="overflow-x:auto;flex-wrap:nowrap">
+      <div class="sub-nav" role="tablist" aria-label="Client record navigation" style="overflow-x:auto;flex-wrap:nowrap;white-space:nowrap">
         <div class="sub-tab active" role="tab" aria-selected="true" onclick="showTab('snapshot',this)">Snapshot</div>
         <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('filings-tab',this)">Filings &amp; Appeals</div>
         <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('awards-tab',this)">Awards &amp; Payments</div>
@@ -884,6 +898,9 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
         <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('contacts-tab',this)">Contacts</div>
         <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('notes-tab',this)">Notes</div>
         <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('tasks-tab',this)">Tasks</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('case-events-tab',this)" style="color:var(--t3)">Case Events <span style="font-size:10px;opacity:.7">WC/PI</span></div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('assoc-parties-tab',this)" style="color:var(--t3)">Assoc Parties <span style="font-size:10px;opacity:.7">WC/PI</span></div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('va-claim-tab',this)" style="color:var(--t3)">VA Claim <span style="font-size:10px;opacity:.7">VA</span></div>
       </div>
 
       <!-- ── PERSISTENT CLIENT HEADER (always visible across all tabs) ── -->
@@ -1469,6 +1486,95 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
                 </div>
               </div>
             </div>
+
+            <!-- Work History -->
+            <div class="card" style="margin-bottom:12px">
+              <div class="card-header"><span class="card-title">Work History</span><span style="font-size:11px;color:var(--t4);margin-left:4px">Employment history for SSA adjudication</span><button class="card-action">+ Add Job</button></div>
+              <div class="card-body" style="padding:0">
+                <table style="width:100%;border-collapse:collapse">
+                  <thead><tr style="background:var(--surface-2);border-bottom:1px solid var(--border)">
+                    <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Employer</th>
+                    <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Dates</th>
+                    <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Job Title</th>
+                    <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Skill Level</th>
+                    <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Exertion</th>
+                    <th style="padding:8px 14px"></th>
+                  </tr></thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border)">
+                      <td style="padding:9px 14px"><div style="font-weight:600;color:var(--t1)">WFU</div><div style="font-size:12px;color:var(--t3)">Winston-Salem, NC</div></td>
+                      <td style="padding:9px 14px;font-size:13px;color:var(--t2)">01/2008 – 06/2013</td>
+                      <td style="padding:9px 14px;font-size:13px;color:var(--t2)">Lab Technician</td>
+                      <td style="padding:9px 14px"><span class="tag slate" style="height:20px;font-size:11px">Semi-Skilled</span></td>
+                      <td style="padding:9px 14px"><span class="tag amber" style="height:20px;font-size:11px">Heavy</span></td>
+                      <td style="padding:9px 14px;text-align:right"><button class="btn ghost" style="height:26px;font-size:12px;padding:0 8px" onclick="toggleWorkHistory(this)">Expand</button></td>
+                    </tr>
+                    <tr id="wh-detail-0" style="display:none;background:var(--surface-2)">
+                      <td colspan="6" style="padding:12px 14px">
+                        <div class="data-grid cols-4" style="margin-bottom:8px">
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Employer Name</div><div class="dc-value">WFU</div><input class="inline-input" value="WFU" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Time On Job</div><div class="dc-value">5 years</div><input class="inline-input" value="5 years" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Start Date</div><div class="dc-value">01/2008</div><input class="inline-input" value="01/2008" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">End Date</div><div class="dc-value">06/2013</div><input class="inline-input" value="06/2013" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">City</div><div class="dc-value">Winston-Salem</div><input class="inline-input" value="Winston-Salem" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">State</div><div class="dc-value">NC</div><input class="inline-input" value="NC" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Hour/Day</div><div class="dc-value">8</div><input class="inline-input" value="8" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Day/Week</div><div class="dc-value">5</div><input class="inline-input" value="5" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Rate Of Pay</div><div class="dc-value">$18.50/hr</div><input class="inline-input" value="$18.50/hr" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Job Title</div><div class="dc-value">Lab Technician</div><input class="inline-input" value="Lab Technician" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Skill Level</div><div class="dc-value">Semi-Skilled</div><input class="inline-input" value="Semi-Skilled" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Type Of Business</div><div class="dc-value">Healthcare/Education</div><input class="inline-input" value="Healthcare/Education" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Physical Exertion</div><div class="dc-value">Heavy</div><input class="inline-input" value="Heavy" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Weight Lifted</div><div class="dc-value">50 lbs</div><input class="inline-input" value="50 lbs" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Weight Carried</div><div class="dc-value">30 lbs</div><input class="inline-input" value="30 lbs" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                          <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Why Left</div><div class="dc-value">Vision deteriorated</div><input class="inline-input" value="Vision deteriorated" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                        </div>
+                        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
+                          <button class="btn primary" style="height:28px;font-size:12px;padding:0 12px">Save</button>
+                          <button class="btn ghost" style="height:28px;font-size:12px;padding:0 12px;color:var(--red);border-color:#fecaca">Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Schools -->
+            <div class="card">
+              <div class="card-header"><span class="card-title">Schools</span><button class="card-action">+ Add School</button></div>
+              <div class="card-body" style="padding:0">
+                <table style="width:100%;border-collapse:collapse">
+                  <thead><tr style="background:var(--surface-2);border-bottom:1px solid var(--border)">
+                    <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">School</th>
+                    <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Dates</th>
+                    <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Main Teacher</th>
+                    <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Highest Grade</th>
+                    <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Spec. Ed</th>
+                    <th style="padding:8px 14px"></th>
+                  </tr></thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--border)">
+                      <td style="padding:9px 14px;font-weight:600;color:var(--t1)">Mount Tabor High School</td>
+                      <td style="padding:9px 14px;font-size:13px;color:var(--t2)">09/1985 – 06/1989</td>
+                      <td style="padding:9px 14px;font-size:13px;color:var(--t2)">—</td>
+                      <td style="padding:9px 14px;font-size:13px;color:var(--t2)">12th Grade</td>
+                      <td style="padding:9px 14px"><span class="tag slate" style="height:20px;font-size:11px">No</span></td>
+                      <td style="padding:9px 14px;text-align:right"><button class="btn ghost" style="height:26px;font-size:12px;padding:0 8px">Edit</button></td>
+                    </tr>
+                    <tr>
+                      <td style="padding:9px 14px;font-weight:600;color:var(--t1)">Tatnall School</td>
+                      <td style="padding:9px 14px;font-size:13px;color:var(--t2)">09/1980 – 06/1985</td>
+                      <td style="padding:9px 14px;font-size:13px;color:var(--t2)">—</td>
+                      <td style="padding:9px 14px;font-size:13px;color:var(--t2)">8th Grade</td>
+                      <td style="padding:9px 14px"><span class="tag slate" style="height:20px;font-size:11px">No</span></td>
+                      <td style="padding:9px 14px;text-align:right"><button class="btn ghost" style="height:26px;font-size:12px;padding:0 8px">Edit</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -1791,6 +1897,416 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- ── CASE EVENTS TAB (WC/PI) ── -->
+        <div id="tab-case-events-tab" class="tab-pane">
+          <div class="scroll-content">
+
+            <!-- Section switcher -->
+            <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+              <button class="btn primary" style="height:28px;font-size:12px;border-radius:14px" onclick="setCaseEventSection(this,'ce-trials')">Trials</button>
+              <button class="btn ghost" style="height:28px;font-size:12px;border-radius:14px" onclick="setCaseEventSection(this,'ce-hearings')">Hearings</button>
+              <button class="btn ghost" style="height:28px;font-size:12px;border-radius:14px" onclick="setCaseEventSection(this,'ce-mediations')">Mediations</button>
+              <button class="btn ghost" style="height:28px;font-size:12px;border-radius:14px" onclick="setCaseEventSection(this,'ce-appeals')">Appeals</button>
+              <button class="btn ghost" style="height:28px;font-size:12px;border-radius:14px" onclick="setCaseEventSection(this,'ce-injury')">Injury Details</button>
+            </div>
+
+            <!-- TRIALS -->
+            <div id="ce-trials">
+              <div class="card" style="margin-bottom:12px">
+                <div class="card-header"><span class="card-title">Trials</span><button class="card-action">+ Add Trial</button></div>
+                <div class="card-body" style="padding:10px 12px">
+                  <div class="data-grid cols-4" style="margin-bottom:10px">
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Request Date</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Trial Date</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Time</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Location</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Plaintiff</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Defendant</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Opp Firm</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Opp Attorney</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Court</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Judge</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Judge Type</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Trial Result</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Decision Date</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Settlement Date</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Settlement Amount</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Witness</div><textarea style="width:100%;min-height:70px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box" placeholder="Witness names..."></textarea></div>
+                    <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Trial Notes</div><textarea style="width:100%;min-height:70px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box" placeholder="Trial notes..."></textarea></div>
+                  </div>
+                </div>
+              </div>
+              <!-- Trials list -->
+              <div class="card">
+                <div class="card-header"><span class="card-title">Trial History</span></div>
+                <div class="card-body" style="padding:0">
+                  <table style="width:100%;border-collapse:collapse">
+                    <thead><tr style="background:var(--surface-2);border-bottom:1px solid var(--border)">
+                      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Request Date</th>
+                      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Location</th>
+                      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Hear Date Time</th>
+                      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Result Date</th>
+                      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Result</th>
+                      <th style="padding:8px 14px"></th>
+                    </tr></thead>
+                    <tbody>
+                      <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 14px;font-size:13px;color:var(--t2)">09/13/2012</td><td style="padding:9px 14px;font-size:13px;color:var(--t2)">Winston Salem, NC</td><td style="padding:9px 14px;font-size:13px;color:var(--t2)">11/14/2012 09:00 AM</td><td style="padding:9px 14px;font-size:13px;color:var(--t2)">03/10/2013</td><td style="padding:9px 14px"><span class="tag green" style="height:20px;font-size:11px">Favorable</span></td><td style="padding:9px 14px;text-align:right"><button class="btn ghost" style="height:26px;font-size:12px;padding:0 8px">Edit</button></td></tr>
+                      <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 14px;font-size:13px;color:var(--t2)">04/07/2014</td><td style="padding:9px 14px;font-size:13px;color:var(--t3)">—</td><td style="padding:9px 14px;font-size:13px;color:var(--t2)">09/21/2014 09:00 AM</td><td style="padding:9px 14px;font-size:13px;color:var(--t3)">—</td><td style="padding:9px 14px;font-size:13px;color:var(--t3)">—</td><td style="padding:9px 14px;text-align:right"><button class="btn ghost" style="height:26px;font-size:12px;padding:0 8px">Edit</button></td></tr>
+                      <tr><td style="padding:9px 14px;font-size:13px;color:var(--t2)">01/03/2015</td><td style="padding:9px 14px;font-size:13px;color:var(--t3)">—</td><td style="padding:9px 14px;font-size:13px;color:var(--t2)">10/31/2019</td><td style="padding:9px 14px;font-size:13px;color:var(--t2)">10/02/2019</td><td style="padding:9px 14px"><span class="tag green" style="height:20px;font-size:11px">Favorable</span></td><td style="padding:9px 14px;text-align:right"><button class="btn ghost" style="height:26px;font-size:12px;padding:0 8px">Edit</button></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- HEARINGS (hidden by default) -->
+            <div id="ce-hearings" style="display:none">
+              <div class="card" style="margin-bottom:12px">
+                <div class="card-header"><span class="card-title">Hearings</span><span style="font-size:11px;color:var(--t4);margin-left:4px">WC/PI hearings</span><button class="card-action">+ Add Hearing</button></div>
+                <div class="card-body" style="padding:10px 12px">
+                  <div class="data-grid cols-4" style="margin-bottom:10px">
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Request Date</div><div class="dc-value">06/16/2022</div><input class="inline-input" value="06/16/2022" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Hearing Date</div><div class="dc-value">06/30/2022</div><input class="inline-input" value="06/30/2022" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Time</div><div class="dc-value">11:00 AM</div><input class="inline-input" value="11:00 AM" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Hearing Type</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Location</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Plaintiff</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Defendant</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Opp Firm</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Opp Attorney</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Court</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Judge</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Commissioner</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Hearing Decision Result</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Decision Date</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Settlement Date</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Settlement Amount</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MEDIATIONS (hidden) -->
+            <div id="ce-mediations" style="display:none">
+              <div class="card" style="margin-bottom:12px">
+                <div class="card-header"><span class="card-title">Mediations</span><button class="card-action">+ Add Mediation</button></div>
+                <div class="card-body" style="padding:10px 12px">
+                  <div class="data-grid cols-4" style="margin-bottom:10px">
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Request Date</div><div class="dc-value">06/16/2022</div><input class="inline-input" value="06/16/2022" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Mediation Date</div><div class="dc-value">06/22/2022</div><input class="inline-input" value="06/22/2022" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Time</div><div class="dc-value">11:30 AM</div><input class="inline-input" value="11:30 AM" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Location</div><div class="dc-value">Charlotte, NC</div><input class="inline-input" value="Charlotte, NC" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Mediator</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Mediation Result</div><div class="dc-value">Favorable</div><input class="inline-input" value="Favorable" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Plaintiff</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Defendant</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Opp Firm</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Opp Attorney</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Settlement Date</div><div class="dc-value">02/13/2013</div><input class="inline-input" value="02/13/2013" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Settlement Amount</div><div class="dc-value" style="color:var(--green);font-weight:700">$25,000.00</div><input class="inline-input" value="$25,000.00" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  </div>
+                  <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Mediation Notes</div><textarea style="width:100%;min-height:70px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box" placeholder="Mediation notes..."></textarea></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- APPEALS (hidden) -->
+            <div id="ce-appeals" style="display:none">
+              <div class="card" style="margin-bottom:12px">
+                <div class="card-header"><span class="card-title">Appeals</span><span style="font-size:11px;color:var(--t4);margin-left:4px">WC/PI appeals — not SSD</span><button class="card-action">+ Add Appeal</button></div>
+                <div class="card-body" style="padding:10px 12px">
+                  <div class="data-grid cols-4" style="margin-bottom:10px">
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Due Date</div><div class="dc-value">08/05/2013</div><input class="inline-input" value="08/05/2013" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Date Filed</div><div class="dc-value">10/16/2013</div><input class="inline-input" value="10/16/2013" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Time Filed</div><div class="dc-value">01:23 PM</div><input class="inline-input" value="01:23 PM" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Type of Appeal</div><div class="dc-value">District</div><input class="inline-input" value="District" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Location</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Court</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Judge</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Opp Firm</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Opp Attorney</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Appeal Result Date</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Appeal Result</div><div class="dc-value" style="color:var(--green);font-weight:700">Favorable</div><input class="inline-input" value="Favorable" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Settlement Amount</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  </div>
+                  <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Notes</div><textarea style="width:100%;min-height:60px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box" placeholder="Appeal notes..."></textarea></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- INJURY DETAILS (hidden) -->
+            <div id="ce-injury" style="display:none">
+              <div class="card">
+                <div class="card-header"><span class="card-title">Injury Details</span><button class="card-action">Save</button></div>
+                <div class="card-body" style="padding:10px 12px">
+                  <div class="data-grid cols-4" style="margin-bottom:10px">
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Date of Injury</div><div class="dc-value">09/01/2010</div><input class="inline-input" value="09/01/2010" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Time of Injury</div><div class="dc-value">09:00 AM</div><input class="inline-input" value="09:00 AM" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">City</div><div class="dc-value">Greensboro</div><input class="inline-input" value="Greensboro" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">County</div><div class="dc-value">Guilford</div><input class="inline-input" value="Guilford" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">File #</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Location</div><div class="dc-value">Wendover Ave</div><input class="inline-input" value="Wendover Ave" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Speaks English</div><div class="dc-value">Yes</div><input class="inline-input" value="Yes" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Language (if No)</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Name of Union</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Union Nr</div><div class="dc-value">0</div><input class="inline-input" value="0" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Employers Business</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Occupation</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Hours/Day</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Days/Week</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Hourly Rate</div><div class="dc-value">$0.00</div><input class="inline-input" value="$0.00" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Avg Weekly Wage</div><div class="dc-value">$0.00</div><input class="inline-input" value="$0.00" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">New Pay Rate</div><div class="dc-value">$0.00</div><input class="inline-input" value="$0.00" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Paid Full Wages</div><div class="dc-value">Yes</div><input class="inline-input" value="Yes" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Other Employer</div><div class="dc-value">No</div><input class="inline-input" value="No" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Lost Time from Work</div><div class="dc-value">No</div><input class="inline-input" value="No" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+                    <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">How Injury Occurred</div><textarea style="width:100%;min-height:70px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box">hit and run</textarea></div>
+                    <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Type &amp; Description of Injury</div><textarea style="width:100%;min-height:70px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box">broke leg</textarea></div>
+                    <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Limitations</div><textarea style="width:100%;min-height:70px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box">no walking</textarea></div>
+                    <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Restrictions</div><textarea style="width:100%;min-height:70px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box">no work until cleared by doctor and physical therapist</textarea></div>
+                  </div>
+                  <!-- Disability Types -->
+                  <div style="margin-bottom:10px">
+                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:8px">Disability Types</div>
+                    <table style="width:100%;border-collapse:collapse;margin-bottom:8px">
+                      <thead><tr style="background:var(--surface-2);border-bottom:1px solid var(--border)">
+                        <th style="padding:7px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Disability Type</th>
+                        <th style="padding:7px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Body Part</th>
+                        <th style="padding:7px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Day Stopped Work</th>
+                        <th style="padding:7px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3)">Return to Work</th>
+                        <th style="padding:7px 12px"></th>
+                      </tr></thead>
+                      <tbody>
+                        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 12px;font-size:13px;font-weight:600;color:var(--t1)">Leg</td><td style="padding:8px 12px;font-size:13px;color:var(--t2)">Left leg</td><td style="padding:8px 12px;font-size:13px;color:var(--t2)">09/01/2010</td><td style="padding:8px 12px;font-size:13px;color:var(--t2)">—</td><td style="padding:8px 12px;text-align:right"><button class="btn ghost" style="height:26px;font-size:12px;padding:0 8px">Edit</button></td></tr>
+                        <tr><td style="padding:8px 12px;font-size:13px;font-weight:600;color:var(--t1)">Back</td><td style="padding:8px 12px;font-size:13px;color:var(--t2)">Lower back</td><td style="padding:8px 12px;font-size:13px;color:var(--t2)">09/01/2010</td><td style="padding:8px 12px;font-size:13px;color:var(--t2)">—</td><td style="padding:8px 12px;text-align:right"><button class="btn ghost" style="height:26px;font-size:12px;padding:0 8px">Edit</button></td></tr>
+                      </tbody>
+                    </table>
+                    <button class="btn ghost" style="height:28px;font-size:12px;padding:0 12px">+ Add Disability Type</button>
+                  </div>
+                  <!-- Pre-Existing Injuries -->
+                  <div style="border-top:1px solid var(--border);padding-top:10px">
+                    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:8px">Pre-Existing Injuries</div>
+                    <div class="data-grid cols-2">
+                      <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Date of Previous</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                      <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Description</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── ASSOC PARTIES TAB (WC/PI) ── -->
+        <div id="tab-assoc-parties-tab" class="tab-pane">
+          <div class="scroll-content">
+
+            <!-- Section switcher -->
+            <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+              <button class="btn primary" style="height:28px;font-size:12px;border-radius:14px" onclick="setAssocSection(this,'ap-insurance')">Insurance Co</button>
+              <button class="btn ghost" style="height:28px;font-size:12px;border-radius:14px" onclick="setAssocSection(this,'ap-opposing-party')">Opposing Party</button>
+              <button class="btn ghost" style="height:28px;font-size:12px;border-radius:14px" onclick="setAssocSection(this,'ap-opposing-firm')">Opposing Firm</button>
+              <button class="btn ghost" style="height:28px;font-size:12px;border-radius:14px" onclick="setAssocSection(this,'ap-experts')">Experts</button>
+            </div>
+
+            <!-- Insurance Company -->
+            <div id="ap-insurance">
+              <div class="card" style="margin-bottom:12px">
+                <div class="card-header"><span class="card-title">Insurance Company</span><button class="card-action">+ Add</button></div>
+                <div class="card-body" style="padding:10px 12px">
+                  <div class="data-grid cols-4">
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Insurance Co</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Contact</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Phone</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Cell</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Fax</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Email</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Website</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Type / Ins</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Relation</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Coverage</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Street</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">City / State / Zip</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  </div>
+                  <div style="margin-top:10px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Notes</div><textarea style="width:100%;min-height:60px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box" placeholder="Notes..."></textarea></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Opposing Party -->
+            <div id="ap-opposing-party" style="display:none">
+              <div class="card" style="margin-bottom:12px">
+                <div class="card-header"><span class="card-title">Opposing Party</span><button class="card-action">+ Add</button></div>
+                <div class="card-body" style="padding:10px 12px">
+                  <div class="data-grid cols-4">
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Firm</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">First Name</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Last Name</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Phone</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Cell</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Email</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Relation</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Type / Ins</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  </div>
+                  <div style="margin-top:10px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Notes</div><textarea style="width:100%;min-height:60px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box" placeholder="Notes..."></textarea></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Opposing Firm -->
+            <div id="ap-opposing-firm" style="display:none">
+              <div class="card" style="margin-bottom:12px">
+                <div class="card-header"><span class="card-title">Opposing Firm</span><button class="card-action">+ Add</button></div>
+                <div class="card-body" style="padding:10px 12px">
+                  <div class="data-grid cols-4">
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Firm Name</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Attorney</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Phone</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Fax</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Email</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Website</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Street</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">City / State / Zip</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  </div>
+                  <div style="margin-top:10px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Notes</div><textarea style="width:100%;min-height:60px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box" placeholder="Notes..."></textarea></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Experts -->
+            <div id="ap-experts" style="display:none">
+              <div class="card" style="margin-bottom:12px">
+                <div class="card-header"><span class="card-title">Experts</span><button class="card-action">+ Add Expert</button></div>
+                <div class="card-body" style="padding:10px 12px">
+                  <div class="data-grid cols-4">
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Name</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Type</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Firm</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Phone</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Cell</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Email</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Website</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Street</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  </div>
+                  <div style="margin-top:10px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Notes</div><textarea style="width:100%;min-height:60px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box" placeholder="Notes..."></textarea></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── VA CLAIM TAB ── -->
+        <div id="tab-va-claim-tab" class="tab-pane">
+          <div class="scroll-content">
+
+            <!-- Main VA Claim form -->
+            <div class="card" style="margin-bottom:12px">
+              <div class="card-header">
+                <span class="card-title">Veterans Administration Claim</span>
+                <span class="tag blue" style="height:20px;font-size:11px;margin-left:6px">Client ID: 001</span>
+                <button class="card-action">Save</button>
+              </div>
+              <div class="card-body" style="padding:10px 12px">
+                <div class="data-grid cols-4" style="margin-bottom:8px">
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Claim Nr.</div><div class="dc-value">259742</div><input class="inline-input" value="259742" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Notice of Action</div><div class="dc-value">12/01/2012</div><input class="inline-input" value="12/01/2012" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Death Date</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Regional Office</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Claim Type</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Initial App Date</div><div class="dc-value">12/01/2012</div><input class="inline-input" value="12/01/2012" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Initial Decision Date</div><div class="dc-value">12/01/2012</div><input class="inline-input" value="12/01/2012" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Decision Type</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Claimant / Non Veteran</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Case Status</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Dates of Service — Start</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Dates of Service — End</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">VCAA Notice Date</div><div class="dc-value">12/01/2012</div><input class="inline-input" value="12/01/2012" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">VCAA Notice Response</div><div class="dc-value">12/01/2012</div><input class="inline-input" value="12/01/2012" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Notice of Disagreement</div><div class="dc-value">12/01/2012</div><input class="inline-input" value="12/01/2012" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">SOC Date</div><div class="dc-value">12/01/2012</div><input class="inline-input" value="12/01/2012" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Decision Type (SOC)</div><div class="dc-value">Denied</div><input class="inline-input" value="Denied" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Deadline for Election</div><div class="dc-value">12/01/2012</div><input class="inline-input" value="12/01/2012" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Type of Election</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">VA Office w/Records</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Other Names in Service</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Form 9 Filing Date</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">BVA Decision Date</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">BVA Decision Type</div><div class="dc-value">Unfavorable</div><input class="inline-input" value="Unfavorable" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Attorney Fee</div><div class="dc-value">0</div><input class="inline-input" value="0" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Date Received</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Hearing Requested</div><div class="dc-value">Yes</div><input class="inline-input" value="Yes" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Hearing Date</div><div class="dc-value">12/01/2012</div><input class="inline-input" value="12/01/2012" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Hearing Request Time</div><div class="dc-value">03:00 PM</div><input class="inline-input" value="03:00 PM" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Hearing Site</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Currently Receiving Benefits</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Previously Filed Claim</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Date Claim Filed</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Claim Filed For</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">City (Where Born)</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">State (Where Born)</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Country (Where Born)</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                </div>
+                <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">What are the Disability Benefits?</div><textarea style="width:100%;min-height:70px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box" placeholder="Describe disability benefits..."></textarea></div>
+              </div>
+            </div>
+
+            <!-- VA Appeals (DRO/BVA) -->
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">VA Appeals (DRO / BVA)</span>
+                <button class="card-action">+ Add Appeal</button>
+              </div>
+              <div class="card-body" style="padding:10px 12px">
+                <!-- Existing appeal record -->
+                <div style="border:1.5px solid var(--border);border-radius:6px;padding:12px;margin-bottom:10px;background:var(--surface-2)">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                    <span style="font-size:13px;font-weight:700;color:var(--t1)">Appeal Due: 05/10/2017</span>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn primary" style="height:26px;font-size:12px;padding:0 10px">Save</button>
+                      <button class="btn ghost" style="height:26px;font-size:12px;padding:0 10px;color:var(--red);border-color:#fecaca">Delete</button>
+                    </div>
+                  </div>
+                  <div class="data-grid cols-4">
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Appeal Due Date</div><div class="dc-value">05/10/2017</div><input class="inline-input" value="05/10/2017" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Appeal Date</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Appeal To</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Decision Date</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Decision Type</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Regional Office</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Time Filed</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Appeal Type</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Docket Nr.</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Appeal Location</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Due Date Evidence</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Notice of Appearance</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Review Officer</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Expected Effective Date</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Effective Date Granted</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Judge</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Expected Rating</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Approved Rating</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Filing Financial Hardship</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Area/Type of Disability 1</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                    <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Area/Type of Disability 2</div><div class="dc-value empty">—</div><input class="inline-input" value="" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
+                    <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Issues</div><textarea style="width:100%;min-height:70px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box" placeholder="Issues on appeal..."></textarea></div>
+                    <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Decision on Issues</div><textarea style="width:100%;min-height:70px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box" placeholder="Decision on issues..."></textarea></div>
+                    <div style="grid-column:span 2"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t4);margin-bottom:6px">Notes</div><textarea style="width:100%;min-height:60px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box" placeholder="Appeal notes..."></textarea></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -2678,6 +3194,105 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 </div><!-- /app -->
 
 <script>
+
+// ── More tab dropdown ──
+function toggleMoreMenu(e) {
+  e.stopPropagation();
+  var menu = document.getElementById('more-tab-menu');
+  if (!menu) return;
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+function showTabFromMore(tabId, label) {
+  // Close menu and reset label
+  var menu = document.getElementById('more-tab-menu');
+  if (menu) menu.style.display = 'none';
+  var moreBtn = document.getElementById('more-tab-btn');
+  if (moreBtn) moreBtn.innerHTML = label + ' <span style="font-size:10px">&#9660;</span>';
+
+  // Clear all sub-tab active states
+  document.querySelectorAll('.sub-tab').forEach(function(t) {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected','false');
+  });
+  if (moreBtn) {
+    moreBtn.classList.add('active');
+    moreBtn.setAttribute('aria-selected','true');
+  }
+
+  // Hide all tab panes and show target
+  document.querySelectorAll('.tab-pane').forEach(function(p) {
+    p.style.display = 'none';
+    p.classList.remove('active-tab');
+  });
+  var pane = document.getElementById('tab-' + tabId);
+  if (pane) {
+    pane.style.display = 'flex';
+    pane.style.flexDirection = 'column';
+    pane.classList.add('active-tab');
+  }
+}
+
+// Close more menu when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#more-tab-wrapper')) {
+    var menu = document.getElementById('more-tab-menu');
+    if (menu) menu.style.display = 'none';
+  }
+});
+
+// ── Case Events section switcher ──
+function setCaseEventSection(btn, sectionId) {
+  ['ce-trials','ce-hearings','ce-mediations','ce-appeals','ce-injury'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  var target = document.getElementById(sectionId);
+  if (target) target.style.display = 'block';
+  btn.closest('.scroll-content').querySelectorAll('button[onclick*="setCaseEventSection"]').forEach(function(b) {
+    b.className = 'btn ghost';
+    b.style.cssText = 'height:28px;font-size:12px;border-radius:14px';
+  });
+  btn.className = 'btn primary';
+  btn.style.cssText = 'height:28px;font-size:12px;border-radius:14px';
+}
+
+// ── Assoc Parties section switcher ──
+function setAssocSection(btn, sectionId) {
+  ['ap-insurance','ap-opposing-party','ap-opposing-firm','ap-experts'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  var target = document.getElementById(sectionId);
+  if (target) target.style.display = 'block';
+  btn.closest('.scroll-content').querySelectorAll('button[onclick*="setAssocSection"]').forEach(function(b) {
+    b.className = 'btn ghost';
+    b.style.cssText = 'height:28px;font-size:12px;border-radius:14px';
+  });
+  btn.className = 'btn primary';
+  btn.style.cssText = 'height:28px;font-size:12px;border-radius:14px';
+}
+
+// ── Work History expand/collapse ──
+function toggleWorkHistory(btn) {
+  var row = btn.closest('tr');
+  var next = row ? row.nextElementSibling : null;
+  if (!next) return;
+  var isHidden = next.style.display === 'none' || next.style.display === '';
+  next.style.display = isHidden ? 'table-row' : 'none';
+  btn.textContent = isHidden ? 'Collapse' : 'Expand';
+}
+
+// ── toggleGroup for Doc Templates ──
+function toggleGroup(header) {
+  var body = header.nextElementSibling;
+  var arrow = header.querySelector('span');
+  if (!body) return;
+  var isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.textContent = isOpen ? '▶' : '▼';
+}
+
 const screenMap = {
   general:   'Client Overview — General | Wings Legal',
   filings:   'Filings & Appeals | Wings Legal',
