@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GovCon Runway Calculator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2535;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #e8eaf0;
+    --text2: #8b92a8;
+    --text3: #5a6278;
+    --teal: #1D9E75;
+    --teal-dim: rgba(29,158,117,0.15);
+    --red: #E24B4A;
+    --red-dim: rgba(226,75,74,0.12);
+    --blue: #4a9eff;
+    --amber: #d4933a;
+    --amber-dim: rgba(212,147,58,0.12);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 2.5rem 1.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .header-left h1 {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  .header-left p {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 4px;
+    font-family: var(--mono);
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 10px;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    color: var(--text3);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    min-height: calc(100vh - 80px);
+  }
+
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 1.5rem;
+    overflow-y: auto;
+    background: var(--bg);
+  }
+
+  .main {
+    padding: 1.5rem 2rem;
+    background: var(--bg);
+    overflow-y: auto;
+  }
+
+  .section {
+    margin-bottom: 1.75rem;
+  }
+
+  .section-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .control-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .control-row label {
+    font-size: 12px;
+    color: var(--text2);
+    min-width: 150px;
+    flex-shrink: 0;
+  }
+
+  .control-row input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 2px;
+    background: var(--border2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .control-row input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--teal);
+    cursor: pointer;
+    border: 2px solid var(--bg);
+  }
+
+  .control-row input[type=range]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--teal);
+    cursor: pointer;
+    border: 2px solid var(--bg);
+  }
+
+  .val {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--teal);
+    min-width: 56px;
+    text-align: right;
+  }
+
+  .contracts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .contract-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+  }
+
+  .contract-card .cname {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .contract-card label {
+    font-size: 11px;
+    color: var(--text2);
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .contract-card input[type=number] {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 5px 8px;
+    outline: none;
+    margin-bottom: 6px;
+    transition: border-color 0.15s;
+  }
+
+  .contract-card input[type=number]:focus {
+    border-color: var(--teal);
+  }
+
+  .metric-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .metric {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .metric .mlabel {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+
+  .metric .mval {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .triggers { margin-bottom: 1.75rem; }
+
+  .trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    border: 1px solid transparent;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .trigger.active {
+    background: var(--red-dim);
+    border-color: rgba(226,75,74,0.25);
+  }
+
+  .trigger.warn {
+    background: var(--amber-dim);
+    border-color: rgba(212,147,58,0.2);
+  }
+
+  .trigger .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .trigger .tmo {
+    font-family: var(--mono);
+    font-size: 11px;
+    min-width: 72px;
+    color: var(--text2);
+  }
+
+  .trigger .tdesc {
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .trigger.active .tdesc { color: #f09595; }
+  .trigger.warn .tdesc { color: #EF9F27; }
+
+  .chart-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+
+  .legend {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 10px;
+  }
+
+  .legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text2);
+    font-family: var(--mono);
+  }
+
+  .swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    margin-bottom: 1.5rem;
+  }
+
+  .cost-breakdown {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0,1fr));
+    gap: 8px;
+    margin-top: 1rem;
+  }
+
+  .cost-item {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+
+  .cost-item .ci-label {
+    font-size: 10px;
+    font-family: var(--mono);
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+
+  .cost-item .ci-val {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1rem 2.5rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+    .metric-row { grid-template-columns: repeat(2, 1fr); }
+    .cost-breakdown { grid-template-columns: repeat(3, 1fr); }
+    header { flex-direction: column; align-items: flex-start; }
+  }
+
+  @media (max-width: 600px) {
+    .contracts-grid { grid-template-columns: 1fr; }
+    .metric-row { grid-template-columns: 1fr 1fr; }
+    .cost-breakdown { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>GovCon Runway Calculator</h1>
+    <p>8(a) / SDVOSB small business — contract pipeline stress model</p>
+  </div>
+  <div class="badge">24-month model</div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+
+    <div class="section">
+      <div class="section-title">Company foundation</div>
+      <div class="control-row"><label>Starting cash</label><input type="range" id="cash" min="100000" max="5000000" step="50000" value="1200000"><span class="val" id="cash-v">$1.20M</span></div>
+      <div class="control-row"><label>Billable headcount</label><input type="range" id="billhc" min="1" max="60" step="1" value="18"><span class="val" id="billhc-v">18</span></div>
+      <div class="control-row"><label>Avg billable salary</label><input type="range" id="billsal" min="50000" max="220000" step="5000" value="120000"><span class="val" id="billsal-v">$120K</span></div>
+      <div class="control-row"><label>Overhead headcount</label><input type="range" id="ovhc" min="0" max="20" step="1" value="4"><span class="val" id="ovhc-v">4</span></div>
+      <div class="control-row"><label>Avg overhead salary</label><input type="range" id="ovsal" min="50000" max="280000" step="5000" value="130000"><span class="val" id="ovsal-v">$130K</span></div>
+      <div class="control-row"><label>Target utilization</label><input type="range" id="util" min="0.50" max="1.00" step="0.01" value="0.87"><span class="val" id="util-v">87%</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Indirect rates</div>
+      <div class="control-row"><label>Fringe (% of salary)</label><input type="range" id="fringe" min="0.10" max="0.55" step="0.01" value="0.30"><span class="val" id="fringe-v">30%</span></div>
+      <div class="control-row"><label>Overhead (% of DL)</label><input type="range" id="oh" min="0.10" max="1.20" step="0.01" value="0.45"><span class="val" id="oh-v">45%</span></div>
+      <div class="control-row"><label>G&A (% of cost input)</label><input type="range" id="ga" min="0.05" max="0.30" step="0.01" value="0.12"><span class="val" id="ga-v">12%</span></div>
+      <div class="control-row"><label>Monthly B&P spend</label><input type="range" id="bp" min="0" max="200000" step="5000" value="35000"><span class="val" id="bp-v">$35K</span></div>
+      <div class="control-row"><label>Other indirect / mo</label><input type="range" id="other" min="0" max="150000" step="5000" value="25000"><span class="val" id="other-v">$25K</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Active contracts</div>
+      <div class="contracts-grid">
+        <div class="contract-card">
+          <div class="cname">Contract 1</div>
+          <label>Monthly revenue ($)</label>
+          <input type="number" id="c1r" value="280000" min="0" step="5000">
+          <label>Duration (months)</label>
+          <input type="number" id="c1d" value="24" min="1" max="60">
+        </div>
+        <div class="contract-card">
+          <div class="cname">Contract 2</div>
+          <label>Monthly revenue ($)</label>
+          <input type="number" id="c2r" value="195000" min="0" step="5000">
+          <label>Duration (months)</label>
+          <input type="number" id="c2d" value="18" min="1" max="60">
+        </div>
+        <div class="contract-card">
+          <div class="cname">Contract 3</div>
+          <label>Monthly revenue ($)</label>
+          <input type="number" id="c3r" value="160000" min="0" step="5000">
+          <label>Duration (months)</label>
+          <input type="number" id="c3d" value="24" min="1" max="60">
+        </div>
+        <div class="contract-card">
+          <div class="cname">Contract 4</div>
+          <label>Monthly revenue ($)</label>
+          <input type="number" id="c4r" value="145000" min="0" step="5000">
+          <label>Duration (months)</label>
+          <input type="number" id="c4d" value="12" min="1" max="60">
+        </div>
+        <div class="contract-card">
+          <div class="cname">Contract 5</div>
+          <label>Monthly revenue ($)</label>
+          <input type="number" id="c5r" value="65000" min="0" step="5000">
+          <label>Duration (months)</label>
+          <input type="number" id="c5d" value="8" min="1" max="60">
+        </div>
+        <div class="contract-card">
+          <div class="cname">Pipeline award</div>
+          <label>Monthly revenue ($)</label>
+          <input type="number" id="c6r" value="420000" min="0" step="5000">
+          <label>Starts month #</label>
+          <input type="number" id="c6s" value="7" min="1" max="24">
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <main class="main">
+
+    <div class="metric-row" id="metrics"></div>
+
+    <div class="triggers" id="triggers"></div>
+
+    <div class="chart-label">Cash on hand + monthly revenue vs cost</div>
+    <div class="legend">
+      <span><span class="swatch" style="background:#1D9E75"></span>Revenue</span>
+      <span><span class="swatch" style="background:#E24B4A"></span>Cost floor</span>
+      <span><span class="swatch" style="background:#4a9eff"></span>Cash ($M, right axis)</span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="mainChart"></canvas>
+    </div>
+
+    <div class="chart-label">Monthly net income / burn</div>
+    <div class="chart-wrap" style="height:180px;">
+      <canvas id="netChart"></canvas>
+    </div>
+
+    <div class="section-title" style="margin-top:0.5rem">Monthly cost breakdown</div>
+    <div class="cost-breakdown" id="costBreakdown"></div>
+
+  </main>
+</div>
+
+<footer>
+  <span>GovCon Runway Model — 24-month projection</span>
+  <span>All figures approximate — not financial advice</span>
+</footer>
+
+<script>
+function fmtM(v) {
+  const a = Math.abs(v);
+  const sign = v < 0 ? '-' : '';
+  if (a >= 1e6) return sign + '$' + (a / 1e6).toFixed(2) + 'M';
+  if (a >= 1e3) return sign + '$' + Math.round(a / 1e3) + 'K';
+  return sign + '$' + Math.round(a);
+}
+function pct(v) { return Math.round(v * 100) + '%'; }
+
+const sliders = [
+  ['cash',   'cash-v',   v => fmtM(+v)],
+  ['billhc', 'billhc-v', v => v],
+  ['billsal','billsal-v',v => '$' + Math.round(+v / 1000) + 'K'],
+  ['ovhc',   'ovhc-v',   v => v],
+  ['ovsal',  'ovsal-v',  v => '$' + Math.round(+v / 1000) + 'K'],
+  ['util',   'util-v',   v => Math.round(+v * 100) + '%'],
+  ['fringe', 'fringe-v', v => pct(+v)],
+  ['oh',     'oh-v',     v => pct(+v)],
+  ['ga',     'ga-v',     v => pct(+v)],
+  ['bp',     'bp-v',     v => fmtM(+v)],
+  ['other',  'other-v',  v => fmtM(+v)],
+];
+
+sliders.forEach(([id, outId, fmt]) => {
+  document.getElementById(id).addEventListener('input', function() {
+    document.getElementById(outId).textContent = fmt(this.value);
+    runModel();
+  });
+});
+
+['c1r','c1d','c2r','c2d','c3r','c3d','c4r','c4d','c5r','c5d','c6r','c6s'].forEach(id => {
+  document.getElementById(id).addEventListener('input', runModel);
+});
+
+let mainChart = null, netChart = null;
+
+const MONTHS = 24;
+const MO_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function runModel() {
+  const g = id => +document.getElementById(id).value;
+
+  const cash0     = g('cash');
+  const billHC    = g('billhc');
+  const billSal   = g('billsal');
+  const ovHC      = g('ovhc');
+  const ovSal     = g('ovsal');
+  const util      = g('util');
+  const fringe    = g('fringe');
+  const ohRate    = g('oh');
+  const gaRate    = g('ga');
+  const bp        = g('bp');
+  const otherInd  = g('other');
+
+  const monthlyDL     = billHC * billSal / 12 * util;
+  const monthlyFringe = (billHC * billSal / 12 + ovHC * ovSal / 12) * fringe;
+  const monthlyOH     = monthlyDL * ohRate;
+  const preGA         = monthlyDL + monthlyFringe + monthlyOH + bp;
+  const monthlyGA     = preGA * gaRate;
+  const fixedCost     = monthlyDL + monthlyFringe + monthlyOH + monthlyGA + bp + otherInd;
+
+  const contracts = [
+    { rev: g('c1r'), dur: g('c1d'), start: 1 },
+    { rev: g('c2r'), dur: g('c2d'), start: 1 },
+    { rev: g('c3r'), dur: g('c3d'), start: 1 },
+    { rev: g('c4r'), dur: g('c4d'), start: 1 },
+    { rev: g('c5r'), dur: g('c5d'), start: 1 },
+    { rev: g('c6r'), dur: 18,       start: g('c6s') },
+  ];
+
+  const labels = [], revData = [], costData = [], cashData = [], netData = [];
+  let cash = cash0;
+  let cashOutMonth = null;
+  const triggerMonths = { 9: null, 6: null, 4: null };
+
+  for (let m = 1; m <= MONTHS; m++) {
+    const mo = (m - 1) % 12;
+    const yr = 2025 + Math.floor((m - 1) / 12);
+    labels.push(MO_LABELS[mo] + ' \'' + String(yr).slice(2));
+
+    const rev = contracts.reduce((sum, c) => {
+      return (m >= c.start && m < c.start + c.dur) ? sum + c.rev : sum;
+    }, 0);
+
+    const net = rev - fixedCost;
+    cash += net;
+
+    revData.push(Math.round(rev / 1000));
+    costData.push(Math.round(fixedCost / 1000));
+    cashData.push(parseFloat((cash / 1e6).toFixed(3)));
+    netData.push(Math.round(net / 1000));
+
+    if (cash <= 0 && cashOutMonth === null) cashOutMonth = labels[m - 1];
+
+    const burn = fixedCost - rev;
+    if (burn > 0 && cash > 0) {
+      const runway = cash / burn;
+      [9, 6, 4].forEach(t => {
+        if (runway <= t && triggerMonths[t] === null) triggerMonths[t] = labels[m - 1];
+      });
+    }
+  }
+
+  const finalCash = cashData[cashData.length - 1];
+
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric">
+      <div class="mlabel">Ending cash</div>
+      <div class="mval" style="color:${finalCash > 0 ? '#1D9E75' : '#E24B4A'}">${fmtM(finalCash * 1e6)}</div>
+    </div>
+    <div class="metric">
+      <div class="mlabel">Monthly cost floor</div>
+      <div class="mval" style="color:#e8eaf0">${fmtM(fixedCost)}</div>
+    </div>
+    <div class="metric">
+      <div class="mlabel">Starting revenue</div>
+      <div class="mval" style="color:#e8eaf0">${fmtM(revData[0] * 1000)}/mo</div>
+    </div>
+    <div class="metric">
+      <div class="mlabel">Cash out</div>
+      <div class="mval" style="color:${cashOutMonth ? '#E24B4A' : '#1D9E75'};font-size:${cashOutMonth ? '14px' : '20px'}">${cashOutMonth || 'Survives 24mo'}</div>
+    </div>
+  `;
+
+  const triggerDefs = [
+    { mo: 9, color: '#EF9F27', label: 'Accelerate BD — start fundraise / LOC conversations' },
+    { mo: 6, color: '#E24B4A', label: 'Freeze discretionary hiring, cut B&P spend' },
+    { mo: 4, color: '#A32D2D', label: 'Execute cost cuts — consider staff actions, bridge financing' },
+  ];
+
+  document.getElementById('triggers').innerHTML = triggerDefs.map(t => {
+    const hit = triggerMonths[t.mo];
+    const cls = hit ? (t.mo === 9 ? 'trigger warn' : 'trigger active') : 'trigger';
+    return `<div class="${cls}">
+      <div class="dot" style="background:${t.color}"></div>
+      <span class="tmo">${hit || 'Not triggered'}</span>
+      <span class="tdesc">${t.label} &nbsp;<span style="opacity:0.5">(${t.mo}mo runway threshold)</span></span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('costBreakdown').innerHTML = [
+    ['Direct labor', monthlyDL],
+    ['Fringe', monthlyFringe],
+    ['Overhead', monthlyOH],
+    ['G&A', monthlyGA],
+    ['B&P + other', bp + otherInd],
+  ].map(([label, val]) => `
+    <div class="cost-item">
+      <div class="ci-label">${label}</div>
+      <div class="ci-val">${fmtM(val)}</div>
+    </div>
+  `).join('');
+
+  const gridColor = 'rgba(255,255,255,0.05)';
+  const tickColor = '#5a6278';
+  const tickFont  = { family: "'IBM Plex Mono', monospace", size: 10 };
+
+  if (mainChart) mainChart.destroy();
+  mainChart = new Chart(document.getElementById('mainChart'), {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'bar', label: 'Revenue', data: revData,
+          backgroundColor: 'rgba(29,158,117,0.6)', borderRadius: 2, yAxisID: 'y',
+        },
+        {
+          type: 'bar', label: 'Cost', data: costData,
+          backgroundColor: 'rgba(226,75,74,0.45)', borderRadius: 2, yAxisID: 'y',
+        },
+        {
+          type: 'line', label: 'Cash', data: cashData,
+          borderColor: '#4a9eff', backgroundColor: 'transparent',
+          tension: 0.35, pointRadius: 2, borderWidth: 2, yAxisID: 'y2',
+        },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: tickColor, font: tickFont, maxRotation: 45, autoSkip: true, maxTicksLimit: 12 }, grid: { color: gridColor } },
+        y:  { position: 'left',  ticks: { color: tickColor, font: tickFont, callback: v => '$' + v + 'K' }, grid: { color: gridColor } },
+        y2: { position: 'right', ticks: { color: '#4a9eff', font: tickFont, callback: v => '$' + v.toFixed(1) + 'M' }, grid: { display: false } },
+      }
+    }
+  });
+
+  if (netChart) netChart.destroy();
+  netChart = new Chart(document.getElementById('netChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Net',
+        data: netData,
+        backgroundColor: netData.map(v => v >= 0 ? 'rgba(29,158,117,0.65)' : 'rgba(226,75,74,0.55)'),
+        borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: tickColor, font: tickFont, maxRotation: 45, autoSkip: true, maxTicksLimit: 12 }, grid: { color: gridColor } },
+        y: { ticks: { color: tickColor, font: tickFont, callback: v => (v < 0 ? '-' : '') + '$' + Math.abs(v) + 'K' }, grid: { color: gridColor } },
+      }
+    }
+  });
+}
+
+runModel();
+</script>
+</body>
+</html>
