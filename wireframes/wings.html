@@ -1582,13 +1582,10 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
         <div id="tab-intake2-tab" class="tab-pane">
           <div class="scroll-content">
             <div style="max-width:860px">
-              <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
-                <button class="btn primary">Save All</button>
-              </div>
 
               <!-- Restrictions & Limitations -->
               <div class="card" style="margin-bottom:12px">
-                <div class="card-header"><span class="card-title">Restrictions &amp; Limitations</span></div>
+                <div class="card-header"><span class="card-title">Restrictions &amp; Limitations</span><span style="font-size:11px;color:var(--t4);margin-left:4px">Click any field to edit</span><button class="card-action">Save</button></div>
                 <div class="card-body">
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
                     <div>
@@ -1614,7 +1611,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 
               <!-- Job Related -->
               <div class="card" style="margin-bottom:12px">
-                <div class="card-header"><span class="card-title">Job Related</span></div>
+                <div class="card-header"><span class="card-title">Job Related</span><span style="font-size:11px;color:var(--t4);margin-left:4px">Click any field to edit</span><button class="card-action">Save</button></div>
                 <div class="card-body">
                   <div style="display:flex;flex-wrap:wrap;gap:20px;margin-bottom:12px;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px">
                     <span style="font-size:12.5px;color:var(--t3);font-weight:500">If condition caused you to:</span>
@@ -1639,7 +1636,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 
               <!-- Listings & Grids -->
               <div class="card">
-                <div class="card-header"><span class="card-title">Listings &amp; Grid Information</span></div>
+                <div class="card-header"><span class="card-title">Listings &amp; Grid Information</span><span style="font-size:11px;color:var(--t4);margin-left:4px">Click any field to edit</span><button class="card-action">Save</button></div>
                 <div class="card-body">
                   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
                     <div>
@@ -1906,15 +1903,15 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 
             <!-- Section switcher -->
             <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
-              <button class="btn primary" style="height:28px;font-size:12px;border-radius:14px" onclick="setCaseEventSection(this,'ce-trials')">Trials</button>
+              <button class="btn primary" style="height:28px;font-size:12px;border-radius:14px" onclick="setCaseEventSection(this,'ce-injury')">Injury Details</button>
+              <button class="btn ghost" style="height:28px;font-size:12px;border-radius:14px" onclick="setCaseEventSection(this,'ce-trials')">Trials</button>
               <button class="btn ghost" style="height:28px;font-size:12px;border-radius:14px" onclick="setCaseEventSection(this,'ce-hearings')">Hearings</button>
               <button class="btn ghost" style="height:28px;font-size:12px;border-radius:14px" onclick="setCaseEventSection(this,'ce-mediations')">Mediations</button>
               <button class="btn ghost" style="height:28px;font-size:12px;border-radius:14px" onclick="setCaseEventSection(this,'ce-appeals')">Appeals</button>
-              <button class="btn ghost" style="height:28px;font-size:12px;border-radius:14px" onclick="setCaseEventSection(this,'ce-injury')">Injury Details</button>
             </div>
 
             <!-- TRIALS -->
-            <div id="ce-trials">
+            <div id="ce-trials" style="display:none">
               <div class="card" style="margin-bottom:12px">
                 <div class="card-header"><span class="card-title">Trials</span><button class="card-action">+ Add Trial</button></div>
                 <div class="card-body" style="padding:10px 12px">
@@ -2039,8 +2036,8 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
               </div>
             </div>
 
-            <!-- INJURY DETAILS (hidden) -->
-            <div id="ce-injury" style="display:none">
+            <!-- INJURY DETAILS -->
+            <div id="ce-injury">
               <div class="card">
                 <div class="card-header"><span class="card-title">Injury Details</span><button class="card-action">Save</button></div>
                 <div class="card-body" style="padding:10px 12px">
@@ -2753,7 +2750,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
             <!-- Recent firm activity -->
             <div class="card" style="flex:1;min-height:0;overflow:hidden">
               <div class="card-header"><span class="card-title">Recent Activity</span></div>
-              <div class="card-body" style="overflow-y:auto;max-height:220px">
+              <div class="card-body" style="overflow-y:auto;max-height:340px">
                 <div class="activity-list">
                   <div class="activity-item"><div class="activity-dot red"></div><div class="activity-text"><strong>Dykins, Ryan</strong> — Alert flagged by Chris Olinsky</div><div class="activity-time">2h ago</div></div>
                   <div class="activity-item"><div class="activity-dot blue"></div><div class="activity-text"><strong>Thompson, Paul</strong> — Hearing confirmed Oct 16</div><div class="activity-time">3h ago</div></div>
