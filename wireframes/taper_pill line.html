@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyfluent — Rx Entry v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Inter+Tight:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #f2f5f9;
+  --surface:   #ffffff;
+  --surface2:  #f0f4f8;
+  --surface3:  #e4eaf3;
+  --surface4:  #d8e1ef;
+  --border:    #cbd5e1;
+  --border2:   #a0aec0;
+  --accent:    #1a6fdb;
+  --accent-dk: #1257b0;
+  --accent-bg: #ebf3ff;
+  --green:     #0d8050;
+  --green-dk:  #095e3c;
+  --green-lt:  #e8f7f1;
+  --amber:     #b05c00;
+  --amber-lt:  #fff5e6;
+  --red:       #c0253a;
+  --red-lt:    #fdeef1;
+  --teal:      #0e7a8a;
+  --teal-lt:   #e4f7f9;
+  --text:      #111827;
+  --text-2:    #374151;
+  --text-3:    #6b7280;
+  --text-4:    #9ca3af;
+  --font:      'Inter', system-ui, sans-serif;
+  --font-t:    'Inter Tight', 'Inter', sans-serif;
+  --r:         8px;
+  --r-sm:      5px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+
+/* ── Shell ── */
+.shell{display:grid;grid-template-rows:52px 1fr;height:100vh;overflow:hidden}
+
+/* ── Topbar ── */
+.topbar{background:var(--accent);display:flex;align-items:center;padding:0 20px;gap:0;box-shadow:0 2px 6px rgba(0,0,0,.18);z-index:100}
+.logo{font-family:var(--font-t);font-weight:700;font-size:17px;letter-spacing:.04em;color:#fff;padding-right:20px;border-right:1px solid rgba(255,255,255,.25);margin-right:18px;text-transform:uppercase}
+.pat-chip{display:flex;align-items:center;gap:10px;padding:6px 14px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:var(--r)}
+.pat-av{width:28px;height:28px;background:rgba(255,255,255,.28);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.pat-name{font-weight:600;font-size:14px;color:#fff}
+.pat-meta{font-size:12px;color:rgba(255,255,255,.82)}
+.tsp{flex:1}
+.enc-badge{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:4px;padding:3px 9px;font-size:12px;font-weight:600}
+.topbar-enc{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.82);padding:0 16px;border-right:1px solid rgba(255,255,255,.2);margin-right:16px}
+.usr{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.88)}
+.usr-av{width:30px;height:30px;background:rgba(255,255,255,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+
+/* ── 3-col main ── */
+.main{display:grid;grid-template-columns:210px 1fr 300px;overflow:hidden;height:100%}
+
+/* ── Left nav ── */
+.lnav{background:var(--surface);border-right:1.5px solid var(--border);overflow:hidden;display:flex;flex-direction:column}
+.ns{font-family:var(--font-t);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);padding:16px 16px 6px}
+.ni{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;border-left:3px solid transparent;color:var(--text-2);font-size:14px;transition:all .12s;min-height:44px}
+.ni:hover{background:var(--surface2);color:var(--text)}
+.ni.on{background:var(--accent-bg);border-left-color:var(--accent);color:var(--accent);font-weight:500}
+.ni-ico{font-size:15px;width:20px;text-align:center}
+.nb{margin-left:auto;background:var(--accent);color:#fff;border-radius:12px;padding:2px 7px;font-size:11px;font-weight:700}
+.nb.r{background:var(--red)}
+
+/* ── Center workspace ── */
+.cws{display:flex;overflow:hidden;height:100%}
+
+/* ── Col 2: Drug search list — compact ── */
+.drug-list{
+  width:268px;flex-shrink:0;
+  border-right:1.5px solid var(--border);
+  background:var(--surface);
+  display:flex;flex-direction:column;
+  overflow:hidden
+}
+.dl-search{padding:10px 12px 8px;flex-shrink:0;position:relative;border-bottom:1px solid var(--border)}
+.dl-ico{position:absolute;left:22px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:14px;pointer-events:none}
+.dl-in{
+  width:100%;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--r);padding:8px 10px 8px 34px;
+  color:var(--text);font-family:var(--font);font-size:13px;outline:none;height:38px;
+  transition:border-color .15s
+}
+.dl-in:focus{border-color:var(--accent);background:var(--surface)}
+.dl-in::placeholder{color:var(--text-4)}
+
+.dl-hint{padding:5px 12px 7px;font-size:11px;color:var(--text-3)}
+.dl-hint a{color:var(--accent);cursor:pointer}
+
+/* Section label in list */
+.dl-sec{padding:7px 12px 4px;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text-4);background:var(--surface2);border-bottom:1px solid var(--border);border-top:1px solid var(--border)}
+
+/* Drug result row — compact single line */
+.dr{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;
+  cursor:pointer;border-bottom:1px solid var(--border);
+  transition:background .1s;min-height:44px
+}
+.dr:hover{background:var(--surface2)}
+.dr.sel{background:var(--accent-bg);border-left:3px solid var(--accent)}
+.dr.sel-tp{background:var(--teal-lt);border-left:3px solid var(--teal)}
+.dr-ic{
+  width:28px;height:28px;border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0
+}
+.ic-form{background:var(--accent-bg);color:var(--accent)}
+.ic-tp{background:var(--teal-lt);color:var(--teal)}
+.ic-act{background:var(--green-lt);color:var(--green)}
+.ic-dc{background:var(--amber-lt);color:var(--amber)}
+.dr-b{flex:1;min-width:0}
+.dr-n{font-weight:600;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dr-sub{font-size:11px;color:var(--text-3);margin-top:1px;display:flex;align-items:center;gap:5px}
+.dr-chip{font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px}
+.chip-f{background:var(--green-lt);color:var(--green)}
+.chip-nf{background:var(--amber-lt);color:var(--amber)}
+.chip-tp{background:var(--teal-lt);color:var(--teal)}
+.chip-act{background:var(--green-lt);color:var(--green)}
+.chip-dc{background:var(--amber-lt);color:var(--amber)}
+.chip-rep{background:#f0ecfa;color:#5c3d9e}
+.dr-act-btn{
+  font-size:11px;font-weight:600;padding:3px 9px;border-radius:4px;
+  border:1.5px solid var(--border);background:var(--surface2);color:var(--text-3);
+  cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .1s;min-height:28px
+}
+.dr-act-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.dl-scroll{flex:1;overflow-y:auto}
+
+::-webkit-scrollbar{width:5px} ::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── Col 3: Rx entry form ── */
+.rx-col{
+  flex:1;display:flex;flex-direction:column;
+  overflow:hidden;background:var(--surface)
+}
+
+/* Form header */
+.rx-hdr{padding:14px 20px 12px;border-bottom:1.5px solid var(--border);flex-shrink:0;background:var(--surface)}
+.rx-drug-name{font-family:var(--font-t);font-weight:700;font-size:16px;color:var(--text);display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px}
+.rx-drug-meta{font-size:12px;color:var(--text-3)}
+.rx-prev{
+  margin-top:10px;padding:8px 11px;border-radius:var(--r-sm);
+  font-size:12px;display:flex;align-items:flex-start;gap:7px;line-height:1.5;
+  background:var(--accent-bg);border:1px solid rgba(26,111,219,.18);color:var(--text-2)
+}
+.rx-prev strong{color:var(--accent)}
+
+/* CDS alert */
+.cds{display:flex;align-items:flex-start;gap:9px;padding:9px 12px;border-radius:var(--r);font-size:12px;line-height:1.5;margin-bottom:0}
+.cds-w{background:var(--amber-lt);border:1.5px solid rgba(176,92,0,.22)}
+.cds-e{background:var(--red-lt);border:1.5px solid rgba(192,37,58,.22)}
+.cds-i{background:var(--teal-lt);border:1.5px solid rgba(14,122,138,.22)}
+.cds-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.cds-body{flex:1}
+.cds-title{font-weight:700;margin-bottom:2px;font-size:12px}
+.cds-w .cds-title{color:var(--amber)}
+.cds-e .cds-title{color:var(--red)}
+.cds-i .cds-title{color:var(--teal)}
+.cds-text{color:var(--text-2)}
+.cds-acts{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+.cact{padding:4px 10px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:var(--font);min-height:28px;transition:all .12s}
+.ca-ov{background:var(--amber-lt);border:1.5px solid rgba(176,92,0,.3);color:var(--amber)}
+.ca-ch{background:var(--accent-bg);border:1.5px solid rgba(26,111,219,.25);color:var(--accent)}
+.ca-dm{background:var(--surface3);border:1.5px solid var(--border);color:var(--text-3)}
+
+/* Form body */
+.rx-body{flex:1;overflow-y:auto;padding:16px 20px 4px}
+.fsec{margin-bottom:14px}
+.fsl{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.fsl::after{content:'';flex:1;height:1px;background:var(--border)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.frow.t3{grid-template-columns:1fr 1fr 1fr}
+.ff{display:flex;flex-direction:column;gap:4px}
+.fl{font-size:11px;color:var(--text-3);font-weight:500}
+.fi,.fse{
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--r-sm);color:var(--text);font-family:var(--font);
+  font-size:13px;padding:7px 9px;outline:none;transition:all .12s;width:100%;height:36px
+}
+.fi:focus,.fse:focus{border-color:var(--accent);background:var(--surface)}
+
+/* Sig builder */
+.sig-block{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:8px}
+.sig-preview{font-size:13px;color:var(--text);font-weight:500;margin-bottom:7px}
+.sig-preview span{color:var(--accent);font-weight:600}
+.sig-chips{display:flex;gap:5px;flex-wrap:wrap}
+.sc{
+  padding:4px 10px;background:var(--surface);border:1.5px solid var(--border2);
+  border-radius:10px;font-size:11px;color:var(--text-2);cursor:pointer;
+  transition:all .1s;font-weight:500;min-height:28px;display:flex;align-items:center
+}
+.sc:hover{border-color:var(--accent);color:var(--accent)}
+.sc.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent);font-weight:600}
+
+/* ── DISPENSING SELECTOR — the trigger ── */
+.disp-sec{margin-bottom:14px}
+.disp-opts{display:flex;flex-direction:column;gap:6px}
+.disp-opt{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 13px;border-radius:var(--r);
+  border:1.5px solid var(--border);cursor:pointer;
+  transition:all .15s;background:var(--surface2)
+}
+.disp-opt:hover{border-color:var(--border2);background:var(--surface)}
+.disp-opt.sel-std{border-color:var(--accent);background:var(--accent-bg)}
+.disp-opt.sel-pl{border-color:var(--teal);background:var(--teal-lt)}
+.disp-radio{
+  width:18px;height:18px;border-radius:50%;
+  border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .15s
+}
+.disp-opt.sel-std .disp-radio{border-color:var(--accent);background:var(--accent)}
+.disp-opt.sel-pl .disp-radio{border-color:var(--teal);background:var(--teal)}
+.disp-radio-dot{width:7px;height:7px;border-radius:50%;background:#fff;display:none}
+.disp-opt.sel-std .disp-radio-dot,.disp-opt.sel-pl .disp-radio-dot{display:block}
+.disp-label{font-weight:600;font-size:13px;color:var(--text)}
+.disp-opt.sel-std .disp-label{color:var(--accent)}
+.disp-opt.sel-pl .disp-label{color:var(--teal)}
+.disp-sub{font-size:12px;color:var(--text-3);margin-top:1px}
+
+/* ── TAPER PANEL — only shown when Pill Line selected ── */
+.taper-zone{
+  overflow:hidden;
+  max-height:0;
+  opacity:0;
+  transition:max-height .3s ease, opacity .25s ease, margin .25s ease;
+  margin-top:0
+}
+.taper-zone.open{
+  max-height:900px;
+  opacity:1;
+  margin-top:14px
+}
+
+.taper-panel{border:1.5px solid rgba(14,122,138,.35);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.taper-ph{
+  display:flex;align-items:center;gap:9px;padding:9px 13px;
+  background:var(--teal-lt);border-bottom:1.5px solid rgba(14,122,138,.18);
+  cursor:pointer;user-select:none
+}
+.taper-ph:hover{background:#baeef4}
+.taper-ph-lbl{font-size:12px;font-weight:700;color:var(--teal);flex:1}
+.taper-ph-meta{font-size:11px;color:var(--teal);opacity:.8}
+.taper-chev{font-size:11px;color:var(--teal);transition:transform .18s}
+.taper-chev.open{transform:rotate(180deg)}
+
+/* Step table */
+.step-tbl{width:100%;border-collapse:collapse}
+.step-tbl thead th{
+  font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text-3);padding:7px 9px;text-align:left;
+  background:var(--surface2);border-bottom:1px solid var(--border)
+}
+.step-tbl thead th:first-child{padding-left:12px;width:70px}
+.step-tbl thead th.tc{text-align:center}
+.step-row td{padding:7px 9px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:13px}
+.step-row:last-child td{border-bottom:none}
+.step-row:hover td{background:rgba(14,122,138,.04)}
+.step-row td:first-child{padding-left:12px}
+.step-num{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:50%;
+  background:var(--teal-lt);border:1.5px solid rgba(14,122,138,.22);
+  font-size:11px;font-weight:700;color:var(--teal)
+}
+.step-dose-val{font-weight:700;color:var(--text)}
+.step-dose-mg{font-size:11px;color:var(--text-3)}
+.step-sel{
+  background:var(--surface2);border:1px solid var(--border);border-radius:4px;
+  color:var(--text);font-family:var(--font);font-size:12px;padding:4px 6px;
+  outline:none;height:28px;width:100%;cursor:pointer
+}
+.step-sel:focus{border-color:var(--teal)}
+.step-dur-in{
+  background:var(--surface2);border:1px solid var(--border);border-radius:4px;
+  color:var(--text);font-family:var(--font);font-size:12px;padding:4px 6px;
+  outline:none;width:40px;height:28px;text-align:center
+}
+.step-dur-in:focus{border-color:var(--teal)}
+.step-qty{
+  font-size:11px;font-weight:600;padding:2px 7px;border-radius:3px;
+  background:var(--teal-lt);color:var(--teal);border:1px solid rgba(14,122,138,.2);
+  display:inline-block
+}
+.step-rm{
+  width:24px;height:24px;border:1.5px solid var(--border);border-radius:4px;
+  background:transparent;color:var(--text-4);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:13px;transition:all .1s;margin:0 auto
+}
+.step-rm:hover{border-color:var(--red);color:var(--red);background:var(--red-lt)}
+
+/* Taper summary strip */
+.taper-sum{
+  display:flex;align-items:center;gap:12px;padding:8px 12px;
+  background:var(--surface2);border-top:1px solid var(--border);flex-wrap:wrap
+}
+.ts-item{font-size:12px;font-weight:600;color:var(--teal);display:flex;align-items:center;gap:4px}
+.ts-div{width:1px;height:12px;background:var(--border)}
+
+/* eMAR mini-preview */
+.emar-mini{padding:10px 12px;border-top:1.5px solid rgba(14,122,138,.15);background:var(--surface)}
+.emar-mini-hdr{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.emar-mini-hdr::after{content:'';flex:1;height:1px;background:var(--border)}
+.emar-tasks{display:flex;flex-direction:column;gap:3px}
+.et{display:flex;align-items:center;gap:8px;padding:5px 9px;border-radius:4px;border:1px solid var(--border);font-size:12px;background:var(--surface2)}
+.et.today{background:var(--teal-lt);border-color:rgba(14,122,138,.28)}
+.et-day{font-weight:600;color:var(--text-3);width:38px;flex-shrink:0;font-size:11px}
+.et.today .et-day{color:var(--teal)}
+.et-dose{font-weight:600;color:var(--text);flex:1}
+.et.today .et-dose{color:var(--teal)}
+.et-time{font-size:11px;color:var(--text-3);padding:1px 5px;background:var(--surface3);border:1px solid var(--border);border-radius:3px}
+.et.today .et-time{background:rgba(14,122,138,.1);border-color:rgba(14,122,138,.2);color:var(--teal)}
+.et-st{font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;flex-shrink:0}
+.st-due{background:var(--teal-lt);color:var(--teal);border:1px solid rgba(14,122,138,.2)}
+.st-sch{background:var(--surface3);color:var(--text-3)}
+.emar-expand{text-align:center;font-size:11px;color:var(--text-3);padding:5px;cursor:pointer;border-top:1px solid var(--border);margin-top:3px}
+.emar-expand:hover{color:var(--accent)}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600}
+.bdg-a{background:var(--green-lt);color:var(--green)}
+.bdg-tp{background:var(--teal-lt);color:var(--teal);border:1px solid rgba(14,122,138,.22)}
+.bdg-auto{background:var(--green-lt);border:1px solid rgba(13,128,80,.2);color:var(--green)}
+
+/* Footer */
+.rx-foot{
+  padding:12px 20px;border-top:1.5px solid var(--border);
+  background:var(--surface2);flex-shrink:0
+}
+.rx-foot-btns{display:flex;gap:8px;margin-bottom:7px}
+.rx-foot-note{font-size:11px;color:var(--text-3);text-align:center}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .12s;white-space:nowrap;min-height:40px}
+.bg{background:transparent;color:var(--text-3);border:1.5px solid var(--border)}
+.bg:hover{background:var(--surface2);color:var(--text-2);border-color:var(--border2)}
+.bsuc{background:var(--green);color:#fff} .bsuc:hover{background:var(--green-dk)}
+
+/* Right context panel */
+.rp{background:var(--surface);border-left:1.5px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.rp-h{padding:12px 14px;border-bottom:1px solid var(--border);font-family:var(--font-t);font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);display:flex;align-items:center;gap:8px}
+.rp-b{flex:1;overflow-y:auto;padding:12px 14px}
+.cs{margin-bottom:16px}
+.cl{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3);margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.cl::after{content:'';flex:1;height:1px;background:var(--border)}
+.pri{display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.pri:last-child{border-bottom:none}
+.pd{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:4px}
+.pri-name{flex:1;color:var(--text-2)}
+.pc{font-size:10px;color:var(--text-3);font-family:monospace}
+.ali{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.ali:last-child{border-bottom:none}
+.ali-name{flex:1;color:var(--text-2);font-weight:500}
+.as{font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px}
+.as-h{background:var(--red-lt);color:var(--red)}
+.as-m{background:var(--amber-lt);color:var(--amber)}
+.mc2{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.mc2:last-child{border-bottom:none}
+.mc2-name{flex:1;color:var(--text-2)}
+.mr2{font-size:10px;color:var(--text-3);background:var(--surface2);border-radius:3px;padding:1px 5px;border:1px solid var(--border)}
+.rri{padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.rri:last-child{border-bottom:none}
+.rrr{display:flex;align-items:center;gap:5px}
+.rrv{font-size:12px;font-weight:700;font-family:monospace}
+.rrv.ab{color:var(--amber)}
+.rrd{font-size:11px;color:var(--text-3)}
+.ctx-note{font-size:12px;color:var(--text-2);line-height:1.6;padding:8px 10px;background:var(--teal-lt);border:1px solid rgba(14,122,138,.18);border-radius:6px}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">Cyfluent</div>
+  <div class="pat-chip">
+    <div class="pat-av">JM</div>
+    <div>
+      <div class="pat-name">Jose Martinez</div>
+      <div class="pat-meta">DOB: 07/04/1985 &nbsp;&middot;&nbsp; MRN: 00382914 &nbsp;&middot;&nbsp; M, 39y &nbsp;&middot;&nbsp; Identity verified &#10003;</div>
+    </div>
+  </div>
+  <div class="tsp"></div>
+  <div class="topbar-enc"><span class="enc-badge">&#9679; Active</span>&nbsp;Sick Call &mdash; Musculoskeletal Pain &nbsp;&middot;&nbsp; 03/25/2026</div>
+  <div class="usr"><div class="usr-av">MS</div> M. Snyder, PA-C</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- LEFT NAV -->
+<div class="lnav">
+  <div class="ns">Encounter</div>
+  <div class="ni"><span class="ni-ico">&#128203;</span>Assignments</div>
+  <div class="ni"><span class="ni-ico">&#128221;</span>HPI</div>
+  <div class="ni"><span class="ni-ico">&#128269;</span>Review of Systems</div>
+  <div class="ni"><span class="ni-ico">&#129658;</span>Physical Exam</div>
+  <div class="ni"><span class="ni-ico">&#128203;</span>Assessment / Plan</div>
+  <div class="ni on"><span class="ni-ico">&#9879;&#65039;</span>Orders <span class="nb">1</span></div>
+  <div class="ni"><span class="ni-ico">&#10084;&#65039;</span>Vitals</div>
+  <div class="ni"><span class="ni-ico">&#128206;</span>Documents</div>
+  <div class="ni"><span class="ni-ico">&#10145;&#65039;</span>Referrals</div>
+  <div class="ns" style="margin-top:6px">Chart</div>
+  <div class="ni"><span class="ni-ico">&#128197;</span>Timeline</div>
+  <div class="ni"><span class="ni-ico">&#127973;</span>Problem List</div>
+  <div class="ni"><span class="ni-ico">&#128138;</span>Medications</div>
+  <div class="ni"><span class="ni-ico">&#9888;&#65039;</span>Allergies</div>
+  <div class="ni"><span class="ni-ico">&#128202;</span>Results</div>
+</div>
+
+<!-- CENTER WORKSPACE: col2 + col3 -->
+<div class="cws">
+
+  <!-- COL 2: Drug search list — compact -->
+  <div class="drug-list">
+    <div class="dl-search">
+      <span class="dl-ico">&#128269;</span>
+      <input class="dl-in" id="drug-search" value="methylprednisolone" placeholder="Search medications&hellip;"/>
+    </div>
+    <div class="dl-hint">Generic preferred &nbsp;&middot;&nbsp; <a>Show brands</a></div>
+
+    <div class="dl-scroll" id="dl-scroll">
+
+      <div class="dl-sec">Formulary results</div>
+
+      <!-- Drug rows — compact, all visible -->
+      <div class="dr sel-tp" data-drug="mdp" onclick="selectDrug('mdp',this)">
+        <div class="dr-ic ic-tp">&#128138;</div>
+        <div class="dr-b">
+          <div class="dr-n">Methylprednisolone 4 mg</div>
+          <div class="dr-sub"><span class="dr-chip chip-f">&#10003; Formulary</span><span class="dr-chip chip-tp">Dose Pack</span></div>
+        </div>
+      </div>
+
+      <div class="dr" data-drug="mp4" onclick="selectDrug('mp4',this)">
+        <div class="dr-ic ic-form">&#128138;</div>
+        <div class="dr-b">
+          <div class="dr-n">Methylprednisolone 4 mg</div>
+          <div class="dr-sub"><span class="dr-chip chip-f">&#10003; Formulary</span><span style="font-size:11px;color:var(--text-3)">Tablet — single dose</span></div>
+        </div>
+      </div>
+
+      <div class="dr" data-drug="mp8" onclick="selectDrug('mp8',this)">
+        <div class="dr-ic ic-form">&#128138;</div>
+        <div class="dr-b">
+          <div class="dr-n">Methylprednisolone 8 mg</div>
+          <div class="dr-sub"><span class="dr-chip chip-f">&#10003; Formulary</span><span style="font-size:11px;color:var(--text-3)">Tablet</span></div>
+        </div>
+      </div>
+
+      <div class="dr" data-drug="mp16" onclick="selectDrug('mp16',this)">
+        <div class="dr-ic ic-form">&#128138;</div>
+        <div class="dr-b">
+          <div class="dr-n">Methylprednisolone 16 mg</div>
+          <div class="dr-sub"><span class="dr-chip chip-nf">Non-formulary</span><span style="font-size:11px;color:var(--text-3)">Tier 3</span></div>
+        </div>
+      </div>
+
+      <div class="dl-sec">Active medications</div>
+
+      <div class="dr" data-drug="ibu" onclick="selectDrug('ibu',this)">
+        <div class="dr-ic ic-act">&#128138;</div>
+        <div class="dr-b">
+          <div class="dr-n">Ibuprofen 600 mg</div>
+          <div class="dr-sub"><span class="dr-chip chip-act">Active</span><span style="font-size:11px;color:var(--text-3)">PO TID</span></div>
+        </div>
+        <button class="dr-act-btn" onclick="event.stopPropagation();selectDrug('ibu',this.closest('.dr'))">Reorder</button>
+      </div>
+
+      <div class="dr" data-drug="ome" onclick="selectDrug('ome',this)">
+        <div class="dr-ic ic-act">&#128138;</div>
+        <div class="dr-b">
+          <div class="dr-n">Omeprazole 20 mg</div>
+          <div class="dr-sub"><span class="dr-chip chip-act">Active</span><span style="font-size:11px;color:var(--text-3)">PO daily</span></div>
+        </div>
+        <button class="dr-act-btn" onclick="event.stopPropagation();selectDrug('ome',this.closest('.dr'))">Reorder</button>
+      </div>
+
+      <div class="dr" data-drug="lis" onclick="selectDrug('lis',this)">
+        <div class="dr-ic ic-act">&#128138;</div>
+        <div class="dr-b">
+          <div class="dr-n">Lisinopril 10 mg</div>
+          <div class="dr-sub"><span class="dr-chip chip-act">Active</span><span style="font-size:11px;color:var(--text-3)">PO daily</span></div>
+        </div>
+        <button class="dr-act-btn" onclick="event.stopPropagation();selectDrug('lis',this.closest('.dr'))">Reorder</button>
+      </div>
+
+      <div class="dr" data-drug="met" onclick="selectDrug('met',this)">
+        <div class="dr-ic ic-act">&#128138;</div>
+        <div class="dr-b">
+          <div class="dr-n">Metformin 500 mg</div>
+          <div class="dr-sub"><span class="dr-chip chip-act">Active</span><span style="font-size:11px;color:var(--text-3)">PO BID</span></div>
+        </div>
+        <button class="dr-act-btn" onclick="event.stopPropagation();selectDrug('met',this.closest('.dr'))">Reorder</button>
+      </div>
+
+      <div class="dl-sec">Discontinued</div>
+
+      <div class="dr" data-drug="pred" onclick="selectDrug('pred',this)">
+        <div class="dr-ic ic-dc">&#128138;</div>
+        <div class="dr-b">
+          <div class="dr-n">Prednisone 10 mg</div>
+          <div class="dr-sub"><span class="dr-chip chip-dc">D/C'd</span><span style="font-size:11px;color:var(--text-3)">Stopped 01/12/2026</span></div>
+        </div>
+        <button class="dr-act-btn" onclick="event.stopPropagation();selectDrug('pred',this.closest('.dr'))">Restart</button>
+      </div>
+
+    </div><!-- /dl-scroll -->
+  </div><!-- /drug-list -->
+
+  <!-- COL 3: Rx entry form -->
+  <div class="rx-col" id="rx-col">
+
+    <div class="rx-hdr">
+      <div class="rx-drug-name" id="rx-name">
+        Methylprednisolone 4 mg &nbsp;<span class="badge bdg-tp" id="rx-badge">&#8675; Dose Pack</span>
+      </div>
+      <div class="rx-drug-meta" id="rx-meta">Generic &middot; Tier 1 in-formulary &middot; Oral tablet &middot; 21 tablets (standard 6-day pack)</div>
+      <div class="rx-prev" id="rx-prev">
+        <span>&#128203;</span>
+        <div id="rx-prev-text"><strong>Dose pack template ready.</strong> Standard 6-day Medrol taper pre-populated. Select dispensing method below — taper schedule only applies to Pill Line.</div>
+      </div>
+    </div>
+
+    <div class="rx-body" id="rx-body">
+
+      <!-- CDS: corticosteroid + DM2 warning (teal info) -->
+      <div class="cds cds-i" id="cds-steroid" style="margin-bottom:14px">
+        <span class="cds-icon">&#128204;</span>
+        <div class="cds-body">
+          <div class="cds-title">Corticosteroid — glucose monitoring advised</div>
+          <div class="cds-text">Patient HbA1c 7.8% (02/2026) with DM2. Methylprednisolone may elevate blood glucose, especially Days 1–3. Consider additional glucose checks during taper.</div>
+          <div class="cds-acts">
+            <button class="cact ca-dm" onclick="dismissCds('cds-steroid')">Acknowledged</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIG -->
+      <div class="fsec" id="sig-sec">
+        <div class="fsl">Sig / Directions</div>
+        <div class="sig-block">
+          <div class="sig-preview" id="sig-preview">Take <span id="sp-qty">1 tablet (4 mg)</span> by <span>mouth</span> <span id="sp-freq">once daily</span> <span id="sp-timing">with food</span></div>
+          <div class="sig-chips" id="sig-chips">
+            <div class="sc on" onclick="pickFreq(this,'once daily')">Once daily</div>
+            <div class="sc" onclick="pickFreq(this,'twice daily')">BID</div>
+            <div class="sc" onclick="pickFreq(this,'three times daily')">TID</div>
+            <div class="sc on" onclick="pickTiming(this,'with food')">With food</div>
+            <div class="sc" onclick="pickTiming(this,'at bedtime')">At bedtime</div>
+          </div>
+        </div>
+        <textarea class="fi" style="height:auto;padding:8px 9px;resize:none;line-height:1.5" rows="2" id="sig-text">Take 1 tablet (4 mg) by mouth once daily with food</textarea>
+      </div>
+
+      <!-- QUANTITY -->
+      <div class="fsec" id="qty-sec">
+        <div class="fsl">Quantity &amp; Supply</div>
+        <div class="frow t3">
+          <div class="ff"><div class="fl">Quantity</div><input class="fi" id="qty-in" value="21"/></div>
+          <div class="ff"><div class="fl">Unit</div><select class="fse"><option>Tablets</option><option>Capsules</option></select></div>
+          <div class="ff"><div class="fl">Days Supply</div><input class="fi" id="days-in" value="6"/></div>
+        </div>
+        <div class="frow">
+          <div class="ff"><div class="fl">Refills</div><input class="fi" value="0"/></div>
+          <div class="ff"><div class="fl">Start Date</div><input class="fi" type="date" value="2026-03-25"/></div>
+        </div>
+      </div>
+
+      <!-- PROBLEM LINK -->
+      <div class="fsec">
+        <div class="fsl">Problem Link</div>
+        <div class="frow">
+          <div class="ff">
+            <div class="fl">Link to Problem</div>
+            <select class="fse"><option>Musculoskeletal pain — lumbar</option><option>Inflammation</option><option>Allergic reaction</option><option>Other</option></select>
+          </div>
+          <div class="ff">
+            <div class="fl">Pharmacy</div>
+            <select class="fse" id="pharm-sel">
+              <option value="inhouse">In-house pharmacy</option>
+              <option value="ext">External — CVS/retail</option>
+              <option value="erx">eRx — Surescripts</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- DISPENSING — the trigger -->
+      <div class="disp-sec">
+        <div class="fsl">Dispensing Method</div>
+        <div class="disp-opts">
+
+          <div class="disp-opt sel-std" id="disp-std" onclick="setDisp('std')">
+            <div class="disp-radio"><div class="disp-radio-dot"></div></div>
+            <div style="flex:1">
+              <div class="disp-label">Regular Rx / External pharmacy</div>
+              <div class="disp-sub">Patient picks up or facility fills as standard prescription</div>
+            </div>
+          </div>
+
+          <div class="disp-opt" id="disp-pl" onclick="setDisp('pl')">
+            <div class="disp-radio"><div class="disp-radio-dot"></div></div>
+            <div style="flex:1">
+              <div class="disp-label">Pill Line (DOT)</div>
+              <div class="disp-sub">Facility dispenses at scheduled times — enables dose schedule below</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TAPER ZONE — slides open only when Pill Line selected -->
+      <div class="taper-zone" id="taper-zone">
+
+        <div class="taper-panel">
+          <!-- Header -->
+          <div class="taper-ph" onclick="toggleTaper()">
+            <span style="font-size:14px">&#8675;</span>
+            <span class="taper-ph-lbl" id="tph-lbl">Dose Schedule &mdash; 6 Steps</span>
+            <span class="taper-ph-meta" id="tph-meta">21 tablets &nbsp;&middot;&nbsp; 6 days</span>
+            <span class="taper-chev open" id="taper-chev">&#9660;</span>
+          </div>
+
+          <!-- Step table -->
+          <div id="taper-body">
+            <table class="step-tbl">
+              <thead>
+                <tr>
+                  <th>Step</th>
+                  <th>Dose</th>
+                  <th>Frequency</th>
+                  <th>Pill line time</th>
+                  <th class="tc">Duration</th>
+                  <th class="tc">Tabs</th>
+                  <th class="tc"></th>
+                </tr>
+              </thead>
+              <tbody id="step-tbody"></tbody>
+            </table>
+
+            <!-- Summary -->
+            <div class="taper-sum">
+              <span class="ts-item">&#128138; <span id="ts-tot">21</span> tablets</span>
+              <span class="ts-div"></span>
+              <span class="ts-item">&#128197; <span id="ts-days">6</span> days</span>
+              <span class="ts-div"></span>
+              <span class="ts-item">&#10003; Codes auto-mapped</span>
+              <span style="margin-left:auto">
+                <button onclick="resetSteps()" style="font-size:11px;padding:3px 9px;border-radius:4px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text-3);cursor:pointer;font-family:var(--font)">&#8635; Reset</button>
+              </span>
+            </div>
+
+            <!-- eMAR preview -->
+            <div class="emar-mini">
+              <div class="emar-mini-hdr">eMAR tasks &mdash; auto-generated on sign</div>
+              <div class="emar-tasks" id="emar-tasks"></div>
+              <div class="emar-expand" id="emar-more" onclick="toggleEmar()" style="display:none"></div>
+            </div>
+          </div>
+
+        </div><!-- /taper-panel -->
+
+        <!-- DOT enforcement note -->
+        <div style="margin-top:8px;padding:8px 11px;border-radius:var(--r-sm);font-size:12px;color:var(--text-2);background:var(--surface2);border:1px solid var(--border);display:flex;align-items:flex-start;gap:7px">
+          <span>&#128274;</span>
+          <div>Taper meds cannot be converted to KOP — dose changes each day. Pharmacy will receive a structured sequence (not 6 separate orders). Total: <strong id="dot-total">21 tablets</strong>.</div>
+        </div>
+
+      </div><!-- /taper-zone -->
+
+    </div><!-- /rx-body -->
+
+    <div class="rx-foot">
+      <div class="rx-foot-btns">
+        <button class="btn bg" style="flex:1">Save Draft</button>
+        <button class="btn bsuc" id="sign-btn" style="flex:2;font-size:13px;font-weight:700" onclick="signRx()">Sign &amp; Send to Pharmacy &#8594;</button>
+      </div>
+      <div class="rx-foot-note"><span class="badge bdg-auto" id="foot-badge">&#10003; NDC / RxNorm auto-mapped &nbsp;&middot;&nbsp; 21 tablets &nbsp;&middot;&nbsp; Standard Rx</span></div>
+    </div>
+
+  </div><!-- /rx-col -->
+
+</div><!-- /cws -->
+
+<!-- RIGHT PANEL -->
+<div class="rp">
+  <div class="rp-h">&#128203; Patient Context <span style="margin-left:auto;font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-4)">Read-only</span></div>
+  <div class="rp-b">
+
+    <div class="cs">
+      <div class="cl">&#9888; Allergies</div>
+      <div class="ali"><div class="ali-name">Penicillin</div><span class="as as-h">Severe</span></div>
+      <div class="ali"><div class="ali-name">Sulfa drugs</div><span class="as as-m">Moderate</span></div>
+    </div>
+
+    <div class="cs">
+      <div class="cl">Active Problems</div>
+      <div class="pri"><div class="pd"></div><div class="pri-name">Musculoskeletal pain — lumbar</div><div class="pc">M54.50</div></div>
+      <div class="pri"><div class="pd"></div><div class="pri-name">Type 2 Diabetes Mellitus</div><div class="pc">E11.9</div></div>
+      <div class="pri"><div class="pd"></div><div class="pri-name">Essential Hypertension</div><div class="pc">I10</div></div>
+    </div>
+
+    <div class="cs">
+      <div class="cl">Active Medications</div>
+      <div class="mc2"><div class="mc2-name">Ibuprofen 600 mg</div><span class="mr2">PO TID</span></div>
+      <div class="mc2"><div class="mc2-name">Omeprazole 20 mg</div><span class="mr2">PO daily</span></div>
+      <div class="mc2"><div class="mc2-name">Lisinopril 10 mg</div><span class="mr2">PO daily</span></div>
+      <div class="mc2"><div class="mc2-name">Metformin 500 mg</div><span class="mr2">PO BID</span></div>
+    </div>
+
+    <div class="cs">
+      <div class="cl">Recent Results</div>
+      <div class="rri"><div class="rrr"><div style="flex:1">HbA1c</div><div class="rrv ab">7.8% &#8593;</div></div><div class="rrd">02/14/2026</div></div>
+      <div class="rri"><div class="rrr"><div style="flex:1">Glucose</div><div class="rrv ab">148 mg/dL &#8593;</div></div><div class="rrd">03/18/2026</div></div>
+      <div class="rri"><div class="rrr"><div style="flex:1">BP</div><div class="rrv" style="color:var(--green)">122/78</div></div><div class="rrd">03/25/2026</div></div>
+    </div>
+
+    <div class="cs" id="ctx-taper" style="display:none">
+      <div class="cl">&#8675; Taper context</div>
+      <div class="ctx-note"><strong style="color:var(--teal)">Glucose monitoring:</strong> Steroids may cause hyperglycemia Days 1–3. Patient HbA1c 7.8% — consider extra BG checks during taper.</div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+// ── Dose step data ─────────────────────────────────
+const DEFAULT_STEPS = [
+  {day:1,tabs:6,mg:24,freq:'QD AM',time:'07:00',dur:1},
+  {day:2,tabs:5,mg:20,freq:'QD AM',time:'07:00',dur:1},
+  {day:3,tabs:4,mg:16,freq:'QD AM',time:'07:00',dur:1},
+  {day:4,tabs:3,mg:12,freq:'QD AM',time:'07:00',dur:1},
+  {day:5,tabs:2,mg:8, freq:'QD AM',time:'07:00',dur:1},
+  {day:6,tabs:1,mg:4, freq:'QD AM',time:'07:00',dur:1},
+];
+let steps = JSON.parse(JSON.stringify(DEFAULT_STEPS));
+let emarOpen = false;
+let taperBodyOpen = true;
+let currentDisp = 'std'; // 'std' | 'pl'
+
+// ── Drug selection ─────────────────────────────────
+const drugData = {
+  mdp:  {name:'Methylprednisolone 4 mg', badge:'&#8675; Dose Pack', badgeCls:'bdg-tp', meta:'Generic · Tier 1 · Oral tablet · 21 tablets (standard 6-day pack)', prev:'<strong>Dose pack template ready.</strong> Standard 6-day Medrol taper pre-populated. Select Pill Line below to activate dose schedule.', isTaper:true},
+  mp4:  {name:'Methylprednisolone 4 mg', badge:'Active', badgeCls:'bdg-a', meta:'Generic · Tier 1 · Oral tablet — single fixed dose', prev:'<strong>New Rx.</strong> No prior order on file.', isTaper:false},
+  mp8:  {name:'Methylprednisolone 8 mg', badge:'Active', badgeCls:'bdg-a', meta:'Generic · Tier 1 · Oral tablet', prev:'<strong>New Rx.</strong> No prior order on file.', isTaper:false},
+  mp16: {name:'Methylprednisolone 16 mg', badge:'Non-formulary', badgeCls:'', meta:'Non-formulary · Tier 3 — PA may be required', prev:'<strong>Non-formulary.</strong> Prior authorization may be needed.', isTaper:false},
+  ibu:  {name:'Ibuprofen 600 mg', badge:'Active', badgeCls:'bdg-a', meta:'Generic · Tier 1 · Active — PO TID', prev:'<strong>Active Rx:</strong> 1 tablet three times daily with food · 30-day supply · Pill Line', isTaper:false},
+  ome:  {name:'Omeprazole 20 mg', badge:'Active', badgeCls:'bdg-a', meta:'Generic · Tier 1 · Active — PO daily', prev:'<strong>Active Rx:</strong> 1 capsule once daily before breakfast · 30-day supply · Pill Line', isTaper:false},
+  lis:  {name:'Lisinopril 10 mg', badge:'Active', badgeCls:'bdg-a', meta:'Generic · Tier 1 · Active — PO daily', prev:'<strong>Active Rx:</strong> 1 tablet once daily · 30-day supply · Pill Line', isTaper:false},
+  met:  {name:'Metformin 500 mg', badge:'Active', badgeCls:'bdg-a', meta:'Generic · Tier 1 · Active — PO BID', prev:'<strong>Active Rx:</strong> 1 tablet twice daily with meals · 30-day supply · Pill Line', isTaper:false},
+  pred: {name:'Prednisone 10 mg', badge:'D/C\'d', badgeCls:'', meta:'Discontinued 01/12/2026', prev:'<strong>Discontinued:</strong> Review reason before restarting.', isTaper:false},
+};
+
+function selectDrug(key, el) {
+  document.querySelectorAll('.dr').forEach(r => {
+    r.classList.remove('sel','sel-tp');
+  });
+  const d = drugData[key];
+  if (d.isTaper) el.classList.add('sel-tp');
+  else el.classList.add('sel');
+
+  // Update header
+  const badgeEl = document.getElementById('rx-badge');
+  badgeEl.innerHTML = d.badge;
+  badgeEl.className = 'badge ' + d.badgeCls;
+  if (!d.badgeCls) badgeEl.style.display = 'none';
+  else badgeEl.style.display = 'inline-flex';
+  document.getElementById('rx-name').childNodes[0].textContent = d.name + '\u00A0';
+  document.getElementById('rx-meta').textContent = d.meta;
+  document.getElementById('rx-prev-text').innerHTML = d.prev;
+
+  // If non-taper drug, force Standard disp and hide taper option
+  if (!d.isTaper) {
+    setDisp('std');
+    document.getElementById('disp-pl').style.opacity = '0.45';
+    document.getElementById('disp-pl').style.pointerEvents = 'none';
+  } else {
+    document.getElementById('disp-pl').style.opacity = '';
+    document.getElementById('disp-pl').style.pointerEvents = '';
+  }
+}
+
+// ── Dispensing toggle — the core logic ─────────────
+function setDisp(mode) {
+  currentDisp = mode;
+  const stdEl = document.getElementById('disp-std');
+  const plEl  = document.getElementById('disp-pl');
+  const zone  = document.getElementById('taper-zone');
+  const ctxTp = document.getElementById('ctx-taper');
+
+  stdEl.classList.toggle('sel-std', mode === 'std');
+  stdEl.classList.toggle('disp-opt', true);
+  plEl.classList.toggle('sel-pl', mode === 'pl');
+
+  if (mode === 'pl') {
+    zone.classList.add('open');
+    ctxTp.style.display = 'block';
+    updateSummary();
+    renderEmar();
+    // Lock to in-house pharmacy
+    const pharmSel = document.getElementById('pharm-sel');
+    pharmSel.value = 'inhouse';
+    pharmSel.disabled = true;
+    // Update sig/qty to reflect taper
+    document.getElementById('qty-in').value = totalTabs();
+    document.getElementById('days-in').value = totalDays();
+    document.getElementById('sig-text').value = 'Methylprednisolone 4 mg — taper dose schedule per pill line (6-day step-down)';
+    document.getElementById('sig-sec').style.opacity = '0.5';
+    document.getElementById('sig-sec').style.pointerEvents = 'none';
+    document.getElementById('qty-sec').style.opacity = '0.5';
+    document.getElementById('qty-sec').style.pointerEvents = 'none';
+    updateFootBadge();
+  } else {
+    zone.classList.remove('open');
+    ctxTp.style.display = 'none';
+    document.getElementById('pharm-sel').disabled = false;
+    document.getElementById('sig-sec').style.opacity = '';
+    document.getElementById('sig-sec').style.pointerEvents = '';
+    document.getElementById('qty-sec').style.opacity = '';
+    document.getElementById('qty-sec').style.pointerEvents = '';
+    document.getElementById('qty-in').value = '21';
+    document.getElementById('days-in').value = '6';
+    document.getElementById('sig-text').value = 'Take 1 tablet (4 mg) by mouth once daily with food';
+    updateFootBadge();
+  }
+}
+
+// ── Taper panel collapse ───────────────────────────
+function toggleTaper() {
+  taperBodyOpen = !taperBodyOpen;
+  document.getElementById('taper-body').style.display = taperBodyOpen ? 'block' : 'none';
+  document.getElementById('taper-chev').classList.toggle('open', taperBodyOpen);
+}
+
+// ── Step rendering ─────────────────────────────────
+function renderSteps() {
+  const tbody = document.getElementById('step-tbody');
+  tbody.innerHTML = '';
+  steps.forEach((s, i) => {
+    const tr = document.createElement('tr');
+    tr.className = 'step-row';
+    tr.innerHTML = `
+      <td><span class="step-num">${s.day}</span></td>
+      <td><span class="step-dose-val">${s.tabs} tab${s.tabs>1?'s':''}</span> <span class="step-dose-mg">(${s.mg} mg)</span></td>
+      <td>
+        <select class="step-sel" onchange="upd(${i},'freq',this.value)">
+          <option ${s.freq==='QD AM'?'selected':''}>QD AM</option>
+          <option ${s.freq==='QD PM'?'selected':''}>QD PM</option>
+          <option ${s.freq==='BID'?'selected':''}>BID</option>
+          <option ${s.freq==='TID'?'selected':''}>TID</option>
+        </select>
+      </td>
+      <td>
+        <select class="step-sel" onchange="upd(${i},'time',this.value)">
+          <option ${s.time==='07:00'?'selected':''}>07:00</option>
+          <option ${s.time==='12:00'?'selected':''}>12:00</option>
+          <option ${s.time==='19:00'?'selected':''}>19:00</option>
+        </select>
+      </td>
+      <td style="text-align:center">
+        <input class="step-dur-in" type="number" min="1" max="30" value="${s.dur}" onchange="upd(${i},'dur',parseInt(this.value)||1)"/>
+      </td>
+      <td style="text-align:center"><span class="step-qty">${s.tabs*s.dur}</span></td>
+      <td><div class="step-rm" onclick="removeStep(${i})">&times;</div></td>`;
+    tbody.appendChild(tr);
+  });
+  updateSummary();
+  renderEmar();
+}
+
+function upd(i, f, v) { steps[i][f] = v; renderSteps(); }
+
+function removeStep(i) {
+  if (steps.length <= 1) return;
+  steps.splice(i,1);
+  steps.forEach((s,idx) => { s.day = idx+1; });
+  renderSteps();
+}
+
+function resetSteps() {
+  steps = JSON.parse(JSON.stringify(DEFAULT_STEPS));
+  renderSteps();
+}
+
+function totalTabs() { return steps.reduce((a,s) => a + s.tabs*s.dur, 0); }
+function totalDays() { return steps.reduce((a,s) => a + s.dur, 0); }
+
+function updateSummary() {
+  const tot = totalTabs(), days = totalDays();
+  document.getElementById('ts-tot').textContent  = tot;
+  document.getElementById('ts-days').textContent = days;
+  document.getElementById('tph-lbl').textContent  = `Dose Schedule \u2014 ${steps.length} Steps`;
+  document.getElementById('tph-meta').textContent = `${tot} tablets \u00B7 ${days} days`;
+  document.getElementById('dot-total').textContent = tot + ' tablets';
+  if (currentDisp === 'pl') {
+    document.getElementById('qty-in').value  = tot;
+    document.getElementById('days-in').value = days;
+    updateFootBadge();
+  }
+}
+
+function updateFootBadge() {
+  const tot = totalTabs(), days = totalDays();
+  const badge = document.getElementById('foot-badge');
+  if (currentDisp === 'pl') {
+    badge.innerHTML = `&#10003; NDC / RxNorm auto-mapped &nbsp;&middot;&nbsp; ${tot} tablets &nbsp;&middot;&nbsp; ${days} eMAR tasks on sign`;
+  } else {
+    badge.innerHTML = '&#10003; NDC / RxNorm auto-mapped &nbsp;&middot;&nbsp; Standard Rx';
+  }
+}
+
+// ── eMAR mini-preview ──────────────────────────────
+function renderEmar() {
+  const container = document.getElementById('emar-tasks');
+  const more      = document.getElementById('emar-more');
+  container.innerHTML = '';
+  const show = emarOpen ? steps : steps.slice(0,3);
+  show.forEach((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'et' + (i===0?' today':'');
+    d.innerHTML = `<span class="et-day">Day ${s.day}</span><span class="et-dose">${s.tabs} tab${s.tabs>1?'s':''} (${s.mg} mg)</span><span class="et-time">${s.time}</span><span class="et-st ${i===0?'st-due':'st-sch'}">${i===0?'Due today':'Scheduled'}</span>`;
+    container.appendChild(d);
+  });
+  if (steps.length > 3) {
+    more.style.display = 'block';
+    more.textContent = emarOpen ? '▲ Show less' : `▼ Show all ${steps.length} tasks`;
+  } else {
+    more.style.display = 'none';
+  }
+}
+
+function toggleEmar() { emarOpen = !emarOpen; renderEmar(); }
+
+// ── Sig builder ────────────────────────────────────
+let sigFreq = 'once daily', sigTiming = 'with food';
+function pickFreq(el, val) {
+  document.querySelectorAll('.sc').forEach(s => {
+    if (['once daily','twice daily','three times daily'].includes(s.textContent.includes('BID')?'twice daily':s.textContent.includes('TID')?'three times daily':s.textContent))
+      s.classList.remove('on');
+  });
+  el.classList.add('on');
+  sigFreq = val;
+  updateSig();
+}
+function pickTiming(el, val) {
+  document.querySelectorAll('.sc').forEach(s => {
+    if (['with food','at bedtime'].includes(s.textContent)) s.classList.remove('on');
+  });
+  el.classList.add('on');
+  sigTiming = val;
+  updateSig();
+}
+function updateSig() {
+  document.getElementById('sp-freq').textContent   = sigFreq;
+  document.getElementById('sp-timing').textContent = sigTiming;
+  document.getElementById('sig-text').value = `Take 1 tablet (4 mg) by mouth ${sigFreq} ${sigTiming}`;
+}
+
+// ── CDS dismiss ────────────────────────────────────
+function dismissCds(id) {
+  const el = document.getElementById(id);
+  el.style.transition = 'opacity .2s'; el.style.opacity = '0';
+  setTimeout(() => el.remove(), 200);
+}
+
+// ── Sign button ────────────────────────────────────
+function signRx() {
+  const btn = document.getElementById('sign-btn');
+  btn.textContent = '✓ Signed — Sent to Pharmacy';
+  btn.style.background = 'var(--green-dk)';
+  setTimeout(() => { btn.innerHTML = 'Sign &amp; Send to Pharmacy &#8594;'; btn.style.background = ''; }, 2500);
+}
+
+// ── Init ───────────────────────────────────────────
+renderSteps();
+setDisp('std');
+</script>
+</body>
+</html>
