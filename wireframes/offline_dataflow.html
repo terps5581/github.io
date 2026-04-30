@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>SEG Offline Workflows — eMAR & EHR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    html, body { margin: 0; padding: 0; background: #f0eee9; font-family: 'Kalam', cursive; }
+    * { box-sizing: border-box; }
+    #root { width: 100vw; height: 100vh; }
+
+    .tweaks-panel {
+      position: fixed; bottom: 20px; right: 20px;
+      background: #fafaf7; border: 1.5px solid #1a1a1a; border-radius: 4px;
+      padding: 14px 16px; font-family: 'Kalam', cursive;
+      box-shadow: 2px 3px 0 rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.1);
+      z-index: 1000; min-width: 260px; display: none;
+    }
+    .tweaks-panel.active { display: block; }
+    .tweaks-panel h3 {
+      margin: 0 0 10px 0; font-size: 15px; font-weight: 700;
+      border-bottom: 1px dashed #9a958a; padding-bottom: 8px;
+    }
+    .tweak-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+    .tweak-row > label { font-size: 13px; color: #5a5548; }
+    .tweak-row .opts { display: flex; gap: 4px; flex-wrap: wrap; }
+    .tweak-row button {
+      flex: 1; font-family: 'Kalam', cursive; font-size: 12px;
+      background: #fff; border: 1.2px solid #1a1a1a;
+      padding: 4px 8px; cursor: pointer; border-radius: 2px; min-width: 60px;
+    }
+    .tweak-row button.on { background: #1a1a1a; color: #fafaf7; }
+    .tweak-row label.toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" data-presets="react">
+    const INK = '#1a1a1a';
+    const PAPER = '#fafaf7';
+    const FAINT = '#9a958a';
+    const ACCENT = '#d9644a';
+    const MUTED = '#f0ece3';
+    const LANE_EMAR = '#e8e2f0';
+    const LANE_EHR = '#dce8df';
+    const LANE_NURSE = '#fff3a8';
+    const LANE_PATIENT = '#f5e6d8';
+    const LANE_SYSTEM = '#e5e1d6';
+    const FONT_HAND = '"Kalam", cursive';
+    const FONT_MONO = '"JetBrains Mono", monospace';
+
+    function SketchRect({ x, y, w, h, fill = PAPER, stroke = INK, sw = 1.5, rx = 3, dashed = false }) {
+      return (
+        <g>
+          <rect x={x} y={y} width={w} height={h} fill={fill} stroke={stroke} strokeWidth={sw} rx={rx}
+            strokeDasharray={dashed ? '5 4' : 'none'} />
+          <rect x={x + 1.2} y={y + 0.8} width={w - 0.6} height={h - 0.3} fill="none" stroke={stroke}
+            strokeWidth={sw * 0.5} rx={rx} opacity="0.4"
+            strokeDasharray={dashed ? '5 4' : 'none'} />
+        </g>
+      );
+    }
+
+    function Step({ x, y, w = 180, h = 90, n, title, body, fill = PAPER, accent = false, dashed = false }) {
+      const stroke = accent ? ACCENT : INK;
+      return (
+        <g>
+          <SketchRect x={x} y={y} w={w} h={h} fill={fill} stroke={stroke} dashed={dashed} />
+          {n != null && (
+            <g>
+              <circle cx={x + 18} cy={y + 18} r="13" fill={stroke} />
+              <text x={x + 18} y={y + 22} textAnchor="middle" fontFamily={FONT_HAND}
+                fontSize="14" fontWeight="700" fill={PAPER}>{n}</text>
+            </g>
+          )}
+          <foreignObject x={x + (n != null ? 36 : 8)} y={y + 6} width={w - (n != null ? 44 : 16)} height={h - 12}>
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{
+              width: '100%', height: '100%', fontFamily: FONT_HAND,
+              color: stroke, lineHeight: 1.2,
+              display: 'flex', flexDirection: 'column', justifyContent: 'center',
+            }}>
+              <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 3 }}>{title}</div>
+              {body && <div style={{ fontSize: 12, opacity: 0.8 }}>{body}</div>}
+            </div>
+          </foreignObject>
+        </g>
+      );
+    }
+
+    function Decision({ x, y, w = 130, h = 74, label, accent = false }) {
+      const stroke = accent ? ACCENT : INK;
+      const cx = x + w / 2, cy = y + h / 2;
+      const pts = `${cx},${y} ${x + w},${cy} ${cx},${y + h} ${x},${cy}`;
+      return (
+        <g>
+          <polygon points={pts} fill={PAPER} stroke={stroke} strokeWidth="1.5" />
+          <polygon points={pts} fill="none" stroke={stroke} strokeWidth="0.7" opacity="0.4"
+            transform="translate(1, 0.6)" />
+          <foreignObject x={x + 10} y={y + 10} width={w - 20} height={h - 20}>
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{
+              width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              textAlign: 'center', fontFamily: FONT_HAND, fontSize: 13, fontWeight: 600, color: stroke,
+              lineHeight: 1.15,
+            }}>{label}</div>
+          </foreignObject>
+        </g>
+      );
+    }
+
+    function Arrow({ from, to, label, curve = 0, accent = false, dashed = false, labelOff = 0, show = true }) {
+      const s = accent ? ACCENT : INK;
+      const [x1, y1] = from, [x2, y2] = to;
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+      const dx = x2 - x1, dy = y2 - y1;
+      const len = Math.sqrt(dx * dx + dy * dy) || 1;
+      const px = -dy / len, py = dx / len;
+      const cx = mx + px * curve, cy = my + py * curve;
+      const d = `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+      const ang = Math.atan2(y2 - cy, x2 - cx);
+      const ah = 9;
+      const h1x = x2 - ah * Math.cos(ang - 0.45);
+      const h1y = y2 - ah * Math.sin(ang - 0.45);
+      const h2x = x2 - ah * Math.cos(ang + 0.45);
+      const h2y = y2 - ah * Math.sin(ang + 0.45);
+      const lx = cx + px * labelOff, ly = cy + py * labelOff;
+      return (
+        <g>
+          <path d={d} fill="none" stroke={s} strokeWidth="1.6"
+            strokeDasharray={dashed ? '6 4' : 'none'} style={{ strokeLinecap: 'round' }} />
+          <path d={`M ${x2} ${y2} L ${h1x} ${h1y} M ${x2} ${y2} L ${h2x} ${h2y}`}
+            stroke={s} strokeWidth="1.6" fill="none" style={{ strokeLinecap: 'round' }} />
+          {label && show && (
+            <g>
+              <rect x={lx - (String(label).length * 3.4) - 5} y={ly - 10}
+                width={String(label).length * 6.8 + 10} height={17}
+                fill={PAPER} opacity="0.95" rx="2" />
+              <text x={lx} y={ly + 2} textAnchor="middle"
+                fontFamily={FONT_HAND} fontSize="12.5" fill={s}>{label}</text>
+            </g>
+          )}
+        </g>
+      );
+    }
+
+    function Lane({ y, h, color, label, sub, w }) {
+      return (
+        <g>
+          <rect x={0} y={y} width={w} height={h} fill={color} opacity="0.5" />
+          <rect x={0} y={y} width={170} height={h} fill={color} />
+          <line x1={170} y1={y} x2={170} y2={y + h} stroke={INK} strokeWidth="1" strokeDasharray="2 3" opacity="0.5" />
+          <line x1={0} y1={y} x2={w} y2={y} stroke={INK} strokeWidth="0.8" opacity="0.5" />
+          <foreignObject x={14} y={y + 12} width={146} height={h - 24}>
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontFamily: FONT_HAND, color: INK }}>
+              <div style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.1 }}>{label}</div>
+              {sub && <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4, fontFamily: FONT_MONO }}>{sub}</div>}
+            </div>
+          </foreignObject>
+        </g>
+      );
+    }
+
+    function Note({ x, y, w = 180, rotate = -1.5, children }) {
+      return (
+        <g transform={`rotate(${rotate} ${x + w / 2} ${y + 30})`}>
+          <foreignObject x={x} y={y} width={w} height={200}>
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{
+              padding: '10px 12px',
+              fontFamily: FONT_HAND, fontSize: 12.5, color: '#5a4a2a',
+              background: '#fff3a8', border: '0.8px solid #d4c470',
+              lineHeight: 1.35,
+              boxShadow: '1px 2px 5px rgba(0,0,0,0.1)',
+            }}>{children}</div>
+          </foreignObject>
+        </g>
+      );
+    }
+
+    function Zone({ x, y, w, h, label, tone = 'offline' }) {
+      const stroke = tone === 'offline' ? ACCENT : '#3a7a4a';
+      const fill = tone === 'offline' ? 'rgba(217,100,74,0.04)' : 'rgba(58,122,74,0.05)';
+      return (
+        <g>
+          <rect x={x} y={y} width={w} height={h} fill={fill} stroke={stroke} strokeWidth="1.2"
+            strokeDasharray="8 5" rx="6" />
+          <g>
+            <rect x={x + 16} y={y - 12} width={String(label).length * 7.5 + 20} height={22}
+              fill={PAPER} stroke={stroke} strokeWidth="1" rx="3" />
+            <text x={x + 26} y={y + 3} fontFamily={FONT_HAND} fontSize="13" fontWeight="700" fill={stroke}>
+              {label}
+            </text>
+          </g>
+        </g>
+      );
+    }
+
+    function Title({ x, y, num, title, subtitle }) {
+      return (
+        <g>
+          <text x={x} y={y} fontFamily={FONT_HAND} fontSize="13" fill={FAINT}>{`// workflow ${num}`}</text>
+          <text x={x} y={y + 28} fontFamily={FONT_HAND} fontSize="26" fontWeight="700" fill={INK}>{title}</text>
+          <text x={x} y={y + 50} fontFamily={FONT_MONO} fontSize="11" fill={FAINT}>{subtitle}</text>
+        </g>
+      );
+    }
+
+    Object.assign(window, {
+      INK, PAPER, FAINT, ACCENT, MUTED, LANE_EMAR, LANE_EHR, LANE_NURSE, LANE_PATIENT, LANE_SYSTEM,
+      FONT_HAND, FONT_MONO,
+      SketchRect, Step, Decision, Arrow, Lane, Note, Zone, Title,
+    });
+  </script>
+
+  <script type="text/babel" data-presets="react">
+    function WorkflowEMAR({ tweaks }) {
+      const { showNotes, showBranch } = tweaks;
+      const W = 1680, H = 820;
+      const laneTop = 110;
+      const lanes = [
+        { label: 'Patient',        sub: 'in SEG cell',        color: LANE_PATIENT, h: 110 },
+        { label: 'Nurse',          sub: 'at cell door',       color: LANE_NURSE,   h: 140 },
+        { label: 'Laptop (eMAR)',  sub: 'offline capture',    color: LANE_EMAR,    h: 140 },
+        { label: 'eMAR (server)',  sub: 'facility network',   color: LANE_EMAR,    h: 120 },
+        { label: 'EHR',            sub: 'prescriber side',    color: LANE_EHR,     h: 110 },
+      ];
+      let y = laneTop;
+      const laneY = lanes.map(l => { const o = y; y += l.h; return o; });
+      const ZONE_SYNC_X = 1230;
+
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" style={{ display: 'block', background: PAPER }}>
+          <Title x={36} y={40} num="A" title="Pill line in SEG — eMAR"
+            subtitle="nurse documents med admin per-patient at the cell, offline. syncs at unit." />
+          {lanes.map((l, i) => (
+            <Lane key={i} y={laneY[i]} h={l.h} color={l.color} label={l.label} sub={l.sub} w={W} />
+          ))}
+          <Zone x={180} y={laneTop - 4} w={ZONE_SYNC_X - 190} h={H - laneTop - 20}
+            label="IN SEG · no wifi" tone="offline" />
+          <Zone x={ZONE_SYNC_X} y={laneTop - 4} w={W - ZONE_SYNC_X - 20} h={H - laneTop - 20}
+            label="BACK ON UNIT · wifi returns" tone="online" />
+
+          <Step x={220} y={laneY[0] + 15} w={150} h={80} n="1" title="At cell door" body="patient at slot, ID band visible" />
+          <Step x={220} y={laneY[1] + 25} w={150} h={95} n="2" title="Verify patient" body="scan/confirm ID, pull due meds from tray" />
+          <Step x={410} y={laneY[1] + 25} w={160} h={95} n="3" title="Offer medication" body="5 rights at the slot" />
+          <Decision x={610} y={laneY[1] + 35} w={130} h={74} label="Taken or refused?" />
+          <Step x={780} y={laneY[1] + 25} w={150} h={95} n="4a" title="Given" body="watch swallow, observe" />
+          <Step x={780} y={laneY[1] + 125} w={150} h={70} n="4b" accent title="Refused" body="note reason" />
+          <Step x={960} y={laneY[1] + 25} w={150} h={95} n="5" title="Next patient" body="move to next cell" />
+          <Step x={410} y={laneY[2] + 25} w={160} h={100} n="i" title="Pull patient's MAR" body="from pre-loaded cache · due meds shown" />
+          <Step x={780} y={laneY[2] + 25} w={150} h={100} n="ii" title="Record admin" body="given · time · initials · saved locally" />
+          <Step x={780} y={laneY[2] + 135} w={150} h={75} n="ii-b" accent title="Record refusal" body="with reason code · local" />
+          <Step x={960} y={laneY[2] + 25} w={150} h={100} n="iii" title="Queue outbox" body="each entry tagged: pending sync" />
+
+          <Step x={ZONE_SYNC_X + 30} y={laneY[1] + 25} w={170} h={95} n="6" title="Dock at unit" body="wifi detected · nurse continues day" />
+          <Step x={ZONE_SYNC_X + 30} y={laneY[2] + 25} w={170} h={100} n="iv" title="Auto-sync outbox" body="all queued entries push · in order" />
+          <Step x={ZONE_SYNC_X + 230} y={laneY[3] + 15} w={180} h={90} n="v" title="eMAR posts admins" body="server timestamps use capture time, not sync time" />
+          <Step x={ZONE_SYNC_X + 230} y={laneY[2] + 25} w={180} h={100} n="vi" accent dashed title="Fire refusal notification" body="→ prescriber in EHR (deferred alert)" />
+          <Step x={ZONE_SYNC_X + 30} y={laneY[4] + 15} w={180} h={80} n="7" title="Prescriber sees refusal" body="in-basket alert · patient chart flagged" />
+
+          <Arrow from={[295, laneY[0] + 95]} to={[295, laneY[1] + 25]} label="hello" labelOff={-12} show={showNotes} />
+          <Arrow from={[370, laneY[1] + 72]} to={[490, laneY[2] + 25]} label="open MAR for pt" labelOff={-15} show={showNotes} />
+          <Arrow from={[490, laneY[2] + 25]} to={[490, laneY[1] + 120]} label="" show={false} />
+          <Arrow from={[570, laneY[2] + 75]} to={[570, laneY[1] + 120]} label="shows due meds" labelOff={-15} show={showNotes} />
+          <Arrow from={[570, laneY[1] + 72]} to={[610, laneY[1] + 72]} />
+          <Arrow from={[740, laneY[1] + 62]} to={[780, laneY[1] + 50]} label="taken" labelOff={-12} show={showNotes} />
+          <Arrow from={[675, laneY[1] + 109]} to={[780, laneY[1] + 145]} label="refused" labelOff={10} accent show={showNotes} />
+          <Arrow from={[855, laneY[1] + 120]} to={[855, laneY[2] + 25]} label="document" labelOff={-15} show={showNotes} />
+          <Arrow from={[855, laneY[1] + 195]} to={[855, laneY[2] + 135]} label="" accent />
+          <Arrow from={[930, laneY[2] + 75]} to={[960, laneY[2] + 75]} />
+          <Arrow from={[930, laneY[2] + 170]} to={[1010, laneY[2] + 125]} label="+ refusal flag" labelOff={10} accent show={showNotes} />
+
+          <path d={`M 1035 ${laneY[1] + 25} Q 1035 ${laneY[1] - 10} 780 ${laneY[1] - 10} Q 410 ${laneY[1] - 10} 410 ${laneY[1] + 25}`}
+            fill="none" stroke={INK} strokeWidth="1.5" strokeDasharray="5 4" />
+          <path d={`M 410 ${laneY[1] + 25} L 418 ${laneY[1] + 19} M 410 ${laneY[1] + 25} L 418 ${laneY[1] + 31}`}
+            stroke={INK} strokeWidth="1.5" fill="none" />
+          {showNotes && (
+            <text x={720} y={laneY[1] - 16} fontFamily={FONT_HAND} fontSize="13" fill={INK}>
+              loop — next patient in SEG rotation
+            </text>
+          )}
+
+          <Arrow from={[1110, laneY[2] + 75]} to={[ZONE_SYNC_X + 30, laneY[2] + 75]} label="carry laptop" labelOff={-12} dashed show={showNotes} />
+          <Arrow from={[ZONE_SYNC_X + 115, laneY[1] + 120]} to={[ZONE_SYNC_X + 115, laneY[2] + 25]} label="wifi up" labelOff={-12} show={showNotes} />
+          <Arrow from={[ZONE_SYNC_X + 200, laneY[2] + 75]} to={[ZONE_SYNC_X + 230, laneY[3] + 60]} label="send batch" labelOff={-14} show={showNotes} />
+
+          {showBranch && (
+            <Arrow from={[ZONE_SYNC_X + 320, laneY[3] + 15]} to={[ZONE_SYNC_X + 320, laneY[2] + 125]} label="refusal? trigger alert" labelOff={14} accent dashed show={showNotes} />
+          )}
+          {showBranch && (
+            <Arrow from={[ZONE_SYNC_X + 230, laneY[2] + 125]} to={[ZONE_SYNC_X + 200, laneY[4] + 55]}
+              label="notify prescriber" labelOff={-14} accent show={showNotes} />
+          )}
+
+          {showNotes && (
+            <g>
+              <Note x={1430} y={40} w={220} rotate={2}>
+                <b>Why it matters:</b> NCCHC requires timely med admin documentation. Paper back-entry loses accuracy — store-and-forward preserves the real admin time.
+              </Note>
+              <Note x={1200} y={H - 110} w={200} rotate={1.5}>
+                <b>Timestamps</b> must reflect <i>capture</i> time, not sync time. The nurse gave the med at 08:14, not at 10:30 when wifi returned.
+              </Note>
+              <Note x={600} y={H - 120} w={240} rotate={-1}>
+                <b>Pre-load the MAR</b> before leaving unit — cached per SEG roster. Without this, step i has nothing to show.
+              </Note>
+            </g>
+          )}
+        </svg>
+      );
+    }
+    window.WorkflowEMAR = WorkflowEMAR;
+  </script>
+
+  <script type="text/babel" data-presets="react">
+    function WorkflowEHR({ tweaks }) {
+      const { showNotes } = tweaks;
+      const W = 1680, H = 780;
+      const laneTop = 110;
+      const lanes = [
+        { label: 'Patient',        sub: 'sick call request',  color: LANE_PATIENT, h: 120 },
+        { label: 'Nurse',          sub: 'at cell door',       color: LANE_NURSE,   h: 180 },
+        { label: 'Laptop (EHR)',   sub: 'offline capture',    color: LANE_EHR,     h: 180 },
+        { label: 'EHR (server)',   sub: 'facility network',   color: LANE_EHR,     h: 120 },
+      ];
+      let y = laneTop;
+      const laneY = lanes.map(l => { const o = y; y += l.h; return o; });
+      const ZONE_SYNC_X = 1230;
+
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" style={{ display: 'block', background: PAPER }}>
+          <Title x={36} y={40} num="B" title="Sick call in SEG — EHR encounter"
+            subtitle="nurse documents a full encounter offline. signs + syncs at unit." />
+          {lanes.map((l, i) => (
+            <Lane key={i} y={laneY[i]} h={l.h} color={l.color} label={l.label} sub={l.sub} w={W} />
+          ))}
+          <Zone x={180} y={laneTop - 4} w={ZONE_SYNC_X - 190} h={H - laneTop - 20}
+            label="IN SEG · no wifi" tone="offline" />
+          <Zone x={ZONE_SYNC_X} y={laneTop - 4} w={W - ZONE_SYNC_X - 20} h={H - laneTop - 20}
+            label="BACK ON UNIT · wifi returns" tone="online" />
+
+          <Step x={220} y={laneY[0] + 20} w={150} h={85} n="1" title="Sick call slip" body="kite / complaint triaged for round" />
+          <Step x={220} y={laneY[1] + 30} w={160} h={110} n="2" title="Arrive at cell" body="verify pt ID · review kite" />
+          <Step x={420} y={laneY[1] + 30} w={160} h={110} n="3" title="Subjective" body="CC, HPI, symptoms" />
+          <Step x={600} y={laneY[1] + 30} w={160} h={110} n="4" title="Objective" body="vitals, observed findings" />
+          <Step x={780} y={laneY[1] + 30} w={160} h={110} n="5" title="Assessment + plan" body="dispo: follow up / provider referral / no action" />
+          <Step x={960} y={laneY[1] + 30} w={160} h={110} n="6" title="Sign note" body="attested locally · pt release" />
+
+          <Step x={220} y={laneY[2] + 30} w={160} h={90} n="i" title="Open encounter" body="cached patient chart" />
+          <Step x={420} y={laneY[2] + 30} w={160} h={90} n="ii" title="Capture S" body="free text + templates" />
+          <Step x={600} y={laneY[2] + 30} w={160} h={90} n="iii" title="Capture O" body="vitals form · body map" />
+          <Step x={780} y={laneY[2] + 30} w={160} h={90} n="iv" title="Capture A/P" body="problem + plan · orders (pending)" />
+          <Step x={960} y={laneY[2] + 30} w={160} h={90} n="v" title="Sign + queue" body="status: pending sync · local attestation time stored" />
+
+          <Step x={ZONE_SYNC_X + 30} y={laneY[1] + 30} w={170} h={110} n="7" title="Nurse at unit" body="laptop reconnects" />
+          <Step x={ZONE_SYNC_X + 30} y={laneY[2] + 30} w={170} h={90} n="vi" title="Auto-sync encounters" body="one by one · in capture order" />
+          <Step x={ZONE_SYNC_X + 220} y={laneY[3] + 15} w={200} h={90} n="vii" title="EHR posts encounter" body="note filed · orders released to pharmacy / provider queue" />
+
+          <Arrow from={[295, laneY[0] + 105]} to={[295, laneY[1] + 30]} />
+          <Arrow from={[300, laneY[1] + 140]} to={[300, laneY[2] + 30]} />
+          <Arrow from={[500, laneY[1] + 140]} to={[500, laneY[2] + 30]} />
+          <Arrow from={[680, laneY[1] + 140]} to={[680, laneY[2] + 30]} />
+          <Arrow from={[860, laneY[1] + 140]} to={[860, laneY[2] + 30]} />
+          <Arrow from={[1040, laneY[1] + 140]} to={[1040, laneY[2] + 30]} />
+          <Arrow from={[380, laneY[2] + 75]} to={[420, laneY[2] + 75]} />
+          <Arrow from={[580, laneY[2] + 75]} to={[600, laneY[2] + 75]} />
+          <Arrow from={[760, laneY[2] + 75]} to={[780, laneY[2] + 75]} />
+          <Arrow from={[940, laneY[2] + 75]} to={[960, laneY[2] + 75]} />
+          <Arrow from={[380, laneY[1] + 85]} to={[420, laneY[1] + 85]} />
+          <Arrow from={[580, laneY[1] + 85]} to={[600, laneY[1] + 85]} />
+          <Arrow from={[760, laneY[1] + 85]} to={[780, laneY[1] + 85]} />
+          <Arrow from={[940, laneY[1] + 85]} to={[960, laneY[1] + 85]} />
+          <Arrow from={[1120, laneY[2] + 75]} to={[ZONE_SYNC_X + 30, laneY[2] + 75]}
+            label="carry laptop" labelOff={-14} dashed show={showNotes} />
+          <Arrow from={[ZONE_SYNC_X + 115, laneY[1] + 140]} to={[ZONE_SYNC_X + 115, laneY[2] + 30]}
+            label="wifi up" labelOff={-12} show={showNotes} />
+          <Arrow from={[ZONE_SYNC_X + 200, laneY[2] + 75]} to={[ZONE_SYNC_X + 220, laneY[3] + 60]}
+            label="push encounters" labelOff={-14} show={showNotes} />
+
+          {showNotes && (
+            <g>
+              <Note x={1430} y={40} w={220} rotate={2}>
+                <b>Signed offline, posted online.</b> The nurse attests at step 6 — attestation timestamp is captured <i>then</i>, even though the EHR file receives it later.
+              </Note>
+              <Note x={780} y={H - 100} w={230} rotate={1.5}>
+                <b>Orders in offline notes</b> stay "pending" until sync. Pharmacy / provider queues fill only after step vii.
+              </Note>
+              <Note x={ZONE_SYNC_X + 20} y={H - 120} w={200} rotate={-1}>
+                Encounters sync in <b>capture order</b>, so chart reflects the real sequence of visits on the round.
+              </Note>
+            </g>
+          )}
+        </svg>
+      );
+    }
+    window.WorkflowEHR = WorkflowEHR;
+  </script>
+
+  <script type="text/babel" data-presets="react">
+    function DesignCanvas({ children }) {
+      const vpRef = React.useRef(null);
+      const worldRef = React.useRef(null);
+      const tf = React.useRef({ x: 0, y: 0, scale: 1 });
+      const apply = React.useCallback(() => {
+        const { x, y, scale } = tf.current;
+        const el = worldRef.current;
+        if (el) el.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+      }, []);
+      React.useEffect(() => {
+        const vp = vpRef.current;
+        if (!vp) return;
+        const zoomAt = (cx, cy, factor) => {
+          const r = vp.getBoundingClientRect();
+          const px = cx - r.left, py = cy - r.top;
+          const t = tf.current;
+          const next = Math.min(4, Math.max(0.15, t.scale * factor));
+          const k = next / t.scale;
+          t.x = px - (px - t.x) * k;
+          t.y = py - (py - t.y) * k;
+          t.scale = next; apply();
+        };
+        const onWheel = (e) => {
+          e.preventDefault();
+          if (e.ctrlKey) zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.01));
+          else if (e.deltaMode !== 0 || (e.deltaX === 0 && Number.isInteger(e.deltaY) && Math.abs(e.deltaY) >= 40))
+            zoomAt(e.clientX, e.clientY, Math.exp(-Math.sign(e.deltaY) * 0.18));
+          else { tf.current.x -= e.deltaX; tf.current.y -= e.deltaY; apply(); }
+        };
+        let drag = null;
+        const onDown = (e) => {
+          const onBg = e.target === vp || e.target === worldRef.current;
+          if (!(e.button === 1 || (e.button === 0 && onBg))) return;
+          e.preventDefault();
+          vp.setPointerCapture(e.pointerId);
+          drag = { id: e.pointerId, lx: e.clientX, ly: e.clientY };
+          vp.style.cursor = 'grabbing';
+        };
+        const onMove = (e) => {
+          if (!drag || e.pointerId !== drag.id) return;
+          tf.current.x += e.clientX - drag.lx;
+          tf.current.y += e.clientY - drag.ly;
+          drag.lx = e.clientX; drag.ly = e.clientY; apply();
+        };
+        const onUp = (e) => {
+          if (!drag || e.pointerId !== drag.id) return;
+          vp.releasePointerCapture(e.pointerId); drag = null; vp.style.cursor = '';
+        };
+        vp.addEventListener('wheel', onWheel, { passive: false });
+        vp.addEventListener('pointerdown', onDown);
+        vp.addEventListener('pointermove', onMove);
+        vp.addEventListener('pointerup', onUp);
+        vp.addEventListener('pointercancel', onUp);
+        return () => {
+          vp.removeEventListener('wheel', onWheel);
+          vp.removeEventListener('pointerdown', onDown);
+          vp.removeEventListener('pointermove', onMove);
+          vp.removeEventListener('pointerup', onUp);
+          vp.removeEventListener('pointercancel', onUp);
+        };
+      }, [apply]);
+
+      const gridSvg = `url("data:image/svg+xml,%3Csvg width='120' height='120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M120 0H0v120' fill='none' stroke='${encodeURIComponent('rgba(0,0,0,0.06)')}' stroke-width='1'/%3E%3C/svg%3E")`;
+
+      return (
+        <div ref={vpRef} style={{
+          height: '100vh', width: '100vw', background: '#f0eee9',
+          overflow: 'hidden', touchAction: 'none', position: 'relative',
+          fontFamily: FONT_HAND,
+        }}>
+          <div ref={worldRef} style={{
+            position: 'absolute', top: 0, left: 0,
+            transformOrigin: '0 0', willChange: 'transform',
+            width: 'max-content', minWidth: '100%', minHeight: '100%',
+            padding: '60px 60px 80px',
+            backgroundImage: gridSvg, backgroundSize: '120px 120px',
+          }}>
+            {children}
+          </div>
+        </div>
+      );
+    }
+
+    function Artboard({ label, children, w, h }) {
+      return (
+        <div style={{ position: 'relative', marginBottom: 80, flexShrink: 0 }}>
+          <div style={{
+            position: 'absolute', bottom: '100%', left: 0, paddingBottom: 8,
+            fontSize: 12, color: 'rgba(60,50,40,0.7)', fontWeight: 500,
+          }}>{label}</div>
+          <div style={{
+            width: w, height: h, background: PAPER,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06)',
+            borderRadius: 2, overflow: 'hidden',
+          }}>{children}</div>
+        </div>
+      );
+    }
+
+    const TWEAK_DEFAULTS = { showNotes: true, showBranch: true };
+
+    function App() {
+      const [tweaks, setTweaks] = React.useState(TWEAK_DEFAULTS);
+      const [editMode, setEditMode] = React.useState(false);
+      const set = (patch) => setTweaks({ ...tweaks, ...patch });
+      React.useEffect(() => {
+        const onMsg = (e) => {
+          if (!e.data || typeof e.data !== 'object') return;
+          if (e.data.type === '__activate_edit_mode') setEditMode(true);
+          else if (e.data.type === '__deactivate_edit_mode') setEditMode(false);
+        };
+        window.addEventListener('message', onMsg);
+        try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch (e) {}
+        return () => window.removeEventListener('message', onMsg);
+      }, []);
+      const scale = 0.85;
+      return (
+        <React.Fragment>
+          <DesignCanvas>
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ fontSize: 24, fontWeight: 700, color: '#1a1a1a', marginBottom: 6 }}>
+                SEG offline workflows — for the dev team
+              </div>
+              <div style={{ fontSize: 14, color: 'rgba(60,50,40,0.7)', maxWidth: 900, lineHeight: 1.4 }}>
+                Two separate clinical workflows in SEG where there is no wifi. Nurse uses a laptop that captures locally, then syncs when back on unit. eMAR and EHR are <b>two apps</b>, connected server-side — so the flows run in parallel and only touch at the sync point.
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 60 }}>
+              <Artboard label="Workflow A · Pill line (eMAR)" w={1680 * scale} h={820 * scale}>
+                <WorkflowEMAR tweaks={tweaks} />
+              </Artboard>
+              <Artboard label="Workflow B · Sick call encounter (EHR)" w={1680 * scale} h={780 * scale}>
+                <WorkflowEHR tweaks={tweaks} />
+              </Artboard>
+            </div>
+          </DesignCanvas>
+          <div className={`tweaks-panel ${editMode ? 'active' : ''}`}>
+            <h3>Tweaks</h3>
+            <div className="tweak-row">
+              <label className="toggle">
+                <input type="checkbox" checked={tweaks.showNotes}
+                  onChange={(e) => set({ showNotes: e.target.checked })} />
+                show annotations &amp; sticky notes
+              </label>
+            </div>
+            <div className="tweak-row">
+              <label className="toggle">
+                <input type="checkbox" checked={tweaks.showBranch}
+                  onChange={(e) => set({ showBranch: e.target.checked })} />
+                show refusal → prescriber branch (eMAR)
+              </label>
+            </div>
+            <div style={{ fontSize: 11, color: '#9a958a', marginTop: 6, borderTop: '1px dashed #9a958a', paddingTop: 8 }}>
+              drag to pan · scroll/pinch to zoom
+            </div>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
