@@ -61,9 +61,19 @@
   .top-right{margin-left:auto;display:flex;align-items:center;gap:8px}
   .icon-btn{width:40px;height:40px;border-radius:11px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);display:grid;place-items:center;font-size:16px;color:var(--muted)}
   .icon-btn:hover{color:var(--ink)}
-  .who{display:flex;align-items:center;gap:9px;padding-left:6px}
+  .who{display:flex;align-items:center;gap:9px;padding:4px 8px 4px 6px;border-radius:11px;cursor:pointer}
+  .who:hover{background:var(--card)}
   .avatar{width:36px;height:36px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
   .who .name{font-weight:700;font-size:13px;line-height:1.15}.who .role{font-size:11.5px;color:var(--muted)}
+  .who-caret{color:var(--faint);font-size:11px;margin-left:1px}
+  .acct-menu{position:absolute;top:52px;right:16px;width:290px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 44px rgba(0,0,0,.22);padding:7px;z-index:80;display:none}
+  .acct-menu.open{display:block}
+  .acct-hd{display:flex;align-items:center;gap:10px;padding:9px 10px 11px}
+  .acct-hd .name{font-weight:700;font-size:14px}.acct-hd .role{font-size:11.5px;color:var(--muted)}
+  .acct-menu button[role=menuitem]{display:flex;align-items:center;gap:11px;width:100%;height:42px;padding:0 11px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink);text-align:left}
+  .acct-menu button[role=menuitem]:hover{background:var(--hover)}
+  .acct-menu .mi{width:20px;text-align:center;color:var(--muted);font-size:14px}
+  .acct-sep{height:1px;background:var(--line);margin:6px 8px}
 
   /* ---- N: nav (slim) ---- */
   .nav{grid-row:2;grid-column:1;padding:6px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
@@ -209,7 +219,16 @@
     </div>
     <div class="top-right">
       <button class="icon-btn" id="modeBtn" onclick="toggleMode()" aria-label="Light or dark">☾</button>
-      <div class="who"><div class="avatar" id="av"></div><div><div class="name" id="nm"></div><div class="role" id="rl"></div></div></div>
+      <button class="who" id="whoBtn" onclick="toggleAcct(event)" aria-haspopup="menu" aria-expanded="false"><div class="avatar" id="av"></div><div style="text-align:left"><div class="name" id="nm"></div><div class="role" id="rl"></div></div><span class="who-caret">▾</span></button>
+      <div class="acct-menu" id="acctMenu" role="menu" aria-label="Account">
+        <div class="acct-hd"><div class="avatar" id="avBig"></div><div><div class="name" id="nmBig"></div><div class="role" id="rlBig"></div></div></div>
+        <button role="menuitem" onclick="acctGo('Settings & preferences — adjust or override anything the workspace has learned')"><span class="mi">⚙</span>Settings & preferences</button>
+        <button role="menuitem" onclick="acctGo('Accessibility — text size, contrast, light/dark, reduced motion. Settable directly, never gated behind learning.')"><span class="mi">◉</span>Accessibility</button>
+        <button role="menuitem" onclick="acctGo('Adaptations — the full ledger of what the workspace has learned for you, each reversible')"><span class="mi">✦</span>Adaptations learned for you</button>
+        <div class="acct-sep"></div>
+        <button role="menuitem" onclick="acctGo('Switch profile / location')"><span class="mi">⇄</span>Switch profile</button>
+        <button role="menuitem" onclick="acctGo('Sign out')"><span class="mi">⏻</span>Sign out</button>
+      </div>
     </div>
   </header>
   <nav class="nav" id="nav" aria-label="Primary"></nav>
@@ -221,7 +240,12 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const $=s=>document.querySelector(s);let tt;
+const $=s=>document.querySelector(s);
+function toggleAcct(e){e.stopPropagation();const m=$('#acctMenu');const b=$('#whoBtn');const open=m.classList.toggle('open');b.setAttribute('aria-expanded',open);}
+function acctGo(msg){$('#acctMenu').classList.remove('open');$('#whoBtn').setAttribute('aria-expanded','false');toast(msg);}
+document.addEventListener('click',e=>{const m=$('#acctMenu');if(m.classList.contains('open')&&!m.contains(e.target)&&!$('#whoBtn').contains(e.target)){m.classList.remove('open');$('#whoBtn').setAttribute('aria-expanded','false');}});
+
+let tt;
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3200);}
 const mq=matchMedia('(prefers-color-scheme: dark)');let userSet=false;
 function setMode(m){document.documentElement.dataset.mode=m;$('#modeBtn').textContent=m==='light'?'☾':'☀';}
@@ -426,15 +450,50 @@ coder:{
     {t:'Keller MRI · medical necessity',d:'PT notes + criteria cited',prep:'Appeal drafted with chart citations',btns:[{l:'Review',k:'ai',msg:'Review appeal draft'}]}
   ]})
  ]}
+},
+office:{
+ who:{nm:'R. Santos',rl:'Practice Operations · Site A',av:'RS'},
+ nav:[['▦','Today',null,1],['▤','Work log',null],['◇','Billing',null],['◔','Audit',null],['⧉','Users',null]],
+ head:{h:'Practice operations',sub:'Fri Jul 10 · ordered by SLA and compliance deadline',deadline:true,tableHead:['Due','Item','Flags','Status']},
+ sched:[
+  slot({t:'Today',dur:'5:00p',nm:'PHI disclosure — court order',rsn:'Custody records · minimum-necessary review required before release',flags:[cueFlag('Part 2'),cueFlag('court order')],st:stWait('Due 5p')}),
+  slot({t:'Today',dur:'',nm:'Records request — outside provider',rsn:'Reyes, M. · release to cardiology',flags:[cueFlag('disclosure')],st:stWait('Pending')}),
+  slot({t:'D-1',dur:'',nm:'Billing reconciliation',rsn:'14 encounters · 2 variances flagged',flags:[cueFlag('variance')],st:stWait('Review')}),
+  slot({t:'D-1',dur:'',nm:'eRx transmission queue',rsn:'6 prescriptions pending confirmation',flags:[],st:stWait('6 pending')}),
+  slot({t:'D-2',dur:'',nm:'Encounter audit',rsn:'8 encounters flagged for documentation review',flags:[cueFlag('audit')],st:stWait('8')}),
+  slot({t:'D-2',dur:'',nm:'Received charts — external',rsn:'3 inbound documents, unclassified (eFax + Direct)',flags:[],st:stWait('3 new')}),
+  slot({t:'D-3',dur:'',nm:'Active user access review',rsn:'Quarterly access recertification',flags:[cueFlag('access')],st:stWait('Due')})
+ ],
+ legend:false,
+ rail:{title:'Operations queue',n:'12',groups:[
+  tgroup({ic:'⛨',title:'PHI & disclosure',n:2,hot:1,open:true,items:[
+    {t:'Court-ordered disclosure · Cell B-12',d:'Minimum-necessary set must be reviewed before release',crit:true,prep:'Proposed minimum-necessary extract prepared for your review',btns:[{l:'Review',k:'pri',msg:'Review the minimum-necessary set → approve disclosure. Nothing releases without you.'}]},
+    {t:'Disclosure accounting · 4 entries',d:'Auto-logged this week · verify and close',btns:[{l:'Review',msg:'Disclosure accounting log'}]}
+  ]}),
+  tgroup({ic:'▦',title:'Documents inbound',n:3,items:[
+    {t:'3 received charts · unclassified',d:'eFax + Direct message inbound',prep:'Auto-classification suggested; you confirm before filing',btns:[{l:'Review',k:'ai',msg:'Confirm classification → file to chart'}]}
+  ]}),
+  tgroup({ic:'◇',title:'Billing & revenue',n:2,items:[
+    {t:'Reconciliation · 14 encounters',d:'2 variances flagged',prep:'Variances isolated with explanation',btns:[{l:'Review',msg:'Review variances'}]}
+  ]}),
+  tgroup({ic:'℞',title:'eRx queue',n:6,items:[
+    {t:'6 prescriptions pending',d:'Transmission status monitored',btns:[{l:'Open',msg:'eRx transmission queue'}]}
+  ]}),
+  tgroup({ic:'◔',title:'Audit & access',n:2,items:[
+    {t:'8 encounters flagged',d:'Documentation / coding review',btns:[{l:'Review',msg:'Audit queue'}]},
+    {t:'Quarterly access recertification',d:'Active user review due',btns:[{l:'Open',msg:'Access recertification'}]}
+  ]})
+ ]}
 }
 };
 
-const ORDER=[['physician','Physician'],['nurse','Nurse / MA'],['frontdesk','Front desk'],['correctional','Correctional RN'],['coder','Coder / Biller']];
+const ORDER=[['physician','Physician'],['nurse','Nurse / MA'],['frontdesk','Front desk'],['correctional','Correctional RN'],['coder','Coder / Biller'],['office','Office Admin']];
 let cur='physician';let provMode='2';
 
 function render(){
  const r=ROLES[cur];
  $('#nm').textContent=r.who.nm;$('#rl').textContent=r.who.rl;$('#av').textContent=r.who.av;
+ $('#nmBig').textContent=r.who.nm;$('#rlBig').textContent=r.who.rl;$('#avBig').textContent=r.who.av;
  $('#ask').placeholder=cur==='frontdesk'?'Ask — \u201cwho\u2019s likely to no-show?\u201d':cur==='coder'?'Ask — \u201cwhat\u2019s aging past 5 days?\u201d':'Ask about a patient or your day';
  $('#askScope').textContent=cur==='coder'||cur==='frontdesk'?'My queue':'This patient';
  $('#nav').innerHTML=`<div class="hint" style="padding:8px 12px 4px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-size:10px">Menu</div>`+r.nav.map(([i,l,c,on])=>`<a href="#" class="${on?'on':''}" onclick="event.preventDefault()"><span class="ic">${i}</span>${l}${c?`<span class="ct">${c}</span>`:''}</a>`).join('')+`<div class="sp"></div><div class="hint">Same map every role — only the contents change.</div>`;
@@ -475,7 +534,7 @@ function render(){
  }
 
  // legend on every schedule-style view (VAL-030)
- const legend=(!r.head.watch)?`<div class="legend"><span><span class="d" style="background:var(--warn)"></span>Care gap staged as orders</span><span style="color:var(--crit)">▎Needs attention</span><span>Every visit opens prepared — flags mark exceptions only</span></div>`:'';
+ const legend=(!r.head.watch && r.legend!==false)?`<div class="legend"><span><span class="d" style="background:var(--warn)"></span>Care gap staged as orders</span><span style="color:var(--crit)">▎Needs attention</span><span>Every visit opens prepared — flags mark exceptions only</span></div>`:'';
 
  $('#main').innerHTML=`
    <div class="wrap-head"><h1>${r.head.h}</h1><span class="sub">· ${r.head.sub}</span><div class="right">${headRight}</div></div>
@@ -486,7 +545,7 @@ function render(){
    <div class="rail-h"><h2>${r.rail.title}</h2><span class="n">${r.rail.n} items</span></div>
    ${r.rail.groups.join('')}
    ${r.railfoot?`<p class="rail-foot"><span class="g"></span>${r.railfoot}</p>`:''}
-   <p class="rail-foot"><span class="g"></span>Indigo marks machine-prepared work awaiting your judgment. Nothing prepared is ever sent or signed without you.</p>`;
+   <p class="rail-foot"><span class="g"></span>Indigo marks machine-prepared work awaiting your judgment. Nothing prepared is ever sent or signed without you. The workspace learns your preferences as you work — Settings is there when you want to adjust something directly, including accessibility.</p>`;
 
  $('#roles').innerHTML=ORDER.map(([k,l])=>`<button class="${k===cur?'on':''}" onclick="sw('${k}')">${l}</button>`).join('');
 }
