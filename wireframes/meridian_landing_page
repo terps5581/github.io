@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>DES-LAND-01 — Landing Workspace v0.3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* MERIDIAN — Health-grade language, v0.3 landing.
+     Redesign goals (owner direction 2026-07-13):
+       · schedule is the hero; providers see patients, not prose
+       · open work (results/messages/refills/sign) in a task sidebar
+       · briefing strip removed; AI marking is quiet by default,
+         colorized ONLY for items awaiting judgment (fixes DU-001/002)
+       · each role scoped to its real world (front desk loses clinical
+         results/refills/attestation; nurse/MA gains multi-provider view)
+       · 44px targets, AA contrast, larger type (fixes DU-004/005/017)
+       · results are Review-not-Dismiss; criticals escalate (fixes VAL-019/DU-010) */
+  :root{ --grad:linear-gradient(135deg,#FF5E8A 0%,#8A5CFF 52%,#38B6FF 100%); --r:16px; --r2:11px; }
+  [data-mode="light"]{
+    --bg:#EDEEF2; --card:#FFFFFF; --card2:#F4F5F8; --hover:#F0F1F5;
+    --ink:#0F1015; --muted:#565A66; --faint:#7C808C;
+    --line:rgba(30,32,40,.10); --line2:rgba(30,32,40,.16);
+    --ai:#4B47D6; --ai-tint:#ECEBFB; --ai-line:rgba(75,71,214,.24);
+    --crit:#C7261B; --crit-tint:#FBE9E7; --crit-edge:#E5372C;
+    --warn:#9A5B00; --warn-tint:#FBEFDD;
+    --ok:#1B7A3D; --ok-tint:#E6F4EB;
+    --shadow:0 1px 2px rgba(15,16,21,.04),0 8px 24px rgba(15,16,21,.06);
+    --ink-btn:#0F1015; --ink-btn-t:#fff; color-scheme:light;
+  }
+  [data-mode="dark"]{
+    --bg:#08090C; --card:#17181E; --card2:#20222A; --hover:#22242C;
+    --ink:#F3F4F7; --muted:#A6AAB6; --faint:#787D8A;
+    --line:rgba(140,146,160,.16); --line2:rgba(140,146,160,.28);
+    --ai:#9E9BFF; --ai-tint:rgba(120,116,255,.15); --ai-line:rgba(158,155,255,.32);
+    --crit:#FF6A60; --crit-tint:rgba(255,106,96,.15); --crit-edge:#FF6A60;
+    --warn:#FFB24D; --warn-tint:rgba(255,178,77,.14);
+    --ok:#45D873; --ok-tint:rgba(69,216,115,.14);
+    --shadow:none; --ink-btn:#F3F4F7; --ink-btn-t:#08090C; color-scheme:dark;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  html,.app{background:var(--bg)}
+  body{font-family:'Figtree',system-ui,sans-serif;font-size:14.5px;line-height:1.5;color:var(--ink);-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
+  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+  button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2.5px solid var(--ai);outline-offset:2px;border-radius:8px}
+  .mono{font-family:'IBM Plex Mono',monospace}
+
+  .app{display:grid;grid-template-rows:54px 1fr;grid-template-columns:180px 1fr 340px;height:100vh;min-width:1040px}
+  /* ---- T: topbar (slim) ---- */
+  .topbar{grid-column:1/4;display:flex;align-items:center;gap:14px;padding:0 16px}
+  .brand{font-weight:800;font-size:16px;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+  .brand .g{width:20px;height:20px;border-radius:6px;background:var(--grad)}
+  .ask{flex:1;max-width:460px;display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:0 13px;height:40px;box-shadow:var(--shadow);cursor:text}
+  .ask .g{width:15px;height:15px;border-radius:5px;background:var(--grad);flex:none}
+  .ask .scope{font-size:11.5px;font-weight:700;color:var(--muted);background:var(--card2);border-radius:6px;padding:2px 7px;white-space:nowrap}
+  .ask input{border:none;background:transparent;flex:1;font:inherit;font-size:13.5px;color:var(--ink);outline:none}
+  .ask input::placeholder{color:var(--faint)}
+  .top-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .icon-btn{width:40px;height:40px;border-radius:11px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);display:grid;place-items:center;font-size:16px;color:var(--muted)}
+  .icon-btn:hover{color:var(--ink)}
+  .who{display:flex;align-items:center;gap:9px;padding-left:6px}
+  .avatar{width:36px;height:36px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
+  .who .name{font-weight:700;font-size:13px;line-height:1.15}.who .role{font-size:11.5px;color:var(--muted)}
+
+  /* ---- N: nav (slim) ---- */
+  .nav{grid-row:2;grid-column:1;padding:6px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+  .nav a{display:flex;align-items:center;gap:11px;height:44px;padding:0 12px;border-radius:11px;color:var(--muted);text-decoration:none;font-weight:600;font-size:13.5px}
+  .nav a:hover{background:var(--card)}
+  .nav a.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+  .nav a .ic{width:18px;text-align:center;font-size:14px}
+  .nav a .ct{margin-left:auto;font-size:12px;font-weight:700;color:var(--faint)}
+  .nav a.on .ct{color:var(--muted)}
+  .nav .sp{flex:1}
+  .nav .hint{font-size:11px;color:var(--faint);padding:10px 12px;line-height:1.5}
+
+  /* ---- W: schedule hero ---- */
+  .main{grid-row:2;grid-column:2;overflow-y:auto;padding:8px 20px 60px}
+  .wrap-head{display:flex;align-items:center;gap:12px;padding:10px 6px 12px;position:sticky;top:0;background:var(--bg);z-index:3}
+  .wrap-head h1{font-size:19px;font-weight:800;letter-spacing:-.02em}
+  .wrap-head .sub{font-size:13px;color:var(--muted);font-weight:600}
+  .wrap-head .right{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .provsel{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px;box-shadow:var(--shadow)}
+  .provsel button{height:32px;padding:0 12px;border-radius:8px;font-size:12.5px;font-weight:700;color:var(--muted)}
+  .provsel button.on{background:var(--ink-btn);color:var(--ink-btn-t)}
+  .seg{display:flex;gap:0;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow)}
+  .seg button{height:34px;padding:0 13px;font-size:12.5px;font-weight:700;color:var(--muted);border-right:1px solid var(--line)}
+  .seg button:last-child{border-right:none}
+  .seg button.on{background:var(--card2);color:var(--ink)}
+
+  .sched{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+  .schedhead{display:grid;grid-template-columns:76px 1fr 184px 122px;background:var(--card2);border-bottom:1px solid var(--line)}
+  .schedhead div{padding:9px 14px;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .slot{display:grid;grid-template-columns:76px 1fr 184px 122px;align-items:center;border-top:1px solid var(--line);min-height:50px;cursor:pointer}
+  .slot:first-child{border-top:none}
+  .slot:hover{background:var(--hover)}
+  .slot>div{padding:6px 14px;min-width:0}
+  .slot .c-time{border-right:1px solid var(--line);align-self:stretch;display:flex;flex-direction:column;justify-content:center}
+  .slot .c-time .h{font-family:'IBM Plex Mono',monospace;font-size:13.5px;font-weight:600}
+  .slot .c-time .dur{font-size:10.5px;color:var(--faint);margin-top:1px}
+  .slot .nm{font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .slot .nm .age{color:var(--muted);font-weight:600;font-size:12.5px}
+  .slot .rsn{font-size:12px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .slot .c-flags{display:flex;gap:6px;flex-wrap:nowrap;align-items:center;overflow:hidden}
+  .slot .c-status{display:flex;align-items:center}
+  .slot.brk{min-height:46px;background:var(--card2);cursor:default;grid-template-columns:76px 1fr}
+  .slot.brk:hover{background:var(--card2)}
+  .slot.brk .brklabel{padding:8px 14px;font-weight:700;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:9px}
+  .slot.brk .brklabel .ln{flex:1;height:1px;background:var(--line2)}
+
+  /* quiet patient cues — glyph-first; color only where it means "attention" */
+  .cue{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;height:22px;padding:0 8px;border-radius:7px;background:var(--card2);color:var(--muted);white-space:nowrap}
+  .cue .d{width:7px;height:7px;border-radius:50%}
+  .cue.prep{color:var(--ai)}
+  .cue.prep .g{width:9px;height:9px;border-radius:2.5px;background:var(--grad)}
+  .cue.gap{background:var(--warn-tint);color:var(--warn)}
+  .cue.gap .d{background:var(--warn)}
+  .cue.new{background:var(--ai-tint);color:var(--ai)}
+  .cue.risk{background:var(--warn-tint);color:var(--warn)}
+  .cue.flag{background:var(--crit-tint);color:var(--crit)}
+  .stat-pill{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px}
+  .stat-pill.arr{background:var(--ok-tint);color:var(--ok)}
+  .stat-pill.room{background:var(--ai-tint);color:var(--ai)}
+  .stat-pill.wait{background:var(--card2);color:var(--muted)}
+  .prov-tag{font-size:11px;font-weight:800;letter-spacing:.02em;padding:2px 7px;border-radius:6px}
+
+  /* ---- nurse multi-schedule: columns aligned by a shared time axis ---- */
+  .cols{display:grid;gap:12px;overflow-x:auto;padding-bottom:4px}
+  .colhead{display:grid;gap:12px;position:sticky;top:56px;background:var(--bg);z-index:2;padding:2px 0 8px}
+  .colhead .ch{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px;padding:0 4px}
+  .colhead .ch .sw{width:10px;height:10px;border-radius:3px;flex:none}
+  .colhead .ch .role{font-size:11.5px;color:var(--faint);font-weight:700}
+  .colhead .ch .ct{margin-left:auto;font-size:11.5px;color:var(--faint);font-weight:700}
+  .colhead .ch.me{color:var(--ink)}
+  .gridbody{display:grid;gap:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+  .trow{display:grid;border-top:1px solid var(--line);min-height:60px}
+  .trow:first-child{border-top:none}
+  .tgut{display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;color:var(--muted);background:var(--card2);border-right:1px solid var(--line)}
+  .cell{padding:8px 11px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;cursor:pointer;min-width:0}
+  .cell:last-child{border-right:none}
+  .cell:hover{background:var(--hover)}
+  .cell.empty{cursor:default;background:transparent}
+  .cell.empty:hover{background:transparent}
+  .cell .cn{font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .cell .cn .age{color:var(--muted);font-weight:600;font-size:12px}
+  .cell .cr{font-size:11.5px;color:var(--muted);margin-top:1px}
+  .cell .ccues{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+  .cell.me-cell{background:linear-gradient(0deg,var(--card2),var(--card2))}
+  .cell.me-cell .cn{color:var(--ink)}
+  .cell .task{font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.03em}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;padding:12px 8px 4px;font-size:11.5px;color:var(--faint)}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .legend .g{width:9px;height:9px;border-radius:2.5px;background:var(--grad)}
+  .legend .d{width:8px;height:8px;border-radius:50%}
+
+  /* ---- A: task sidebar (open work) ---- */
+  .rail{grid-row:2;grid-column:3;overflow-y:auto;padding:10px 16px 50px;border-left:1px solid var(--line)}
+  .rail-h{display:flex;align-items:baseline;gap:8px;padding:8px 4px 10px;position:sticky;top:0;background:var(--bg);z-index:2}
+  .rail-h h2{font-size:15px;font-weight:800}
+  .rail-h .n{font-size:12.5px;color:var(--muted);font-weight:700}
+  .tgroup{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+  .tgroup>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;height:46px;padding:0 14px;font-weight:700;font-size:13.5px}
+  .tgroup>summary::-webkit-details-marker{display:none}
+  .tgroup>summary .ic{width:18px;text-align:center;color:var(--muted)}
+  .tgroup>summary .cnt{margin-left:auto;display:flex;align-items:center;gap:7px}
+  .tgroup>summary .badge{min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--card2);color:var(--muted);font-size:12px;font-weight:800;display:grid;place-items:center}
+  .tgroup>summary .badge.hot{background:var(--crit-tint);color:var(--crit)}
+  .tgroup>summary .chev{color:var(--faint);font-size:11px;transition:transform .15s}
+  .tgroup[open]>summary .chev{transform:rotate(90deg)}
+  .titem{display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border-top:1px solid var(--line)}
+  .titem .b{flex:1;min-width:0}
+  .titem .t{font-weight:700;font-size:13.5px}
+  .titem .d{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .titem.crit{background:var(--crit-tint)}
+  .titem.crit::before{content:"";position:absolute;left:0;width:3px;top:0;bottom:0;background:var(--crit-edge)}
+  .titem{position:relative}
+  .prepmark{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--ai);margin-top:5px}
+  .prepmark .g{width:8px;height:8px;border-radius:2.5px;background:var(--grad);flex:none}
+  .btn{height:36px;padding:0 13px;border-radius:9px;font-size:12.5px;font-weight:700;background:var(--card2);color:var(--ink);flex:none}
+  .btn:hover{filter:brightness(.97)}
+  .btn.pri{background:var(--ink-btn);color:var(--ink-btn-t)}
+  .btn.ai{background:var(--ai-tint);color:var(--ai)}
+  .titem .act{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+  .tempty{padding:14px;font-size:12.5px;color:var(--faint);text-align:center}
+  .rail-foot{font-size:11.5px;color:var(--faint);line-height:1.5;padding:6px 6px}
+  .rail-foot .g{width:8px;height:8px;border-radius:2px;background:var(--grad);display:inline-block;vertical-align:-1px;margin-right:5px}
+
+  /* review chrome */
+  .demo{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:60;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 7px 5px 15px;display:flex;align-items:center;gap:9px;box-shadow:0 12px 34px rgba(0,0,0,.22)}
+  .demo .l{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:800}
+  .demo .r{display:flex;gap:3px}
+  .demo button{height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--muted)}
+  .demo button.on{background:var(--ink-btn);color:var(--ink-btn-t)}
+  .toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--ink-btn);color:var(--ink-btn-t);border-radius:11px;padding:10px 16px;font-size:12.5px;font-weight:600;opacity:0;pointer-events:none;transition:.18s;z-index:70;max-width:460px;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .tag{position:fixed;top:60px;right:352px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--faint);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:3px 8px;z-index:4}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><span class="g"></span>Meridian</div>
+    <div class="ask" onclick="toast('Command surface — scope chip shows what you\u2019re asking about. Keyboard: press /')">
+      <span class="g"></span><span class="scope" id="askScope">This patient</span>
+      <input id="ask" aria-label="Ask anything">
+    </div>
+    <div class="top-right">
+      <button class="icon-btn" id="modeBtn" onclick="toggleMode()" aria-label="Light or dark">☾</button>
+      <div class="who"><div class="avatar" id="av"></div><div><div class="name" id="nm"></div><div class="role" id="rl"></div></div></div>
+    </div>
+  </header>
+  <nav class="nav" id="nav" aria-label="Primary"></nav>
+  <main class="main" id="main"></main>
+  <aside class="rail" id="rail" aria-label="Your open work"></aside>
+</div>
+<div class="tag">DES-LAND-01 · v0.4 · schedule-dominant</div>
+<div class="demo"><span class="l">View as</span><div class="r" id="roles"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);let tt;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3200);}
+const mq=matchMedia('(prefers-color-scheme: dark)');let userSet=false;
+function setMode(m){document.documentElement.dataset.mode=m;$('#modeBtn').textContent=m==='light'?'☾':'☀';}
+setMode(mq.matches?'dark':'light');
+mq.addEventListener('change',e=>{if(!userSet)setMode(e.matches?'dark':'light')});
+function toggleMode(){userSet=true;setMode(document.documentElement.dataset.mode==='light'?'dark':'light');}
+
+/* cue builders — quiet by default */
+const cuePrep=()=>`<span class="cue prep" title="Prepared — opens ready"><span class="g"></span>Ready</span>`;
+const cueGap=(n)=>`<span class="cue gap" title="Care gaps staged as orders"><span class="d"></span>${n} gap${n>1?'s':''}</span>`;
+const cueNew=()=>`<span class="cue new">New pt</span>`;
+const cueRisk=(band)=>`<span class="cue risk" title="No-show likelihood — banded per calibration law">No-show: ${band}</span>`;
+const cueFlag=(t)=>`<span class="cue flag">${t}</span>`;
+const stAr=()=>`<span class="stat-pill arr">Arrived</span>`;
+const stRoom=(r)=>`<span class="stat-pill room">Room ${r}</span>`;
+const stWait=(t)=>`<span class="stat-pill wait">${t}</span>`;
+
+/* provider colors for nurse multi-provider view */
+const PC={OK:'#4B47D6',RS:'#1B7A3D',LI:'#9A5B00'};
+const provTag=(ab)=>`<span class="prov-tag" style="background:${PC[ab]}22;color:${PC[ab]}">${ab}</span>`;
+
+const slot=(o)=>`<div class="slot" onclick="toast('Opens ${o.open||'the prepared visit'} — DES-ENC-01, downstream')">
+  <div class="c-time"><div class="h">${o.t}</div><div class="dur">${o.dur||''}</div></div>
+  <div class="c-pt"><div class="nm">${o.prov?provTag(o.prov):''}${o.nm} <span class="age">${o.age||''}</span></div><div class="rsn">${o.rsn}</div></div>
+  <div class="c-flags">${(o.flags||[]).join('')}</div>
+  <div class="c-status">${o.st||''}</div></div>`;
+const brk=(label,sub)=>`<div class="slot brk"><div class="c-time"><div class="h">${sub||''}</div></div><div class="brklabel">${label}<span class="ln"></span></div></div>`;
+const schedHead=(labels)=>`<div class="schedhead"><div>${labels[0]}</div><div>${labels[1]}</div><div>${labels[2]}</div><div>${labels[3]}</div></div>`;
+
+const tgroup=(o)=>{
+  const hot=o.hot||0;
+  const items=o.items&&o.items.length?o.items.map(it=>`<div class="titem ${it.crit?'crit':''}">
+      <div class="b"><div class="t">${it.t}</div>${it.d?`<div class="d">${it.d}</div>`:''}${it.prep?`<div class="prepmark"><span class="g"></span>${it.prep}</div>`:''}</div>
+      <div class="act">${(it.btns||[]).map(b=>`<button class="btn ${b.k||''}" onclick="event.stopPropagation();toast('${b.msg}')">${b.l}</button>`).join('')}</div>
+    </div>`).join(''):`<div class="tempty">Nothing needs you here right now.</div>`;
+  return `<details class="tgroup" ${o.open?'open':''}>
+    <summary><span class="ic">${o.ic}</span>${o.title}<span class="cnt">${hot?`<span class="badge hot">${hot}</span>`:''}<span class="badge">${o.n}</span><span class="chev">▸</span></span></summary>
+    ${items}</details>`;
+};
+
+const ROLES={
+physician:{
+ who:{nm:'Dr. A. Okafor',rl:'Physician · Internal Medicine',av:'AO'},
+ nav:[['▦','Today',null,1],['☷','Schedule',null],['⧉','Patients',null],['◇','Orders',null],['▤','Documents',null]],
+ head:{h:'Today',sub:'Fri Jul 10 · 18 visits · 6 tasks need you',tableHead:['Time','Patient','Flags','Status']},
+ sched:[
+  slot({t:'8:00',dur:'20 min',nm:'Marisol Reyes',age:'61 F',rsn:'Follow-up · T2DM, HTN',flags:[cueGap(2)],st:stRoom(3)}),
+  slot({t:'8:20',dur:'20 min',nm:'Daniel Okwe',age:'48 M',rsn:'New patient · establishing care',flags:[cueNew(),cueFlag('med disc.')],st:stWait('Checked in')}),
+  slot({t:'8:40',dur:'20 min',nm:'Priya Natarajan',age:'34 F',rsn:'Results follow-up · thyroid',flags:[],st:stWait('9m out')}),
+  slot({t:'9:00',dur:'20 min',nm:'George Halvorsen',age:'72 M',rsn:'Chronic care · CHF, CKD',flags:[cueGap(1)],st:stWait('')}),
+  slot({t:'9:20',dur:'40 min',nm:'Amina Bello',age:'29 F',rsn:'Annual exam',flags:[],st:stWait('')}),
+  slot({t:'10:00',dur:'20 min',nm:'Robert Chen',age:'66 M',rsn:'Post-hospital follow-up',flags:[cueFlag('K⁺ pending')],st:stWait('')}),
+  slot({t:'10:20',dur:'20 min',nm:'Yusuf Demir',age:'54 M',rsn:'Follow-up · hyperlipidemia',flags:[],st:stWait('')}),
+  slot({t:'10:40',dur:'20 min',nm:'Grace Whitmore',age:'81 F',rsn:'Fall follow-up · gait review',flags:[cueGap(1)],st:stWait('')}),
+  slot({t:'11:00',dur:'40 min',nm:'Nathan Poole',age:'45 M',rsn:'New patient · chronic pain',flags:[cueNew()],st:stWait('')}),
+  slot({t:'11:40',dur:'20 min',nm:'Sofia Marín',age:'37 F',rsn:'Contraception counseling',flags:[],st:stWait('')}),
+  brk('Lunch','12:00'),
+  slot({t:'1:00',dur:'20 min',nm:'Walter Osei',age:'59 M',rsn:'Diabetes · insulin titration',flags:[cueGap(1)],st:stWait('')}),
+  slot({t:'1:20',dur:'20 min',nm:'Hana Kim',age:'42 F',rsn:'Migraine follow-up',flags:[],st:stWait('')}),
+  slot({t:'1:40',dur:'40 min',nm:'Elias Braun',age:'68 M',rsn:'Medicare annual wellness',flags:[cueGap(3)],st:stWait('')}),
+  slot({t:'2:20',dur:'20 min',nm:'Rosa Delgado',age:'50 F',rsn:'Thyroid nodule follow-up',flags:[],st:stWait('')}),
+  slot({t:'2:40',dur:'20 min',nm:'Tomas Vance',age:'33 M',rsn:'Anxiety · med check',flags:[],st:stWait('')}),
+  slot({t:'3:00',dur:'20 min',nm:'Ingrid Sato',age:'70 F',rsn:'CKD staging review',flags:[cueFlag('eGFR trend')],st:stWait('')}),
+  slot({t:'3:20',dur:'40 min',nm:'Marcus Reed',age:'63 M',rsn:'New patient · CHF transfer',flags:[cueNew()],st:stWait('')}),
+  slot({t:'4:00',dur:'20 min',nm:'Lena Fischer',age:'28 F',rsn:'Postpartum follow-up',flags:[],st:stWait('')}),
+  brk('Documentation & in-basket','4:20'),
+ ],
+ legend:true,
+ rail:{title:'Your open work today',n:'15',groups:[
+  tgroup({ic:'◔',title:'Results',n:3,hot:1,open:true,items:[
+    {t:'Chen, R. — Potassium 5.9',d:'On lisinopril + spironolactone',crit:true,prep:'Repeat BMP + hold message drafted',btns:[{l:'Review',k:'pri',msg:'Opens result → review evidence → sign. Critical results can\u2019t be one-tap dismissed.'}]},
+    {t:'Alvarez, M. — Mammogram BI-RADS 3',d:'6-mo follow-up tracked',prep:'Imaging order + patient letter drafted',btns:[{l:'Review',k:'pri',msg:'Review drafts → sign'}]},
+    {t:'Natarajan, P. — TSH 6.8',d:'Trended against baseline',prep:'Interpretation drafted for 8:40 visit',btns:[{l:'Review',msg:'Review'}]}
+  ]}),
+  tgroup({ic:'✉',title:'Messages',n:6,hot:1,items:[
+    {t:'Gary L. — chest tightness on exertion',d:'Needs your judgment · not drafted',crit:true,btns:[{l:'Open',k:'pri',msg:'Opens with synthesized cardiac context'}]},
+    {t:'5 more · 4 drafted, 1 routine',d:'Routine items are scanned for urgent content and resurface if flagged — nothing is silently dropped',prep:'Review & send — you\u2019re the send',btns:[{l:'Review',k:'ai',msg:'Review drafted replies → send'}]}
+  ]}),
+  tgroup({ic:'℞',title:'Refills',n:4,items:[
+    {t:'4 refill requests · all drafted',d:'Stable meds, monitoring current',prep:'Approvals staged with monitoring notes',btns:[{l:'Review',k:'ai',msg:'Review → approve. Nothing auto-sent.'}]}
+  ]}),
+  tgroup({ic:'✎',title:'To sign',n:2,items:[
+    {t:'2 ambient notes from yesterday',d:'Hoffman f/u · Bell annual',prep:'SOAP + E/M drafted; you edit, attest, sign',btns:[{l:'Sign',msg:'Edit → attest → sign'}]}
+  ]})
+ ]}
+},
+nurse:{
+ who:{nm:'J. Whitfield, RN',rl:'Nurse · Pod 2',av:'JW'},
+ nav:[['▦','Today',null,1],['☷','Rooming',null],['⧉','Patients',null],['◇','Orders',null]],
+ head:{h:'Pod schedule',sub:'your rooming beside each provider, aligned by time',cols:true},
+ /* provider columns; nurse lane is derived from these + own tasks. Column view built in render(). */
+ providers:[
+   {ab:'OK',name:'Dr. Okafor',role:'Internal Med'},
+   {ab:'RS',name:'Dr. Reyes',role:'Family Med'},
+   {ab:'LI',name:'Dr. Lin',role:'Internal Med'}
+ ],
+ grid:[
+  {t:'8:00', me:{task:'Rooming',nm:'Reyes, M.',rsn:'Room 3 · vitals + POC A1c',cues:[cueFlag('verify med rec')]},
+    OK:{nm:'Reyes, M.',age:'61',rsn:'Follow-up · T2DM',cues:[cuePrep()]},
+    RS:{nm:'Blake, A.',age:'55',rsn:'BP recheck',cues:[cuePrep()]},
+    LI:{nm:'Sato, K.',age:'70',rsn:'Med review',cues:[cuePrep()]}},
+  {t:'8:20', me:{task:'Intake',nm:'Okwe, D.',rsn:'New patient forms',cues:[cueNew()]},
+    OK:{nm:'Okwe, D.',age:'48',rsn:'New patient',cues:[cuePrep(),cueNew()]},
+    RS:null, LI:{nm:'Diaz, M.',age:'52',rsn:'Diabetes f/u',cues:[cuePrep()]}},
+  {t:'8:40', me:{task:'PHQ-9',nm:'Natarajan, P.',rsn:'Screen to room tablet',cues:[]},
+    OK:{nm:'Natarajan, P.',age:'34',rsn:'Results f/u',cues:[cuePrep()]},
+    RS:{nm:'Ferro, L.',age:'41',rsn:'Depression f/u · PHQ-9',cues:[cuePrep()]},
+    LI:null},
+  {t:'9:00', me:null,
+    OK:{nm:'Halvorsen, G.',age:'72',rsn:'CHF, CKD',cues:[cuePrep(),cueGap(1)]},
+    RS:{nm:'Reed, M.',age:'63',rsn:'Wound check',cues:[cuePrep()]},
+    LI:{nm:'Park, J.',age:'59',rsn:'Hypertension',cues:[cuePrep()]}},
+  {t:'9:20', me:{task:'Vaccine',nm:'Bello, A.',rsn:'Consent pre-filled',cues:[]},
+    OK:{nm:'Bello, A.',age:'29',rsn:'Annual exam',cues:[cuePrep()]},
+    RS:null, LI:{nm:'Haddad, N.',age:'38',rsn:'Med review',cues:[cuePrep()]}}
+ ],
+ legend:true,
+ rail:{title:'Your tasks',n:'10',groups:[
+  tgroup({ic:'⚗',title:'Med rec to verify',n:2,hot:1,open:true,items:[
+    {t:'Chen, R. — 2 discrepancies',d:'Duplicate PPI + dose mismatch',crit:true,prep:'Reconciled across fills + visits; flags staged',btns:[{l:'Verify',k:'pri',msg:'You verify each flag → attest'}]},
+    {t:'Reyes, M. — 1 discrepancy',d:'Atorvastatin 40 vs chart 20',prep:'Verify with patient at rooming',btns:[{l:'Verify',k:'pri',msg:'Verify → attest'}]}
+  ]}),
+  tgroup({ic:'✉',title:'Messages',n:5,items:[
+    {t:'5 messages · 3 drafted',d:'Call-backs and result questions · deferred items scanned for urgency, resurface if flagged',prep:'Drafts ready in patient\u2019s language',btns:[{l:'Review',k:'ai',msg:'Review → send'}]}
+  ]}),
+  tgroup({ic:'⚑',title:'Tasks',n:3,items:[
+    {t:'Standing-order labs · 3 queued',d:'Protocol-matched to visit reasons',prep:'One tap each to release',btns:[{l:'Review',msg:'Release under standing order'}]},
+    {t:'Vaccines due · 2 patients',d:'Consents pre-filled; lot entry only',btns:[{l:'Open',msg:'Prepared vaccine workflow'}]}
+  ]})
+ ]}
+},
+frontdesk:{
+ who:{nm:'S. Barros',rl:'Front desk · Patient access',av:'SB'},
+ nav:[['▦','Today',null,1],['☷','Schedule',null],['⧉','Patients',null],['▤','Reports',null]],
+ head:{h:'Front desk',sub:'Who\u2019s here · who\u2019s coming · who to call',allProv:true,tableHead:['Time','Patient','Flags','Status']},
+ sched:[
+  slot({t:'8:00',ready:false,prov:'OK',nm:'Reyes, M.',rsn:'Dr. Okafor · copay verified',flags:[],st:stAr()}),
+  slot({t:'8:00',ready:false,prov:'RS',nm:'Blake, A.',rsn:'Dr. Reyes',flags:[],st:stAr()}),
+  slot({t:'8:20',ready:false,prov:'OK',nm:'Okwe, D.',rsn:'Dr. Okafor · new patient',flags:[cueFlag('forms pending')],st:stWait('Checked in')}),
+  slot({t:'9:40',ready:false,prov:'OK',nm:'Tran, H.',rsn:'Dr. Okafor',flags:[cueRisk('high')],st:stWait('Unconfirmed')}),
+  slot({t:'11:00',ready:false,prov:'RS',nm:'Dawson, P.',rsn:'Dr. Reyes',flags:[],st:stWait('')}),
+  slot({t:'2:00',ready:false,prov:'LI',nm:'Keller, J.',rsn:'Dr. Lin · MRI pre-visit',flags:[],st:stWait('')})
+ ],
+ legend:true,
+ rail:{title:'Your queue',n:'16',groups:[
+  tgroup({ic:'☏',title:'Calls to triage',n:5,hot:1,open:true,items:[
+    {t:'Reschedule request — line 2',d:'Tran, H. · asking for afternoon',prep:'Earlier slot today already offered',btns:[{l:'Open',k:'pri',msg:'Opens caller context + open slots'}]},
+    {t:'4 more in queue',d:'2 scheduling, 1 billing, 1 records',btns:[{l:'View',msg:'Call queue, routed by type'}]}
+  ]}),
+  tgroup({ic:'✔',title:'Confirmations',n:8,items:[
+    {t:'8 unconfirmed · risk-sorted',d:'4 high no-show risk at top',prep:'Reminder texts drafted, EN/ES',btns:[{l:'Review',k:'ai',msg:'Review batch → send. Never auto-sends.'}]}
+  ]}),
+  tgroup({ic:'⛨',title:'Authorization status',n:3,items:[
+    {t:'Keller MRI · Friday',d:'Approval likely',prep:'Request pre-filled from chart',btns:[{l:'Review',k:'pri',msg:'Review pre-filled request → submit'}]},
+    {t:'Dawson echo · denial risk',d:'Missing prior echo report',prep:'Records request drafted',btns:[{l:'Fix',msg:'Fix before submission'}]}
+  ]})
+ ]}
+},
+correctional:{
+ who:{nm:'M. Ito, RN',rl:'Nurse · Correctional site B',av:'MI'},
+ nav:[['◉','Watch board',null,1],['⧉','Roster',null],['⚕','Pharmacy',null],['⇄','Sync',null]],
+ head:{h:'Shift board',sub:'Watch status is tracked by the system, never by memory',watch:true},
+ sched:[
+  `<div class="slot" onclick="toast('Opens watch detail')"><div class="time"><div class="h mono">B-14</div><div class="dur">constant</div></div><div class="who2"><div class="nm">Observable</div><div class="rsn">Last check 4 min ago · device A</div></div><div class="cues"><span class="cue" style="color:var(--ok)"><span class="d" style="background:var(--ok)"></span>OK</span></div><div class="status"></div></div>`,
+  `<div class="slot" style="background:var(--crit-tint)" onclick="toast('Observability lost — verify by radio per protocol. Alerted once; supervisor notified.')"><div class="time"><div class="h mono">B-07</div><div class="dur">q15</div></div><div class="who2"><div class="nm">Device-dark · 11 min</div><div class="rsn">Observability lost — not a missed check. Verify by radio.</div></div><div class="cues"><span class="cue flag">Escalated</span></div><div class="status"></div></div>`,
+  `<div class="slot" onclick="toast('Opens watch detail')"><div class="time"><div class="h mono">C-02</div><div class="dur">q30</div></div><div class="who2"><div class="nm">Observable</div><div class="rsn">Last check 12 min ago · device B</div></div><div class="cues"><span class="cue" style="color:var(--ok)"><span class="d" style="background:var(--ok)"></span>OK</span></div><div class="status"></div></div>`,
+  `<div class="slot" onclick="toast('Opens watch detail')"><div class="time"><div class="h mono">C-11</div><div class="dur">q30</div></div><div class="who2"><div class="nm">Observable</div><div class="rsn">Last check 6 min ago · device B</div></div><div class="cues"><span class="cue" style="color:var(--ok)"><span class="d" style="background:var(--ok)"></span>OK</span></div><div class="status"></div></div>`
+ ],
+ legend:false,
+ railfoot:'Device B: 2 events captured offline with true timestamps — reconcile on reconnect (PATTERN-OFFLINE-01).',
+ rail:{title:'Shift tasks',n:'21',groups:[
+  tgroup({ic:'⚕',title:'MAR pass · 07:30',n:12,open:true,items:[
+    {t:'12 administrations · route-sequenced',d:'KOP vs nurse-administered pre-sorted',prep:'1 refusal pattern flagged (3 consecutive)',btns:[{l:'Start',k:'pri',msg:'MAR workflow'}]}
+  ]}),
+  tgroup({ic:'☰',title:'Sick call',n:7,hot:1,items:[
+    {t:'B-22 · chest pain on exertion',d:'Same-day evaluation suggested',crit:true,btns:[{l:'Open',k:'pri',msg:'Triage view with chart context'}]},
+    {t:'6 routine · grouped by complaint',d:'Schedule suggestions staged',btns:[{l:'Review',msg:'Batched queue'}]}
+  ]}),
+  tgroup({ic:'✚',title:'Intake / receiving',n:2,items:[
+    {t:'Booking #4471',d:'History pre-populated; current-state items blank by design',prep:'Present ideation/plan/intent always freshly asked',btns:[{l:'Begin',k:'pri',msg:'Screening — item-class partition per STORY-006-01-01'}]}
+  ]})
+ ]}
+},
+coder:{
+ who:{nm:'T. Nakamura',rl:'Coding & revenue',av:'TN'},
+ nav:[['▦','Queue',null,1],['⧉','Encounters',null],['▤','Aging',null],['◔','Reports',null]],
+ head:{h:'Coding queue',sub:'23 pre-coded · ordered by payer deadline',deadline:true,tableHead:['Due','Encounter','Flags','Code']},
+ sched:[
+  slot({t:'D-1',dur:'today',nm:'Hoffman, K.',rsn:'E11.65, I10 · office visit',flags:[],st:stWait('99214')}),
+  slot({t:'D-1',dur:'today',nm:'Bell, A.',rsn:'Annual + depression screen',flags:[],st:stWait('99396')}),
+  slot({t:'D-2',dur:'',nm:'Diaz, R.',rsn:'Note supports 99214, coded 99213',ready:false,flags:[cueFlag('level gap')],st:stWait('99213')}),
+  slot({t:'D-2',dur:'',nm:'Osei, F.',rsn:'Modifier 25 unsupported',ready:false,flags:[cueFlag('modifier')],st:stWait('review')}),
+  slot({t:'D-3',dur:'',nm:'Park, S.',rsn:'Straightforward office visit',flags:[],st:stWait('99213')})
+ ],
+ legend:true,
+ rail:{title:'Needs your decision',n:'5',groups:[
+  tgroup({ic:'⚠',title:'Discrepancies',n:3,hot:0,open:true,items:[
+    {t:'Diaz, R. · note supports 99214',d:'MDM: Rx mgmt + 2 chronic conditions',prep:'Provider query drafted if you\u2019d rather confirm',btns:[{l:'Resolve',k:'pri',msg:'Accept level or send query — provenance-stamped'}]},
+    {t:'Osei, F. · unsupported modifier 25',d:'No separately identifiable E/M documented',prep:'Options staged',btns:[{l:'Resolve',msg:'Resolve with staged options'}]}
+  ]}),
+  tgroup({ic:'↩',title:'Denials → appeals',n:2,items:[
+    {t:'Keller MRI · medical necessity',d:'PT notes + criteria cited',prep:'Appeal drafted with chart citations',btns:[{l:'Review',k:'ai',msg:'Review appeal draft'}]}
+  ]})
+ ]}
+}
+};
+
+const ORDER=[['physician','Physician'],['nurse','Nurse / MA'],['frontdesk','Front desk'],['correctional','Correctional RN'],['coder','Coder / Biller']];
+let cur='physician';let provMode='2';
+
+function render(){
+ const r=ROLES[cur];
+ $('#nm').textContent=r.who.nm;$('#rl').textContent=r.who.rl;$('#av').textContent=r.who.av;
+ $('#ask').placeholder=cur==='frontdesk'?'Ask — \u201cwho\u2019s likely to no-show?\u201d':cur==='coder'?'Ask — \u201cwhat\u2019s aging past 5 days?\u201d':'Ask about a patient or your day';
+ $('#askScope').textContent=cur==='coder'||cur==='frontdesk'?'My queue':'This patient';
+ $('#nav').innerHTML=`<div class="hint" style="padding:8px 12px 4px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-size:10px">Menu</div>`+r.nav.map(([i,l,c,on])=>`<a href="#" class="${on?'on':''}" onclick="event.preventDefault()"><span class="ic">${i}</span>${l}${c?`<span class="ct">${c}</span>`:''}</a>`).join('')+`<div class="sp"></div><div class="hint">Same map every role — only the contents change.</div>`;
+
+ let headRight='';
+ if(r.head.cols) headRight=`<div class="provsel"><button class="${provMode==='2'?'on':''}" onclick="provMode='2';render()">2 providers</button><button class="${provMode==='3'?'on':''}" onclick="provMode='3';render()">3 providers</button></div>`;
+ else if(r.head.allProv) headRight=`<div class="seg"><button class="on">All providers</button><button onclick="toast('Filter by provider')">By provider</button></div>`;
+ else if(!r.head.watch&&!r.head.deadline) headRight=`<div class="seg"><button class="on">Day</button><button onclick="toast('Week view')">Week</button></div>`;
+
+ let scheduleHTML='';
+ if(r.head.cols){
+   // multi-schedule: Me lane + N provider columns, aligned by a shared time gutter
+   const provs=r.providers.slice(0, provMode==='3'?3:2);
+   const cols=['ME',...provs.map(p=>p.ab)];
+   const template=`72px repeat(${cols.length}, 1fr)`;
+   const pcolor=(ab)=>PC[ab]||'var(--muted)';
+   const headCells=`<div></div>`+
+     `<div class="ch me"><span class="sw" style="background:var(--ink)"></span>My rooming <span class="ct">Pod 2</span></div>`+
+     provs.map(p=>`<div class="ch"><span class="sw" style="background:${pcolor(p.ab)}"></span>${p.name} <span class="role">${p.role}</span></div>`).join('');
+   const rows=r.grid.map(g=>{
+     const cells=[`<div class="tgut">${g.t}</div>`];
+     // Me lane
+     if(g.me){cells.push(`<div class="cell me-cell" onclick="toast('Opens your rooming task')"><div class="task">${g.me.task}</div><div class="cn">${g.me.nm}</div><div class="cr">${g.me.rsn}</div>${g.me.cues&&g.me.cues.length?`<div class="ccues">${g.me.cues.join('')}</div>`:''}</div>`);}
+     else{cells.push(`<div class="cell empty"></div>`);}
+     // provider lanes
+     provs.forEach(p=>{const c=g[p.ab];
+       if(c){cells.push(`<div class="cell" onclick="toast('Opens ${c.nm} — prepared visit')"><div class="cn">${c.nm} <span class="age">${c.age||''}</span></div><div class="cr">${c.rsn}</div>${c.cues&&c.cues.length?`<div class="ccues">${c.cues.join('')}</div>`:''}</div>`);}
+       else{cells.push(`<div class="cell empty"></div>`);}
+     });
+     return `<div class="trow" style="grid-template-columns:${template}">${cells.join('')}</div>`;
+   }).join('');
+   scheduleHTML=`
+     <div class="colhead" style="grid-template-columns:${template}">${headCells}</div>
+     <div class="gridbody">${rows}</div>`;
+ } else {
+   const th=r.head.tableHead?schedHead(r.head.tableHead):'';
+   scheduleHTML=`<div class="sched">${th}${r.sched.join('')}</div>`;
+ }
+
+ // legend on every schedule-style view (VAL-030)
+ const legend=(!r.head.watch)?`<div class="legend"><span><span class="d" style="background:var(--warn)"></span>Care gap staged as orders</span><span style="color:var(--crit)">▎Needs attention</span><span>Every visit opens prepared — flags mark exceptions only</span></div>`:'';
+
+ $('#main').innerHTML=`
+   <div class="wrap-head"><h1>${r.head.h}</h1><span class="sub">· ${r.head.sub}</span><div class="right">${headRight}</div></div>
+   ${scheduleHTML}
+   ${legend}`;
+
+ $('#rail').innerHTML=`
+   <div class="rail-h"><h2>${r.rail.title}</h2><span class="n">${r.rail.n} items</span></div>
+   ${r.rail.groups.join('')}
+   ${r.railfoot?`<p class="rail-foot"><span class="g"></span>${r.railfoot}</p>`:''}
+   <p class="rail-foot"><span class="g"></span>Indigo marks machine-prepared work awaiting your judgment. Nothing prepared is ever sent or signed without you.</p>`;
+
+ $('#roles').innerHTML=ORDER.map(([k,l])=>`<button class="${k===cur?'on':''}" onclick="sw('${k}')">${l}</button>`).join('');
+}
+function sw(k){cur=k;render();}
+render();
+</script>
+</body>
+</html>
