@@ -849,6 +849,16 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 .sub-nav-scroll{position:absolute;top:50%;right:6px;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--surface,#fff);color:var(--t2,#334155);font-size:17px;font-weight:700;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(15,23,42,.12);z-index:2;padding:0}
 .sub-nav-wrap.can-scroll .sub-nav-scroll{display:flex}
 .sub-nav-scroll:hover{background:var(--surface-2,#f8fafc);color:var(--sb-bg,#1e3a5f)}
+
+/* ── Compact action alert inside banner ── */
+.banner-alert{display:flex;align-items:center;gap:8px;margin-top:9px;padding:6px 10px;background:var(--red-bg,#fef2f2);border:1px solid #fecaca;border-left:3px solid var(--red,#dc2626);border-radius:7px;font-size:12px;min-width:0}
+.ba-icon{font-size:13px;flex-shrink:0;line-height:1}
+.ba-title{font-weight:800;color:var(--red,#dc2626);white-space:nowrap;flex-shrink:0}
+.ba-flag{font-size:10.5px;font-weight:700;color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;padding:1px 7px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.ba-items{color:var(--t2,#334155);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.ba-dismiss{flex-shrink:0;font-size:13px;color:#fca5a5;cursor:pointer;background:none;border:none;padding:2px;line-height:1}
+.ba-dismiss:hover{color:var(--red,#dc2626)}
+@media(max-width:720px){.ba-items{white-space:normal}}
 </style>
 </head>
 <body>
@@ -1015,20 +1025,20 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
             </div>
           </div>
         </div>
-        </div>
-
-        
-        
-
-        <!-- ── ALERT BANNER ── -->
-        <div class="alert-banner" role="alert" aria-live="assertive">
-          <div class="alert-icon">⚠️</div>
-          <div class="alert-content">
-            <div class="alert-title">Action Required — Flagged by Chris Olinsky</div>
-            <div class="alert-items">Update client medications &nbsp;·&nbsp; Order medical records &nbsp;·&nbsp; Call client &nbsp;·&nbsp; Arrange interpreter</div>
+          <!-- ── ACTION ALERT (compact, in banner) ── -->
+          <div class="banner-alert" id="banner-alert" role="alert" aria-live="assertive">
+            <span class="ba-icon">⚠️</span>
+            <span class="ba-title">Action Required</span>
+            <span class="ba-flag">Chris Olinsky</span>
+            <span class="ba-items">Update medications · Order medical records · Call client · Arrange interpreter</span>
+            <button class="ba-dismiss" aria-label="Dismiss alert" onclick="document.getElementById('banner-alert').style.display='none'">✕</button>
           </div>
-          <button class="alert-dismiss" aria-label="Dismiss alert" onclick="this.closest('.alert-banner').style.display='none'">✕</button>
         </div>
+
+        
+        
+
+        
 
       
 
@@ -3758,11 +3768,8 @@ document.querySelectorAll('.screen:not(.active)').forEach(s => {
 
 // ── Alert banner toggle (from header tag) ──
 function toggleAlert() {
-  const banner = document.querySelector('.alert-banner');
-  if (!banner) return;
-  banner.style.display = banner.style.display === 'none' ? 'flex' : 'none';
-  const tag = document.getElementById('alert-tag');
-  if (tag) tag.style.opacity = banner.style.display === 'none' ? '0.5' : '1';
+  var a = document.getElementById('banner-alert');
+  if (a) a.style.display = (a.style.display === 'none') ? 'flex' : 'none';
 }
 
 // ── Tab switching within client record ──
