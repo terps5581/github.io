@@ -276,9 +276,14 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
   border-radius: var(--radius);
   padding: 11px 16px;
   display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-shadow: var(--shadow);
+}
+.ch-identity-row {
+  display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: var(--shadow);
 }
 .ch-avatar {
   width: 44px; height: 44px;
@@ -312,25 +317,21 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .grid-main {
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: minmax(0,1fr) 280px;
   gap: 12px;
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
+  align-content: start;
+  align-items: start;
+}
+@media (max-width: 1280px){
+  .grid-main { grid-template-columns: 1fr; }
 }
 
-.grid-left {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 0;
-}
+.grid-left { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 
-.grid-right {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 0;
-}
+.grid-right { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
    CARD
@@ -386,7 +387,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
   border: 1px solid var(--border);
 }
 .data-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-.data-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.data-grid.cols-4 { grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); }
 
 .data-cell {
   background: var(--surface);
@@ -407,12 +408,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
   color: var(--t4);
   margin-bottom: 3px;
 }
-.dc-value {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--t1);
-  line-height: 1.3;
-}
+.dc-value { font-size: 13px; font-weight: 600; color: var(--t1); line-height: 1.3; word-break: break-word; }
 .dc-value.mono { font-size: 13.5px; }
 .dc-value.empty { color: var(--t4); font-weight: 400; font-style: italic; }
 
@@ -498,7 +494,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .status-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 10px;
 }
 .status-cell {
@@ -508,7 +504,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
   padding: 10px 12px;
 }
 .status-cell-label { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--t4); margin-bottom: 4px; }
-.status-cell-value { font-size: 15px; font-weight: 800; color: var(--t1); letter-spacing: -.3px; }
+.status-cell-value { font-size: 14px; font-weight: 800; color: var(--t1); letter-spacing: -.2px; line-height: 1.25; word-break: break-word; }
 .status-cell-sub   { font-size: 11px; color: var(--t3); margin-top: 2px; }
 .status-cell.green { border-color: #bbf7d0; background: #f0fdf4; }
 .status-cell.green .status-cell-value { color: var(--green); }
@@ -762,7 +758,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 
 /* Tab panes */
 .tab-pane { display: none; flex: 1; flex-direction: column; min-height: 0; }
-.tab-pane.active-tab { display: flex; flex: 1; flex-direction: column; }
+.tab-pane.active-tab { display: flex; flex: 1; flex-direction: column; min-height: 0; }
 .sub-tab { cursor: pointer; }
 
 .group-body { overflow: hidden; }
@@ -790,6 +786,69 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 .ai-section:nth-child(2) { animation-delay: .05s; }
 .ai-section:nth-child(3) { animation-delay: .1s; }
 .ai-section:nth-child(4) { animation-delay: .15s; }
+
+/* ── Case switcher strip ── */
+.case-cards-inbanner{margin-top:11px;padding-top:11px;border-top:1px solid var(--border)}
+.case-strip-label{font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--t4,#94a3b8);margin-bottom:6px}
+.case-cards{display:flex;gap:8px;flex-wrap:wrap}
+.case-card{flex:1 1 200px;min-width:0;display:flex;background:var(--surface-2,#f8fafc);border:1.5px solid var(--border,#e2e8f0);border-radius:10px;overflow:hidden;cursor:pointer;transition:.14s}
+.case-card:hover{border-color:var(--border-2,#cbd5e1);background:#fff}
+.case-card.active{background:#fff;border-color:var(--sb-bg,#1e3a5f);box-shadow:0 2px 8px rgba(30,58,95,.13)}
+.cc-accent{width:4px;flex-shrink:0;opacity:.45}
+.case-card.active .cc-accent{opacity:1}
+.cc-body{padding:7px 11px;flex:1;min-width:0}
+.cc-row1{display:flex;align-items:center;gap:6px;flex-wrap:wrap;row-gap:5px}
+.cc-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.cc-type{font-size:12.5px;font-weight:800;color:var(--t1,#0f172a);white-space:nowrap}
+.cc-stage{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap}
+.cc-flag{margin-left:auto;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--sb-bg,#1e3a5f);background:#e0f2fe;border:1px solid #bae6fd;padding:2px 7px;border-radius:20px;opacity:0;transition:.14s;white-space:nowrap;flex-shrink:0}
+.case-card.active .cc-flag{opacity:1}
+.cc-row2{font-size:11px;color:var(--t3,#64748b);margin-top:4px;line-height:1.35}
+.cc-next{font-weight:700;color:var(--amber,#d97706)}
+.case-card.add{flex:0 0 auto;min-width:0;align-items:center;justify-content:center;border-style:dashed;background:none}
+.case-card.add:hover{border-color:var(--blue,#0ea5e9)}
+.cc-add{padding:0 18px;font-size:12.5px;font-weight:700;color:var(--t3,#64748b)}
+.case-card.add:hover .cc-add{color:var(--blue,#0ea5e9)}
+@media(max-width:720px){.case-card{min-width:100%}.case-card.add{min-width:100%}}
+
+/* ── Capture & Review screen ── */
+.cap-btn{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1.5px solid var(--border);border-radius:11px;cursor:pointer;transition:.14s;background:var(--surface-2,#f8fafc)}
+.cap-btn:hover{border-color:var(--blue,#0ea5e9);background:#e0f2fe}
+.cap-ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;color:#fff}
+.cap-tx .ct{font-size:13.5px;font-weight:700;color:var(--t1,#0f172a)}
+.cap-tx .cs{font-size:11px;color:var(--t3,#64748b)}
+.rq-group-head{padding:10px 18px;background:var(--surface-2,#f8fafc);display:flex;align-items:center;gap:9px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.rq-gname{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--t2,#334155)}
+.rq-gq{font-size:11px;color:var(--t4,#94a3b8);font-weight:700}
+.rq-gdec{font-size:11px;color:var(--t4,#94a3b8);font-style:italic;margin-left:auto}
+.rq-item{padding:12px 18px;display:flex;align-items:center;gap:13px;border-bottom:1px solid var(--border);transition:.1s}
+.rq-item:hover{background:var(--surface-2,#f8fafc)}
+.rq-chan{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:var(--surface-2,#f8fafc);border:1px solid var(--border)}
+.rq-main{flex:1;min-width:0}
+.rq-t{font-size:13.5px;font-weight:700;color:var(--t1,#0f172a);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rq-s{font-size:11.5px;color:var(--t3,#64748b);margin-top:2px}
+.rq-tag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:1px 7px;border-radius:10px;background:var(--surface-2,#f8fafc);border:1px solid var(--border);color:var(--t3,#64748b)}
+.rq-conf{font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px}
+.rq-conf.hi{background:#dcfce7;color:#16a34a}
+.rq-conf.lo{background:#fef3c7;color:#d97706}
+.rq-act{display:flex;gap:7px;flex-shrink:0}
+.rq-fld{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.rq-fld:last-of-type{border-bottom:none}
+.rq-fl{font-size:12px;color:var(--t3,#64748b);width:130px;flex-shrink:0}
+.rq-fv{font-size:13px;font-weight:700;color:var(--t1,#0f172a);flex:1}
+.rq-fs{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:9px}
+.rq-fs.ok{background:#dcfce7;color:#16a34a}
+.rq-fs.check{background:#fef3c7;color:#d97706}
+
+/* ── Tab bar scroll affordance ── */
+.sub-nav-wrap{position:relative;flex-shrink:0}
+.sub-nav-wrap .sub-nav{overflow-x:auto;scrollbar-width:none}
+.sub-nav-wrap .sub-nav::-webkit-scrollbar{display:none}
+.sub-nav-wrap::after{content:"";position:absolute;top:0;right:0;height:100%;width:44px;pointer-events:none;background:linear-gradient(to right,rgba(255,255,255,0),var(--surface,#fff) 70%);opacity:0;transition:opacity .2s;z-index:1}
+.sub-nav-wrap.can-scroll::after{opacity:1}
+.sub-nav-scroll{position:absolute;top:50%;right:6px;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--surface,#fff);color:var(--t2,#334155);font-size:17px;font-weight:700;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(15,23,42,.12);z-index:2;padding:0}
+.sub-nav-wrap.can-scroll .sub-nav-scroll{display:flex}
+.sub-nav-scroll:hover{background:var(--surface-2,#f8fafc);color:var(--sb-bg,#1e3a5f)}
 </style>
 </head>
 <body>
@@ -822,6 +881,9 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
     </button>
     <button class="sb-item" onclick="showScreen('leads')" aria-label="Leads">
       <span class="icon">🎯</span> Leads
+    </button>
+    <button class="sb-item" onclick="showScreen('capture')" aria-label="Capture & Review">
+      <span class="icon">📥</span> Capture &amp; Review <span class="sb-count" style="margin-left:auto;background:var(--red,#dc2626);color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px">9</span>
     </button>
     <button class="sb-item" onclick="showScreen('calendar')" aria-label="Calendar">
       <span class="icon">📅</span> Calendar
@@ -887,25 +949,10 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 
     <!-- ═══ SCREEN: GENERAL ═══ -->
     <div class="screen active" id="screen-general" role="main" aria-label="General — Client Overview">
-      <div class="sub-nav" role="tablist" aria-label="Client record navigation" style="overflow-x:auto;flex-wrap:nowrap;white-space:nowrap">
-        <div class="sub-tab active" role="tab" aria-selected="true" onclick="showTab('snapshot',this)">Snapshot</div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('filings-tab',this)">Filings &amp; Appeals</div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('awards-tab',this)">Awards &amp; Payments</div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('intake1-tab',this)">Intake I</div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('intake2-tab',this)">Intake II</div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('medical-tab',this)">Medical Records</div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('client-docs',this)">Documents</div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('contacts-tab',this)">Contacts</div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('notes-tab',this)">Notes</div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('tasks-tab',this)">Tasks</div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('case-events-tab',this)" style="color:var(--t3)">Case Events <span style="font-size:10px;opacity:.7">WC/PI</span></div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('assoc-parties-tab',this)" style="color:var(--t3)">Assoc Parties <span style="font-size:10px;opacity:.7">WC/PI</span></div>
-        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('va-claim-tab',this)" style="color:var(--t3)">VA Claim <span style="font-size:10px;opacity:.7">VA</span></div>
-      </div>
-
-      <!-- ── PERSISTENT CLIENT HEADER (always visible across all tabs) ── -->
+<!-- ── PERSISTENT CLIENT HEADER (always visible across all tabs) ── -->
       <div class="client-header-persistent">
         <div class="client-header">
+          <div class="ch-identity-row">
           <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIj4KICA8ZGVmcz4KICAgIDxjbGlwUGF0aCBpZD0icm5kIj48cmVjdCB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHJ4PSIxMCIvPjwvY2xpcFBhdGg+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNiZGQwZWEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjN2FhZmQ0Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJza2luIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNkNDk1NmEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjYjg3MDQwIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8ZyBjbGlwLXBhdGg9InVybCgjcm5kKSI+CiAgICA8cmVjdCB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIGZpbGw9InVybCgjYmcpIi8+CiAgICA8ZWxsaXBzZSBjeD0iMjUiIGN5PSI1NiIgcng9IjIwIiByeT0iMTYiIGZpbGw9IiMxZTNhNWYiLz4KICAgIDxyZWN0IHg9IjIxIiB5PSIzMiIgd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsbD0idXJsKCNza2luKSIvPgogICAgPGVsbGlwc2UgY3g9IjI1IiBjeT0iMjYiIHJ4PSIxMSIgcnk9IjEzIiBmaWxsPSJ1cmwoI3NraW4pIi8+CiAgICA8ZWxsaXBzZSBjeD0iMjUiIGN5PSIxNSIgcng9IjExIiByeT0iNyIgZmlsbD0iIzNiMmExYSIvPgogICAgPHJlY3QgeD0iMTQiIHk9IjE0IiB3aWR0aD0iMjIiIGhlaWdodD0iNiIgZmlsbD0iIzNiMmExYSIvPgogICAgPGVsbGlwc2UgY3g9IjE0IiBjeT0iMjYiIHJ4PSIyLjUiIHJ5PSIzIiBmaWxsPSJ1cmwoI3NraW4pIi8+CiAgICA8ZWxsaXBzZSBjeD0iMzYiIGN5PSIyNiIgcng9IjIuNSIgcnk9IjMiIGZpbGw9InVybCgjc2tpbikiLz4KICAgIDxlbGxpcHNlIGN4PSIyMSIgY3k9IjI1IiByeD0iMiIgcnk9IjIuMiIgZmlsbD0iIzJhMWEwYSIvPgogICAgPGVsbGlwc2UgY3g9IjI5IiBjeT0iMjUiIHJ4PSIyIiByeT0iMi4yIiBmaWxsPSIjMmExYTBhIi8+CiAgICA8Y2lyY2xlIGN4PSIyMS43IiBjeT0iMjQuMyIgcj0iLjciIGZpbGw9IndoaXRlIi8+CiAgICA8Y2lyY2xlIGN4PSIyOS43IiBjeT0iMjQuMyIgcj0iLjciIGZpbGw9IndoaXRlIi8+CiAgICA8cGF0aCBkPSJNMjEgMzEgUTI1IDMzLjUgMjkgMzEiIHN0cm9rZT0iI2EwNjA0MCIgc3Ryb2tlLXdpZHRoPSIxLjIiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDwvZz4KPC9zdmc+" alt="Photo of Ryan L. Dykins" style="width:44px;height:44px;border-radius:9px;object-fit:cover;flex-shrink:0;border:2px solid var(--border)">
           <div style="flex:1;min-width:0">
             <div class="ch-name">Ryan L. Dykins</div>
@@ -917,15 +964,61 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
           </div>
           <div class="ch-right">
             <div class="ch-tags">
-              <span class="tag blue">Title XVI</span>
-              <span class="tag green">● Active</span>
-              <span class="tag amber">WON</span>
               <span class="tag red" id="alert-tag" style="cursor:pointer" onclick="toggleAlert()" title="Click to show/hide alert">⚠ Alert</span>
               <span class="tag slate">Needs interpreter</span>
             </div>
           </div>
           <button class="btn ghost" style="margin-left:8px;flex-shrink:0" onclick="showTab('demographics',this)">Edit Client</button>
         </div>
+<div class="case-cards-inbanner" id="case-strip">
+          <div class="case-strip-label">Cases</div>
+          <div class="case-cards" id="case-cards">
+            <div class="case-card active" id="cc-ssd" onclick="setActiveCase('ssd')">
+              <div class="cc-accent" style="background:var(--blue)"></div>
+              <div class="cc-body">
+                <div class="cc-row1">
+                  <span class="cc-dot" style="background:var(--blue)"></span>
+                  <span class="cc-type">SSD</span>
+                  <span class="cc-stage" style="background:#dbeafe;color:#1d4ed8">Title XVI</span>
+                  <span class="cc-stage" style="background:#e0f2fe;color:#0284c7">Reconsideration</span>
+                  <span class="cc-flag">Viewing</span>
+                </div>
+                <div class="cc-row2">Onset 03/19/2013 · DLI 12/31/2018 · <span class="cc-next">Next: hearing Oct 16</span></div>
+              </div>
+            </div>
+            <div class="case-card" id="cc-wc" onclick="setActiveCase('wc')">
+              <div class="cc-accent" style="background:#7c3aed"></div>
+              <div class="cc-body">
+                <div class="cc-row1">
+                  <span class="cc-dot" style="background:#7c3aed"></span>
+                  <span class="cc-type">WC</span>
+                  <span class="cc-stage" style="background:#ede9fe;color:#7c3aed">Mediation set</span>
+                  <span class="cc-flag">Viewing</span>
+                </div>
+                <div class="cc-row2">Injury 09/01/2010 · Liberty Mutual · <span class="cc-next">Next: mediation Jun 22</span></div>
+              </div>
+            </div>
+            <div class="case-card" id="cc-va" onclick="setActiveCase('va')">
+              <div class="cc-accent" style="background:#16a34a"></div>
+              <div class="cc-body">
+                <div class="cc-row1">
+                  <span class="cc-dot" style="background:#16a34a"></span>
+                  <span class="cc-type">VA</span>
+                  <span class="cc-stage" style="background:#dcfce7;color:#16a34a">BVA Appeal</span>
+                  <span class="cc-flag">Viewing</span>
+                </div>
+                <div class="cc-row2">Claim #259742 · NOD 12/01/2012 · <span class="cc-next">Next: appeal due May 10</span></div>
+              </div>
+            </div>
+            <div class="case-card add" onclick="alert('New case flow — to be wired next.')" title="Start a new case for this client">
+              <div class="cc-add">+ Add case</div>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        
+        
 
         <!-- ── ALERT BANNER ── -->
         <div class="alert-banner" role="alert" aria-live="assertive">
@@ -936,7 +1029,30 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
           </div>
           <button class="alert-dismiss" aria-label="Dismiss alert" onclick="this.closest('.alert-banner').style.display='none'">✕</button>
         </div>
+
+      
+
+      
       </div><!-- /client-header-persistent -->
+
+      <div class="sub-nav-wrap">
+        <div class="sub-nav" role="tablist" aria-label="Client record navigation" style="overflow-x:auto;flex-wrap:nowrap;white-space:nowrap">
+        <div class="sub-tab active" role="tab" aria-selected="true" onclick="showTab('snapshot',this)">Snapshot</div>
+        <div class="sub-tab case-tab-ssd" role="tab" aria-selected="false" onclick="showTab('filings-tab',this)">Filings &amp; Appeals</div>
+        <div class="sub-tab case-tab-ssd" role="tab" aria-selected="false" onclick="showTab('awards-tab',this)">Awards &amp; Payments</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('intake1-tab',this)">Intake</div>
+        
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('medical-tab',this)">Medical Records</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('client-docs',this)">Documents</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('contacts-tab',this)">Contacts</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('notes-tab',this)">Notes</div>
+        <div class="sub-tab" role="tab" aria-selected="false" onclick="showTab('tasks-tab',this)">Tasks</div>
+        <div class="sub-tab case-tab-wc" role="tab" aria-selected="false" onclick="showTab('case-events-tab',this)">Case Events</div>
+        <div class="sub-tab case-tab-wc" role="tab" aria-selected="false" onclick="showTab('assoc-parties-tab',this)">Assoc Parties</div>
+        <div class="sub-tab case-tab-va" role="tab" aria-selected="false" onclick="showTab('va-claim-tab',this)">VA Claim</div>
+      </div>
+        <button class="sub-nav-scroll" id="subNavScroll" onclick="scrollTabs()" aria-label="Scroll tabs right" title="More tabs">›</button>
+      </div>
 
       <div class="content" id="tab-content">
         <!-- ── SNAPSHOT TAB ── -->
@@ -1018,7 +1134,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
                 <button class="card-action">Edit</button>
               </div>
               <div class="card-body" style="padding:10px 12px">
-                <div class="status-row" style="margin-bottom:10px;grid-template-columns:repeat(4,1fr)">
+                <div class="status-row" style="margin-bottom:10px">
                   <div class="status-cell" style="border-left:3px solid #3b82f6">
                     <div class="status-cell-label">SSD Stage</div>
                     <div class="status-cell-value" style="font-size:13px;letter-spacing:-.2px">Reconsideration</div>
@@ -1250,7 +1366,24 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
           <div style="max-width:800px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div style="font-size:13px;color:var(--t3)">3 notes on file</div>
-              <button class="btn primary">+ Add Note</button>
+              <button class="btn primary" onclick="openNoteForm()">+ Add Note</button>
+            </div>
+            <div id="note-form" style="display:none;background:var(--surface-2);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <span style="font-size:13px;font-weight:700;color:var(--t1)">New Note</span>
+                <button class="btn ghost" style="height:26px;font-size:12px;padding:0 10px" onclick="closeNoteForm()">Cancel</button>
+              </div>
+              <div class="data-grid cols-4" style="margin-bottom:10px">
+                <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Date</div><div class="dc-value">03/17/2026</div><input class="inline-input" value="03/17/2026" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Note Type</div><div class="dc-value">General</div><input class="inline-input" value="General" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Recorded By</div><div class="dc-value">Marc Hanes</div><input class="inline-input" value="Marc Hanes" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+                <div class="data-cell" onclick="editCell(this)" tabindex="0"><div class="dc-label">Hours</div><div class="dc-value">0.00</div><input class="inline-input" value="0.00" onblur="saveCell(this)" onkeydown="cellKeydown(event,this)"><span class="edit-hint">edit</span></div>
+              </div>
+              <textarea style="width:100%;min-height:70px;border:1.5px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13px;color:var(--t2);resize:vertical;outline:none;box-sizing:border-box" placeholder="Note details..."></textarea>
+              <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+                <button class="btn ghost" style="height:30px;font-size:12px;padding:0 14px" onclick="closeNoteForm()">Cancel</button>
+                <button class="btn primary" style="height:30px;font-size:12px;padding:0 14px" onclick="closeNoteForm()">Save Note</button>
+              </div>
             </div>
             <div style="display:flex;flex-direction:column;gap:8px">
               <div class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div style="font-size:12px;color:var(--t3)">Chris Olinsky · 10/01/2021</div><span class="tag amber" style="height:20px;font-size:11px">Flag</span></div><div style="font-size:13.5px;color:var(--t1);line-height:1.6">Client needs interpreter for all appointments. Confirm Spanish interpreter is booked for Oct 16 hearing. Also follow up on Rainey records — outstanding since Jan 2020.</div></div></div>
@@ -1575,12 +1708,9 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
               </div>
             </div>
 
-          </div>
-        </div>
+          
 
-        <!-- ── INTAKE II TAB ── -->
-        <div id="tab-intake2-tab" class="tab-pane">
-          <div class="scroll-content">
+            <!-- ── (merged from Intake II) ── -->
             <div style="max-width:860px">
 
               <!-- Restrictions & Limitations -->
@@ -2848,6 +2978,158 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
       </div>
     </div>
 
+    <!-- ═══ SCREEN: CAPTURE & REVIEW ═══ -->
+    <div class="screen" id="screen-capture" role="main" aria-label="Capture and Review">
+      <div class="topbar" style="border-bottom:1px solid var(--border);padding:0 20px;height:44px">
+        <span style="font-size:15px;font-weight:800;color:var(--t1);letter-spacing:-.2px">Capture &amp; Review</span>
+        <span style="font-size:12.5px;color:var(--t3);margin-left:10px">Every channel lands here for confirmation before it commits to a record</span>
+      </div>
+      <div class="scroll-content">
+        <div style="max-width:1000px">
+
+          <!-- CAPTURE BAR -->
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header"><span class="card-title">Capture something new</span></div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+                <div class="cap-btn"><div class="cap-ic" style="background:#0ea5e9">📷</div><div class="cap-tx"><div class="ct">Photo capture</div><div class="cs">Snap paper with a phone</div></div></div>
+                <div class="cap-btn"><div class="cap-ic" style="background:#0284c7">🖨️</div><div class="cap-tx"><div class="ct">Scan batch</div><div class="cs">Multi-page from scanner</div></div></div>
+                <div class="cap-btn"><div class="cap-ic" style="background:#7c3aed">📞</div><div class="cap-tx"><div class="ct">Screening call</div><div class="cs">Log a potential client</div></div></div>
+                <div class="cap-btn"><div class="cap-ic" style="background:#d97706">🌐</div><div class="cap-tx"><div class="ct">Online form link</div><div class="cs">Send a prospect the intake form</div></div></div>
+                <div class="cap-btn"><div class="cap-ic" style="background:#16a34a">🔐</div><div class="cap-tx"><div class="ct">Client portal invite</div><div class="cs">Client uploads their own docs</div></div></div>
+                <div class="cap-btn"><div class="cap-ic" style="background:#1e3a5f">🏛️</div><div class="cap-tx"><div class="ct">SSA / records pull</div><div class="cs">ERE &amp; bulk medical records</div></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- UNIFIED QUEUE -->
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header">
+              <span class="card-title">Needs Review</span>
+              <span style="font-size:11px;font-weight:800;padding:2px 9px;border-radius:20px;background:#fee2e2;color:#dc2626;margin-left:6px">9 items</span>
+              <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn primary" style="height:28px;font-size:12px;padding:0 12px">All</button>
+                <button class="btn ghost" style="height:28px;font-size:12px;padding:0 12px">Approvals</button>
+                <button class="btn ghost" style="height:28px;font-size:12px;padding:0 12px">Data</button>
+                <button class="btn ghost" style="height:28px;font-size:12px;padding:0 12px">Records</button>
+              </div>
+            </div>
+            <div class="card-body" style="padding:0">
+
+              <!-- GROUP: APPROVALS -->
+              <div class="rq-group-head"><span class="rq-gname">Approvals</span><span class="rq-gq">2</span><span class="rq-gdec">Flip this lead into a client?</span></div>
+              <div class="rq-item">
+                <div class="rq-chan">📞</div>
+                <div class="rq-main">
+                  <div class="rq-t">Sandra Williams <span class="rq-tag">Screening call</span></div>
+                  <div class="rq-s">Alleged: back injury (WC) · Referral: Google · Note: "Injured on the job 02/2026, strong case" · 12 min ago</div>
+                </div>
+                <div class="rq-act"><button class="btn ghost" style="height:30px;font-size:12px;padding:0 12px">View</button><button class="btn" style="height:30px;font-size:12px;padding:0 12px;background:#16a34a;border-color:#16a34a;color:#fff">Approve → Client</button></div>
+              </div>
+              <div class="rq-item">
+                <div class="rq-chan">🌐</div>
+                <div class="rq-main">
+                  <div class="rq-t">Miguel Garcia <span class="rq-tag">Online form</span></div>
+                  <div class="rq-s">Alleged: diabetes, neuropathy (SSD) · Uploaded: SSA denial letter · Submitted 1h ago</div>
+                </div>
+                <div class="rq-act"><button class="btn ghost" style="height:30px;font-size:12px;padding:0 12px">View</button><button class="btn" style="height:30px;font-size:12px;padding:0 12px;background:#16a34a;border-color:#16a34a;color:#fff">Approve → Client</button></div>
+              </div>
+
+              <!-- GROUP: DATA CONFIRMATIONS -->
+              <div class="rq-group-head"><span class="rq-gname">Data Confirmations</span><span class="rq-gq">4</span><span class="rq-gdec">Confirm the extracted fields</span></div>
+              <div class="rq-item">
+                <div class="rq-chan">📷</div>
+                <div class="rq-main">
+                  <div class="rq-t">SSA Award Letter — Dykins, Ryan <span class="rq-tag">Photo</span> <span class="rq-conf lo">3 fields to confirm</span></div>
+                  <div class="rq-s">Extracted: award amount, entitlement date, SSI/SSD split → Awards &amp; Payments · 20 min ago</div>
+                </div>
+                <div class="rq-act"><button class="btn primary" style="height:30px;font-size:12px;padding:0 12px" onclick="showReviewDrawer()">Review &amp; confirm</button></div>
+              </div>
+              <div class="rq-item">
+                <div class="rq-chan">🖨️</div>
+                <div class="rq-main">
+                  <div class="rq-t">Medical records — Van Helsing (Dykins) <span class="rq-tag">Scan</span> <span class="rq-conf hi">high confidence</span></div>
+                  <div class="rq-s">Extracted: 14 visit dates, 3 diagnoses, 2 medications → Medical Records · 35 min ago</div>
+                </div>
+                <div class="rq-act"><button class="btn primary" style="height:30px;font-size:12px;padding:0 12px" onclick="showReviewDrawer()">Review &amp; confirm</button></div>
+              </div>
+              <div class="rq-item">
+                <div class="rq-chan">🔐</div>
+                <div class="rq-main">
+                  <div class="rq-t">Updated address + insurance — Hall, Glenda <span class="rq-tag">Portal</span> <span class="rq-conf hi">high confidence</span></div>
+                  <div class="rq-s">Client-supplied via portal → Contacts, Intake · 2h ago</div>
+                </div>
+                <div class="rq-act"><button class="btn primary" style="height:30px;font-size:12px;padding:0 12px" onclick="showReviewDrawer()">Review &amp; confirm</button></div>
+              </div>
+              <div class="rq-item">
+                <div class="rq-chan">🏛️</div>
+                <div class="rq-main">
+                  <div class="rq-t">SSA status update — Martinez, Rosa <span class="rq-tag">SSA</span> <span class="rq-conf lo">1 field to confirm</span></div>
+                  <div class="rq-s">Extracted: DLI, recon decision date → Filings &amp; Appeals · 3h ago</div>
+                </div>
+                <div class="rq-act"><button class="btn primary" style="height:30px;font-size:12px;padding:0 12px" onclick="showReviewDrawer()">Review &amp; confirm</button></div>
+              </div>
+
+              <!-- GROUP: RECONCILIATIONS -->
+              <div class="rq-group-head"><span class="rq-gname">Reconciliations</span><span class="rq-gq">3</span><span class="rq-gdec">Match incoming records to client / provider</span></div>
+              <div class="rq-item">
+                <div class="rq-chan">📥</div>
+                <div class="rq-main">
+                  <div class="rq-t">Bulk records batch — Forsyth Medical Ctr <span class="rq-tag">Records</span></div>
+                  <div class="rq-s">28 files received · 24 auto-matched · <b style="color:#d97706">4 need manual match</b> · 1h ago</div>
+                </div>
+                <div class="rq-act"><button class="btn primary" style="height:30px;font-size:12px;padding:0 12px">Reconcile 4</button></div>
+              </div>
+              <div class="rq-item">
+                <div class="rq-chan">📥</div>
+                <div class="rq-main">
+                  <div class="rq-t">ERE exhibit sync — 6 clients <span class="rq-tag">ERE</span></div>
+                  <div class="rq-s">Exhibit lists pulled · all matched · confirm before filing to records · 4h ago</div>
+                </div>
+                <div class="rq-act"><button class="btn primary" style="height:30px;font-size:12px;padding:0 12px">Reconcile</button></div>
+              </div>
+
+            </div>
+          </div>
+
+          <div style="background:#e0f2fe;border:1px solid #bae6fd;border-left:4px solid #0ea5e9;border-radius:8px;padding:11px 14px;font-size:12.5px;color:#0c4a6e;margin-bottom:16px">
+            <b>How to read this:</b> one queue, grouped by the <b>kind of decision</b> — not by channel. Each item shows a channel tag so you keep per-channel visibility without separate inboxes. Nothing here has touched a client record yet — that only happens after review.
+          </div>
+
+          <!-- REVIEW DRAWER (hidden until a Review button is clicked) -->
+          <div class="card" id="review-drawer" style="display:none;margin-bottom:16px">
+            <div class="card-header" style="background:#1e3a5f">
+              <span class="card-title" style="color:#fff">Review &amp; Confirm</span>
+              <span style="font-size:11.5px;color:#a5c3e0;margin-left:auto">SSA Award Letter · captured by Photo · Dykins, Ryan</span>
+            </div>
+            <div class="card-body" style="padding:0">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+                <div style="border-right:1.5px solid var(--border);padding:16px;background:var(--surface-2)">
+                  <div style="border:1.5px dashed var(--border-2,#cbd5e1);border-radius:9px;height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--t4);gap:8px;background:#fff">
+                    <div style="font-size:40px">📄</div><div style="font-size:13px">Source document</div><div style="font-size:11px">tap a field to see where it came from</div>
+                  </div>
+                </div>
+                <div style="padding:16px">
+                  <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--t4);margin-bottom:10px">Extracted fields — confirm before commit</div>
+                  <div class="rq-fld"><span class="rq-fl">SSD Award Amount</span><span class="rq-fv">$1,847.00</span><span class="rq-fs ok">✓ clear</span></div>
+                  <div class="rq-fld"><span class="rq-fl">SSI Award Amount</span><span class="rq-fv">$943.00</span><span class="rq-fs ok">✓ clear</span></div>
+                  <div class="rq-fld"><span class="rq-fl">Entitlement Date</span><span class="rq-fv">03/2013</span><span class="rq-fs check">confirm</span></div>
+                  <div class="rq-fld"><span class="rq-fl">Award Letter Date</span><span class="rq-fv">10/16/2024</span><span class="rq-fs check">confirm</span></div>
+                  <div class="rq-fld"><span class="rq-fl">Title</span><span class="rq-fv">Title II / XVI</span><span class="rq-fs check">confirm</span></div>
+                </div>
+              </div>
+              <div style="padding:14px 16px;border-top:1.5px solid var(--border);display:flex;gap:9px;justify-content:flex-end;background:var(--surface-2)">
+                <button class="btn ghost" style="height:32px;font-size:12px;padding:0 14px" onclick="hideReviewDrawer()">Reject / quarantine</button>
+                <button class="btn ghost" style="height:32px;font-size:12px;padding:0 14px">Edit fields</button>
+                <button class="btn" style="height:32px;font-size:12px;padding:0 14px;background:#16a34a;border-color:#16a34a;color:#fff" onclick="hideReviewDrawer()">Confirm → commit to Awards tab</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ SCREEN: MY TASKS (firm-level cross-client) ═══ -->
     <div class="screen" id="screen-tasks" role="main" aria-label="My Tasks">
       <div class="topbar" style="border-bottom:1px solid var(--border);padding:0 20px;height:44px">
@@ -3192,52 +3474,6 @@ body { font-family: var(--sans); background: var(--bg); color: var(--t1); font-s
 
 <script>
 
-// ── More tab dropdown ──
-function toggleMoreMenu(e) {
-  e.stopPropagation();
-  var menu = document.getElementById('more-tab-menu');
-  if (!menu) return;
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-}
-
-function showTabFromMore(tabId, label) {
-  // Close menu and reset label
-  var menu = document.getElementById('more-tab-menu');
-  if (menu) menu.style.display = 'none';
-  var moreBtn = document.getElementById('more-tab-btn');
-  if (moreBtn) moreBtn.innerHTML = label + ' <span style="font-size:10px">&#9660;</span>';
-
-  // Clear all sub-tab active states
-  document.querySelectorAll('.sub-tab').forEach(function(t) {
-    t.classList.remove('active');
-    t.setAttribute('aria-selected','false');
-  });
-  if (moreBtn) {
-    moreBtn.classList.add('active');
-    moreBtn.setAttribute('aria-selected','true');
-  }
-
-  // Hide all tab panes and show target
-  document.querySelectorAll('.tab-pane').forEach(function(p) {
-    p.style.display = 'none';
-    p.classList.remove('active-tab');
-  });
-  var pane = document.getElementById('tab-' + tabId);
-  if (pane) {
-    pane.style.display = 'flex';
-    pane.style.flexDirection = 'column';
-    pane.classList.add('active-tab');
-  }
-}
-
-// Close more menu when clicking outside
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('#more-tab-wrapper')) {
-    var menu = document.getElementById('more-tab-menu');
-    if (menu) menu.style.display = 'none';
-  }
-});
-
 // ── Case Events section switcher ──
 function setCaseEventSection(btn, sectionId) {
   ['ce-trials','ce-hearings','ce-mediations','ce-appeals','ce-injury'].forEach(function(id) {
@@ -3291,6 +3527,7 @@ function toggleGroup(header) {
 }
 
 const screenMap = {
+  capture:   'Capture & Review | Wings Legal',
   general:   'Client Overview — General | Wings Legal',
   filings:   'Filings & Appeals | Wings Legal',
   awards:    'Awards & Payments | Wings Legal',
@@ -3630,6 +3867,80 @@ function closeAISummary() {
 document.getElementById('ai-modal').addEventListener('click', function(e) {
   if (e.target === this) closeAISummary();
 });
+
+// ── Multi-case switcher ──
+var CASE_TABS = {
+  ssd: { show: ['case-tab-ssd'], hide: ['case-tab-wc','case-tab-va'] },
+  wc:  { show: ['case-tab-wc'],  hide: ['case-tab-ssd','case-tab-va'] },
+  va:  { show: ['case-tab-va'],  hide: ['case-tab-ssd','case-tab-wc'] }
+};
+
+function setActiveCase(caseType) {
+  // Update card active states
+  document.querySelectorAll('.case-card').forEach(function(c){ c.classList.remove('active'); });
+  var card = document.getElementById('cc-' + caseType);
+  if (card) card.classList.add('active');
+
+  // Show/hide practice-area tabs for this case
+  var cfg = CASE_TABS[caseType];
+  if (cfg) {
+    cfg.hide.forEach(function(cls){
+      document.querySelectorAll('.' + cls).forEach(function(t){ t.style.display = 'none'; });
+    });
+    cfg.show.forEach(function(cls){
+      document.querySelectorAll('.' + cls).forEach(function(t){ t.style.display = ''; });
+    });
+  }
+
+  // If the currently active tab is now hidden, fall back to Snapshot
+  var activeTab = document.querySelector('.sub-tab.active');
+  if (activeTab && activeTab.style.display === 'none') {
+    var snap = document.querySelector('.sub-tab[onclick*="snapshot"]');
+    if (snap) snap.click();
+  }
+
+  // Recalc tab scroll affordance now that visible tab count changed
+  if (typeof updateTabScroll === 'function') setTimeout(updateTabScroll, 50);
+}
+
+// Initialize: filter tabs to the default active case (SSD).
+// Clicking a case card re-filters the tab bar to that case.
+document.addEventListener('DOMContentLoaded', function(){
+  setActiveCase('ssd');
+});
+
+
+// ── Capture & Review: drawer ──
+function showReviewDrawer() {
+  var d = document.getElementById('review-drawer');
+  if (d) { d.style.display = 'block'; d.scrollIntoView({behavior:'smooth',block:'center'}); }
+}
+function hideReviewDrawer() {
+  var d = document.getElementById('review-drawer');
+  if (d) d.style.display = 'none';
+}
+
+
+// ── Tab bar scroll affordance ──
+function updateTabScroll(){
+  var wrap = document.querySelector('.sub-nav-wrap');
+  if(!wrap) return;
+  var nav = wrap.querySelector('.sub-nav');
+  if(!nav) return;
+  var moreRight = nav.scrollWidth - nav.clientWidth - nav.scrollLeft > 4;
+  wrap.classList.toggle('can-scroll', moreRight);
+}
+function scrollTabs(){
+  var nav = document.querySelector('.sub-nav-wrap .sub-nav');
+  if(nav) nav.scrollBy({left: Math.max(160, nav.clientWidth*0.6), behavior:'smooth'});
+}
+document.addEventListener('DOMContentLoaded', function(){
+  var nav = document.querySelector('.sub-nav-wrap .sub-nav');
+  if(nav){ nav.addEventListener('scroll', updateTabScroll); }
+  window.addEventListener('resize', updateTabScroll);
+  setTimeout(updateTabScroll, 100);
+});
+
 </script>
 </body>
 </html>
