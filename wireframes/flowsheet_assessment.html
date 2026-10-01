@@ -2,14 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Nursing Flowsheets</title>
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nursing Flowsheets prototype</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#14151B;--muted:#5C5F6E;--line:#ECEDF2;--line2:#D9DBE3;--card:#FFFFFF;--card2:#F5F6F9;--ground:#EEF0F4;--hover:#EEF0F7;--accent:#4B47D6;--abnormal:#C7261B;--ok:#1B7A3D;--warn:#FFB300;--warn-edge:#B87900}
 body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:var(--ground);font-variant-numeric:tabular-nums}
@@ -19,256 +15,14 @@ input[data-col-input]:focus{outline:2px solid var(--accent);outline-offset:0;bor
 .cellbtn{cursor:pointer}
 .cellbtn:hover{background:var(--hover) !important}
 .ghost:hover{background:var(--hover) !important}
-a{color:var(--accent)}a:hover{color:#2F2BA8}
+.sidenav{width:216px;flex-shrink:0;background:var(--card);border-right:1px solid var(--line2);padding:20px 12px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px}
+@media (max-width:760px){.sidenav{display:none}}
 </style>
-</helmet>
-<div style="display: flex; min-height: 100vh; background: var(--ground)">
-
-<nav aria-label="Nursing" style="width: 216px; flex-shrink: 0; background: var(--card); border-right: 1px solid var(--line2); padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px">
-<div style="font-size: 15px; font-weight: 700; padding: 0 10px 16px">Meridian</div>
-<div style="font-size: 12px; font-weight: 600; color: var(--muted); padding: 0 10px 6px">Nursing</div>
-<a href="#grid" aria-current="page" style="display: block; padding: 9px 10px; border-radius: 6px; background: var(--card2); color: var(--accent); font-weight: 600; text-decoration: none; border-left: 3px solid var(--accent)">Flowsheets</a>
-<p style="margin: 6px 10px 0; font-size: 12px; line-height: 1.4; color: var(--muted)">Replaces Assessments and Flowsheet.</p>
-</nav>
-
-<main style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column">
-
-<div style="background: var(--card); border-bottom: 1px solid var(--line2); padding: 12px 24px; display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap">
-<span style="font-size: 16px; font-weight: 700">TEST, Patient A</span>
-<span style="font-size: 13px; color: var(--muted)">67 y · Female · MRN DEMO-0001 · Inpatient, day 2</span>
-<span style="font-size: 12px; color: var(--muted); border: 1px solid var(--line2); border-radius: 4px; padding: 1px 6px">Demo data</span>
-</div>
-
-<div style="padding: 20px 24px 12px; display: flex; flex-direction: column; gap: 6px">
-<h1 style="margin: 0; font-size: 22px; font-weight: 700">Flowsheets</h1>
-<p style="margin: 0; font-size: 13px; color: var(--muted); max-width: 900px">Head-to-toe notes signed before this change stay readable as filed under Notes. This grid shows coded findings recorded from now on; earlier notes were not migrated.</p>
-</div>
-
-<div role="tablist" aria-label="Flowsheets" style="display: flex; gap: 4px; padding: 0 24px; border-bottom: 1px solid var(--line2); overflow-x: auto">
-<sc-for list="{{tabs}}" as="t" hint-placeholder-count="6">
-<button role="tab" aria-selected="{{t.selected}}" onClick="{{t.pick}}" class="ghost" style="{{t.style}}">{{t.label}}<sc-if value="{{t.custom}}" hint-placeholder-val="{{false}}"><span style="margin-left: 6px; font-size: 11px; font-weight: 500; color: var(--muted); border: 1px solid var(--line2); border-radius: 4px; padding: 0 5px">Custom</span></sc-if></button>
-</sc-for>
-</div>
-
-<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 24px">
-<div role="group" aria-label="Time range" style="display: flex; border: 1px solid var(--line2); border-radius: 6px; overflow: hidden; background: var(--card)">
-<button aria-pressed="{{visit.on}}" onClick="{{visit.pick}}" style="{{visit.style}}">This visit</button>
-<button aria-pressed="{{allTime.on}}" onClick="{{allTime.pick}}" style="{{allTime.style}}">All time</button>
-</div>
-<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
-<button onClick="{{openAddRow}}" class="ghost" style="height: 36px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 6px; background: var(--card); color: var(--ink); font-size: 14px; font-weight: 500; cursor: pointer">+ Add a row or screener</button>
-<sc-if value="{{draftBar.none}}" hint-placeholder-val="{{true}}">
-<button onClick="{{draftBar.start}}" style="height: 36px; padding: 0 16px; border: 1px solid var(--accent); border-radius: 6px; background: var(--accent); color: #FFFFFF; font-size: 14px; font-weight: 600; cursor: pointer">{{draftBar.startLabel}}</button>
-</sc-if>
-<sc-if value="{{draftBar.open}}" hint-placeholder-val="{{false}}">
-<span style="font-size: 13px; color: var(--muted)">In progress since {{draftBar.since}}. Tab or Enter moves down the column.</span>
-<button onClick="{{draftBar.discard}}" class="ghost" style="height: 36px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 6px; background: var(--card); color: var(--ink); font-size: 14px; cursor: pointer">Discard</button>
-<button onClick="{{draftBar.sign}}" disabled="{{draftBar.cant}}" style="{{draftBar.signStyle}}">Sign</button>
-</sc-if>
-</div>
-</div>
-
-<div id="grid" style="margin: 0 24px 24px; border: 1px solid var(--line2); border-radius: 8px; overflow: auto; max-height: 660px; background: var(--card); position: relative">
-<div style="min-width: {{minW}}px">
-<div style="{{headStyle}}">
-<div style="position: sticky; left: 0; z-index: 4; background: var(--card2); border-right: 1px solid var(--line2); border-bottom: 1px solid var(--line2); padding: 8px 12px; font-size: 12px; font-weight: 600; color: var(--muted); display: flex; align-items: flex-end">Measurement</div>
-<sc-for list="{{cols}}" as="c" hint-placeholder-count="4">
-<div style="{{c.style}}">
-<div style="font-size: 11px; color: var(--muted)">{{c.d}}</div>
-<div style="font-size: 13px; font-weight: 700">{{c.t}}</div>
-<sc-if value="{{c.status}}" hint-placeholder-val="{{false}}"><div style="{{c.statusStyle}}">{{c.status}}</div></sc-if>
-</div>
-</sc-for>
-</div>
-
-<sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
-<sc-if value="{{r.isGroup}}" hint-placeholder-val="{{false}}">
-<div style="background: var(--card2); border-bottom: 1px solid var(--line2)">
-<button onClick="{{r.toggle}}" aria-expanded="{{r.expanded}}" class="ghost" style="position: sticky; left: 0; display: inline-flex; align-items: center; gap: 8px; border: 0; background: var(--card2); padding: 6px 12px; min-height: 30px; cursor: pointer; font-size: 12px; font-weight: 700; color: var(--ink)">
-<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" style="{{r.chevStyle}}"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-<span>{{r.label}}</span>
-<sc-if value="{{r.sync}}" hint-placeholder-val="{{false}}"><span style="font-weight: 400; color: var(--muted)">{{r.sync}}</span></sc-if>
-<sc-if value="{{r.hiddenNote}}" hint-placeholder-val="{{false}}"><span style="font-weight: 400; color: var(--muted)">{{r.hiddenNote}}</span></sc-if>
-</button>
-</div>
-</sc-if>
-<sc-if value="{{r.isRow}}" hint-placeholder-val="{{true}}">
-<div style="{{r.rowStyle}}">
-<div style="{{r.labelStyle}}">
-<sc-if value="{{r.isCustom}}" hint-placeholder-val="{{false}}">
-<button onClick="{{r.toggleMenu}}" aria-expanded="{{r.menuOpen}}" aria-label="{{r.menuAria}}" style="border: 0; background: transparent; padding: 0; margin: 0; text-align: left; font-size: inherit; color: var(--ink); cursor: pointer; font-weight: 500; text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px">{{r.label}}</button>
-</sc-if>
-<sc-if value="{{r.notCustom}}" hint-placeholder-val="{{true}}">
-<span style="font-weight: 500">{{r.label}}</span>
-</sc-if>
-<span style="font-size: 12px; color: var(--muted)">{{r.unit}}</span>
-<sc-for list="{{r.tags}}" as="tg" hint-placeholder-count="0">
-<span style="{{tg.style}}">{{tg.text}}</span>
-</sc-for>
-<sc-if value="{{r.menuOpen}}" hint-placeholder-val="{{false}}">
-<div role="menu" aria-label="Row options" style="position: absolute; left: 8px; top: calc(100% - 2px); z-index: 12; width: 280px; background: var(--card); border: 1px solid var(--line2); border-radius: 8px; box-shadow: 0 8px 24px rgba(20,21,27,0.14); padding: 6px; display: flex; flex-direction: column; gap: 2px">
-<button role="menuitem" onClick="{{r.savePersonal}}" class="ghost" style="text-align: left; border: 0; background: var(--card); padding: 8px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; color: var(--ink)">Save to my own flowsheet</button>
-<button role="menuitem" onClick="{{r.suggest}}" class="ghost" style="text-align: left; border: 0; background: var(--card); padding: 8px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; color: var(--ink)">Suggest to the unit's template</button>
-<p style="margin: 4px 10px 6px; font-size: 12px; line-height: 1.4; color: var(--muted)">{{r.menuNote}}</p>
-</div>
-</sc-if>
-</div>
-<sc-for list="{{r.cells}}" as="cell" hint-placeholder-count="4">
-<sc-if value="{{cell.isBlank}}" hint-placeholder-val="{{false}}">
-<div aria-hidden="true" style="{{cell.style}}"></div>
-</sc-if>
-<sc-if value="{{cell.isStatic}}" hint-placeholder-val="{{false}}">
-<div style="{{cell.style}}"><span style="{{cell.textStyle}}">{{cell.text}}</span><sc-if value="{{cell.chip}}" hint-placeholder-val="{{false}}"><span style="{{cell.chipStyle}}">{{cell.chip}}</span></sc-if></div>
-</sc-if>
-<sc-if value="{{cell.isLive}}" hint-placeholder-val="{{true}}">
-<button class="cellbtn" onClick="{{cell.open}}" aria-label="{{cell.aria}}" style="{{cell.style}}">
-<span style="{{cell.textStyle}}">{{cell.text}}</span><sc-if value="{{cell.flag}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="margin-left: 4px; font-size: 11px; font-weight: 700; color: var(--abnormal)">{{cell.flag}}</span></sc-if>
-<sc-if value="{{cell.chip}}" hint-placeholder-val="{{false}}"><span style="{{cell.chipStyle}}">{{cell.chip}}</span></sc-if>
-<sc-if value="{{cell.qual}}" hint-placeholder-val="{{false}}"><span style="display: block; font-size: 12px; color: var(--muted)">{{cell.qual}}</span></sc-if>
-<sc-if value="{{cell.amended}}" hint-placeholder-val="{{false}}"><span style="display: block; font-size: 11px; color: var(--muted); font-style: italic">Amended</span></sc-if>
-<sc-if value="{{cell.hasNote}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; top: 4px; right: 4px; width: 7px; height: 7px; border-radius: 50%; background: var(--ink)"></span></sc-if>
-</button>
-</sc-if>
-<sc-if value="{{cell.isEditor}}" hint-placeholder-val="{{false}}">
-<div style="{{cell.style}}">
-<sc-if value="{{cell.isChoice}}" hint-placeholder-val="{{false}}">
-<input data-col-input="1" readOnly="{{true}}" value="{{cell.display}}" aria-label="{{cell.aria}}" placeholder="{{cell.placeholder}}" onKeyDown="{{cell.onKey}}" onFocus="{{cell.onFocus}}" onBlur="{{cell.onBlur}}" style="{{cell.inputStyle}}">
-</sc-if>
-<sc-if value="{{cell.isText}}" hint-placeholder-val="{{false}}">
-<input data-col-input="1" value="{{cell.display}}" aria-label="{{cell.aria}}" inputMode="{{cell.inputMode}}" onChange="{{cell.setText}}" onKeyDown="{{cell.onKey}}" style="{{cell.inputStyle}}">
-</sc-if>
-<sc-if value="{{cell.hasQual}}" hint-placeholder-val="{{false}}">
-<input data-col-input="1" value="{{cell.qual}}" aria-label="{{cell.qualAria}}" placeholder="What kind, if it helps" onChange="{{cell.setQual}}" onKeyDown="{{cell.onQualKey}}" style="{{cell.qualStyle}}">
-</sc-if>
-<sc-if value="{{cell.showOpts}}" hint-placeholder-val="{{false}}">
-<div role="listbox" aria-label="{{cell.aria}}" style="position: absolute; left: 0; top: calc(100% - 2px); z-index: 15; min-width: 220px; background: var(--card); border: 1px solid var(--line2); border-radius: 8px; box-shadow: 0 8px 24px rgba(20,21,27,0.16); padding: 4px; display: flex; flex-direction: column; gap: 1px">
-<sc-for list="{{cell.opts}}" as="o" hint-placeholder-count="2">
-<button tabIndex="-1" role="option" aria-selected="{{o.selected}}" onMouseDown="{{o.pick}}" style="{{o.style}}"><span style="color: var(--muted); width: 14px; display: inline-block">{{o.key}}</span>{{o.label}}</button>
-</sc-for>
-<div style="font-size: 11px; color: var(--muted); padding: 4px 8px 2px">Type the number or first letter</div>
-</div>
-</sc-if>
-</div>
-</sc-if>
-</sc-for>
-</div>
-</sc-if>
-</sc-for>
-</div>
-</div>
-</main>
-</div>
-
-<sc-if value="{{pop.open}}" hint-placeholder-val="{{false}}">
-<button aria-label="Close details" onClick="{{closePop}}" style="position: fixed; inset: 0; z-index: 20; background: transparent; border: 0; cursor: default"></button>
-<div role="dialog" aria-label="{{pop.label}}" style="position: fixed; left: {{pop.x}}px; top: {{pop.y}}px; width: 340px; max-height: 80vh; overflow: auto; z-index: 21; background: var(--card); border: 1px solid var(--line2); border-radius: 10px; box-shadow: 0 12px 32px rgba(20,21,27,0.18); padding: 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px">
-<div style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline">
-<span style="font-size: 13px; font-weight: 600">{{pop.label}}</span>
-<span style="font-size: 12px; color: var(--muted)">{{pop.when}}</span>
-</div>
-<div>
-<span style="{{pop.valueStyle}}">{{pop.valueText}}</span>
-<sc-if value="{{pop.flagWord}}" hint-placeholder-val="{{false}}"><span style="margin-left: 8px; font-size: 12px; font-weight: 600; color: var(--abnormal)">{{pop.flagWord}}</span></sc-if>
-<sc-if value="{{pop.qual}}" hint-placeholder-val="{{false}}"><div style="font-size: 13px; color: var(--muted); margin-top: 2px">{{pop.qual}}</div></sc-if>
-<div style="font-size: 12px; color: var(--muted); margin-top: 4px">{{pop.signedText}}</div>
-</div>
-<sc-if value="{{pop.reason}}" hint-placeholder-val="{{false}}"><div style="font-size: 12px; line-height: 1.4; background: var(--card2); border: 1px solid var(--line2); border-radius: 6px; padding: 8px">{{pop.reason}}</div></sc-if>
-<sc-if value="{{pop.from}}" hint-placeholder-val="{{false}}"><div style="font-size: 12px; color: var(--muted); line-height: 1.4">{{pop.from}}</div></sc-if>
-<sc-if value="{{pop.hasHistory}}" hint-placeholder-val="{{false}}">
-<div style="border-top: 1px solid var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 6px">
-<div style="font-size: 11px; font-weight: 600; color: var(--muted)">Amendment history</div>
-<sc-for list="{{pop.history}}" as="h" hint-placeholder-count="1">
-<div style="font-size: 12px; line-height: 1.4"><span style="text-decoration: line-through; color: var(--muted)">{{h.was}}</span> to <strong>{{h.to}}</strong> at {{h.t}}. Reason: {{h.reason}}</div>
-</sc-for>
-</div>
-</sc-if>
-<sc-if value="{{pop.note}}" hint-placeholder-val="{{false}}">
-<div style="border-top: 1px solid var(--line); padding-top: 8px">
-<div style="font-size: 11px; font-weight: 600; color: var(--muted)">Note</div>
-<div style="font-size: 13px; line-height: 1.4">{{pop.note}}</div>
-</div>
-</sc-if>
-<sc-if value="{{pop.canNote}}" hint-placeholder-val="{{false}}">
-<div style="display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); padding-top: 8px">
-<label for="cellnote" style="font-size: 12px; font-weight: 600">{{pop.noteLabel}}</label>
-<textarea id="cellnote" rows="2" value="{{pop.noteDraft}}" onChange="{{pop.setNote}}" style="resize: vertical; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line2); border-radius: 6px"></textarea>
-<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
-<span style="font-size: 11px; color: var(--muted)">Adds a note. The value is not changed.</span>
-<button onClick="{{pop.saveNote}}" class="ghost" style="height: 30px; padding: 0 12px; border: 1px solid var(--line2); background: var(--card); color: var(--ink); border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer">Save note</button>
-</div>
-</div>
-</sc-if>
-<sc-if value="{{pop.canAmend}}" hint-placeholder-val="{{false}}">
-<div style="border-top: 1px solid var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 6px">
-<button onClick="{{pop.startAmend}}" style="align-self: flex-start; height: 32px; padding: 0 14px; border: 1px solid var(--accent); background: var(--accent); color: #FFFFFF; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer">Amend</button>
-<span style="font-size: 11px; color: var(--muted)">Signed entries are never edited in place. An amendment keeps the original and records why it changed.</span>
-</div>
-</sc-if>
-<sc-if value="{{pop.amending}}" hint-placeholder-val="{{false}}">
-<div style="border-top: 1px solid var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 8px">
-<div style="font-size: 12px; font-weight: 600">Amended value</div>
-<sc-if value="{{pop.amendIsChoice}}" hint-placeholder-val="{{false}}">
-<div role="group" aria-label="Amended value" style="display: flex; gap: 6px; flex-wrap: wrap">
-<sc-for list="{{pop.amendOpts}}" as="o" hint-placeholder-count="2">
-<button aria-pressed="{{o.selected}}" onClick="{{o.pick}}" style="{{o.style}}">{{o.label}}</button>
-</sc-for>
-</div>
-</sc-if>
-<sc-if value="{{pop.amendIsText}}" hint-placeholder-val="{{false}}">
-<input aria-label="Amended value" value="{{pop.amendV}}" onChange="{{pop.setAmendV}}" style="height: 32px; padding: 0 8px; border: 1px solid var(--line2); border-radius: 6px; font-size: 13px">
-</sc-if>
-<sc-if value="{{pop.amendHasQual}}" hint-placeholder-val="{{false}}">
-<input aria-label="What kind" placeholder="What kind, if it helps" value="{{pop.amendQ}}" onChange="{{pop.setAmendQ}}" style="height: 32px; padding: 0 8px; border: 1px solid var(--line2); border-radius: 6px; font-size: 13px">
-</sc-if>
-<label for="amendreason" style="font-size: 12px; font-weight: 600">Reason for amendment</label>
-<input id="amendreason" value="{{pop.amendReason}}" onChange="{{pop.setAmendReason}}" placeholder="Required" style="height: 32px; padding: 0 8px; border: 1px solid var(--line2); border-radius: 6px; font-size: 13px">
-<div style="display: flex; justify-content: flex-end; gap: 8px">
-<button onClick="{{pop.cancelAmend}}" class="ghost" style="height: 32px; padding: 0 12px; border: 1px solid var(--line2); background: var(--card); color: var(--ink); border-radius: 6px; font-size: 13px; cursor: pointer">Cancel</button>
-<button onClick="{{pop.saveAmend}}" disabled="{{pop.amendCant}}" style="{{pop.amendSaveStyle}}">Save amendment</button>
-</div>
-</div>
-</sc-if>
-</div>
-</sc-if>
-
-<sc-if value="{{addRow.open}}" hint-placeholder-val="{{false}}">
-<div style="position: fixed; inset: 0; z-index: 30; background: rgba(20,21,27,0.35); display: flex; align-items: center; justify-content: center; padding: 16px">
-<div role="dialog" aria-modal="true" aria-labelledby="addrow-h" style="width: 540px; max-width: 100%; max-height: 90vh; overflow: auto; background: var(--card); border-radius: 12px; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 16px 48px rgba(20,21,27,0.25)">
-<h2 id="addrow-h" style="margin: 0; font-size: 18px">Add to {{addRow.tabLabel}}</h2>
-<div role="group" aria-label="What to add" style="display: flex; border: 1px solid var(--line2); border-radius: 6px; overflow: hidden; align-self: flex-start">
-<button aria-pressed="{{addRow.isFinding}}" onClick="{{addRow.pickFinding}}" style="{{addRow.findingStyle}}">A finding</button>
-<button aria-pressed="{{addRow.isScreener}}" onClick="{{addRow.pickScreener}}" style="{{addRow.screenerStyle}}">A screener</button>
-</div>
-<sc-if value="{{addRow.isFinding}}" hint-placeholder-val="{{true}}">
-<div style="display: flex; flex-direction: column; gap: 10px">
-<p style="margin: 0; font-size: 13px; color: var(--muted); line-height: 1.45">Search for a coded finding first. If nothing fits, record it as uncoded text.</p>
-<label for="rowsearch" style="font-size: 13px; font-weight: 600">Find a finding</label>
-<input id="rowsearch" value="{{addRow.q}}" onChange="{{addRow.setQ}}" placeholder="e.g. capillary refill" style="height: 38px; padding: 0 10px; border: 1px solid var(--line2); border-radius: 6px; font-size: 14px">
-<div style="display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow: auto">
-<sc-for list="{{addRow.results}}" as="o" hint-placeholder-count="4">
-<button onClick="{{o.pick}}" aria-pressed="{{o.selected}}" style="{{o.style}}"><span style="font-weight: 500">{{o.label}}</span><span style="font-size: 12px; opacity: 0.8">{{o.sub}}</span></button>
-</sc-for>
-</div>
-<div style="font-size: 12px; line-height: 1.45; background: var(--card2); border: 1px solid var(--line2); border-radius: 8px; padding: 10px">Goes on this patient's flowsheet, so the next nurse sees it. Afterward you can save it to your own flowsheet or suggest it to the unit's template; an admin reviews every suggestion.</div>
-</div>
-</sc-if>
-<sc-if value="{{addRow.isScreener}}" hint-placeholder-val="{{false}}">
-<div style="display: flex; flex-direction: column; gap: 10px">
-<p style="margin: 0; font-size: 13px; color: var(--muted); line-height: 1.45">Adds every question, its answer choices and its computed score. Answers stay in sync with the same screener on any other flowsheet.</p>
-<sc-for list="{{addRow.screeners}}" as="sc" hint-placeholder-count="2">
-<button onClick="{{sc.pick}}" disabled="{{sc.disabled}}" aria-pressed="{{sc.selected}}" style="{{sc.style}}"><span style="font-weight: 500">{{sc.label}}</span><span style="font-size: 12px; opacity: 0.8">{{sc.sub}}</span></button>
-</sc-for>
-</div>
-</sc-if>
-<div style="display: flex; justify-content: flex-end; gap: 8px">
-<button onClick="{{closeDlg}}" class="ghost" style="height: 36px; padding: 0 14px; border: 1px solid var(--line2); background: var(--card); border-radius: 6px; font-size: 14px; cursor: pointer; color: var(--ink)">Cancel</button>
-<button onClick="{{addRow.add}}" disabled="{{addRow.cant}}" style="{{addRow.addStyle}}">Add</button>
-</div>
-</div>
-</div>
-</sc-if>
-</x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+import { html, render, Component } from 'https://unpkg.com/htm@3.1.1/preact/standalone.module.js';
 var LABEL_W = 272;
 var COL_W = 132;
 var TIME_COLS = [
@@ -390,9 +144,9 @@ function displayOf(m, v, q) {
   return v + (q ? ', ' + q : '');
 }
 
-class Component extends DCLogic {
-  constructor(...a) {
-    super(...a);
+class App extends Component {
+  constructor(props) {
+    super(props);
     this.state = {
       tab: 'assess', allTime: false, measures: MEASURES(),
       extra: { time: [], shift: [] }, draft: { time: null, shift: null },
@@ -816,7 +570,189 @@ class Component extends DCLogic {
       }
     };
   }
+
+  renderCell(cell, key) {
+    if (cell.isBlank) return html`<div key=${key} aria-hidden="true" style=${cell.style}></div>`;
+    if (cell.isStatic) return html`<div key=${key} style=${cell.style}><span style=${cell.textStyle}>${cell.text}</span>${cell.chip && html`<span style=${cell.chipStyle}>${cell.chip}</span>`}</div>`;
+    if (cell.isLive) return html`<button key=${key} class="cellbtn" onClick=${cell.open} aria-label=${cell.aria} style=${cell.style}>
+      <span style=${cell.textStyle}>${cell.text}</span>${cell.flag && html`<span aria-hidden="true" style="margin-left:4px;font-size:11px;font-weight:700;color:var(--abnormal)">${cell.flag}</span>`}
+      ${cell.chip && html`<span style=${cell.chipStyle}>${cell.chip}</span>`}
+      ${cell.qual && html`<span style="display:block;font-size:12px;color:var(--muted)">${cell.qual}</span>`}
+      ${cell.amended && html`<span style="display:block;font-size:11px;color:var(--muted);font-style:italic">Amended</span>`}
+      ${cell.hasNote && html`<span aria-hidden="true" style="position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--ink)"></span>`}
+    </button>`;
+    return html`<div key=${key} style=${cell.style}>
+      ${cell.isChoice && html`<input data-col-input="1" readOnly=${true} value=${cell.display} aria-label=${cell.aria} placeholder=${cell.placeholder} onKeyDown=${cell.onKey} onFocus=${cell.onFocus} onBlur=${cell.onBlur} style=${cell.inputStyle} />`}
+      ${cell.isText && html`<input data-col-input="1" value=${cell.display} aria-label=${cell.aria} inputMode=${cell.inputMode} onInput=${cell.setText} onKeyDown=${cell.onKey} style=${cell.inputStyle} />`}
+      ${cell.hasQual && html`<input data-col-input="1" value=${cell.qual} aria-label=${cell.qualAria} placeholder="What kind, if it helps" onInput=${cell.setQual} onKeyDown=${cell.onQualKey} style=${cell.qualStyle} />`}
+      ${cell.showOpts && html`<div role="listbox" aria-label=${cell.aria} style="position:absolute;left:0;top:calc(100% - 2px);z-index:15;min-width:220px;background:var(--card);border:1px solid var(--line2);border-radius:8px;box-shadow:0 8px 24px rgba(20,21,27,0.16);padding:4px;display:flex;flex-direction:column;gap:1px">
+        ${cell.opts.map((o) => html`<button key=${o.key} tabIndex="-1" role="option" aria-selected=${o.selected} onMouseDown=${o.pick} style=${o.style}><span style="color:var(--muted);width:14px;display:inline-block">${o.key}</span>${o.label}</button>`)}
+        <div style="font-size:11px;color:var(--muted);padding:4px 8px 2px">Type the number or first letter</div>
+      </div>`}
+    </div>`;
+  }
+
+  render() {
+    const v = this.renderVals(), p = v.pop, a = v.addRow, d = v.draftBar;
+    const tabs = v.tabs.map((t) => html`<button key=${t.label} role="tab" aria-selected=${t.selected} onClick=${t.pick} class="ghost" style=${t.style}>${t.label}${t.custom && html`<span style="margin-left:6px;font-size:11px;font-weight:500;color:var(--muted);border:1px solid var(--line2);border-radius:4px;padding:0 5px">Custom</span>`}</button>`);
+    const cols = v.cols.map((c, i) => html`<div key=${'h' + i} style=${c.style}>
+      <div style="font-size:11px;color:var(--muted)">${c.d}</div>
+      <div style="font-size:13px;font-weight:700">${c.t}</div>
+      ${c.status && html`<div style=${c.statusStyle}>${c.status}</div>`}
+    </div>`);
+    const rows = v.rows.map((r, i) => {
+      if (r.isGroup) return html`<div key=${'g' + r.label} style="background:var(--card2);border-bottom:1px solid var(--line2)">
+        <button onClick=${r.toggle} aria-expanded=${r.expanded} class="ghost" style="position:sticky;left:0;display:inline-flex;align-items:center;gap:8px;border:0;background:var(--card2);padding:6px 12px;min-height:30px;cursor:pointer;font-size:12px;font-weight:700;color:var(--ink)">
+          <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" style=${r.chevStyle}><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span>${r.label}</span>
+          ${r.sync && html`<span style="font-weight:400;color:var(--muted)">${r.sync}</span>`}
+          ${r.hiddenNote && html`<span style="font-weight:400;color:var(--muted)">${r.hiddenNote}</span>`}
+        </button>
+      </div>`;
+      return html`<div key=${'r' + r.label + i} style=${r.rowStyle}>
+        <div style=${r.labelStyle}>
+          ${r.isCustom
+            ? html`<button onClick=${r.toggleMenu} aria-expanded=${r.menuOpen} aria-label=${r.menuAria} style="border:0;background:transparent;padding:0;margin:0;text-align:left;font-size:inherit;color:var(--ink);cursor:pointer;font-weight:500;text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px">${r.label}</button>`
+            : html`<span style="font-weight:500">${r.label}</span>`}
+          <span style="font-size:12px;color:var(--muted)">${r.unit}</span>
+          ${r.tags.map((tg, j) => html`<span key=${j} style=${tg.style}>${tg.text}</span>`)}
+          ${r.menuOpen && html`<div role="menu" aria-label="Row options" style="position:absolute;left:8px;top:calc(100% - 2px);z-index:12;width:280px;background:var(--card);border:1px solid var(--line2);border-radius:8px;box-shadow:0 8px 24px rgba(20,21,27,0.14);padding:6px;display:flex;flex-direction:column;gap:2px">
+            <button role="menuitem" onClick=${r.savePersonal} class="ghost" style="text-align:left;border:0;background:var(--card);padding:8px 10px;border-radius:6px;font-size:13px;cursor:pointer;color:var(--ink)">Save to my own flowsheet</button>
+            <button role="menuitem" onClick=${r.suggest} class="ghost" style="text-align:left;border:0;background:var(--card);padding:8px 10px;border-radius:6px;font-size:13px;cursor:pointer;color:var(--ink)">Suggest to the unit's template</button>
+            <p style="margin:4px 10px 6px;font-size:12px;line-height:1.4;color:var(--muted)">${r.menuNote}</p>
+          </div>`}
+        </div>
+        ${r.cells.map((cell, j) => this.renderCell(cell, 'c' + j))}
+      </div>`;
+    });
+
+    const popover = p.open && html`
+      <button aria-label="Close details" onClick=${v.closePop} style="position:fixed;inset:0;z-index:20;background:transparent;border:0;cursor:default"></button>
+      <div role="dialog" aria-label=${p.label} style=${'position:fixed;left:' + p.x + 'px;top:' + p.y + 'px;width:340px;max-height:80vh;overflow:auto;z-index:21;background:var(--card);border:1px solid var(--line2);border-radius:10px;box-shadow:0 12px 32px rgba(20,21,27,0.18);padding:14px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px'}>
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline">
+          <span style="font-size:13px;font-weight:600">${p.label}</span>
+          <span style="font-size:12px;color:var(--muted)">${p.when}</span>
+        </div>
+        <div>
+          <span style=${p.valueStyle}>${p.valueText}</span>
+          ${p.flagWord && html`<span style="margin-left:8px;font-size:12px;font-weight:600;color:var(--abnormal)">${p.flagWord}</span>`}
+          ${p.qual && html`<div style="font-size:13px;color:var(--muted);margin-top:2px">${p.qual}</div>`}
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">${p.signedText}</div>
+        </div>
+        ${p.reason && html`<div style="font-size:12px;line-height:1.4;background:var(--card2);border:1px solid var(--line2);border-radius:6px;padding:8px">${p.reason}</div>`}
+        ${p.from && html`<div style="font-size:12px;color:var(--muted);line-height:1.4">${p.from}</div>`}
+        ${p.hasHistory && html`<div style="border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted)">Amendment history</div>
+          ${p.history.map((h, j) => html`<div key=${j} style="font-size:12px;line-height:1.4"><span style="text-decoration:line-through;color:var(--muted)">${h.was}</span> to <strong>${h.to}</strong> at ${h.t}. Reason: ${h.reason}</div>`)}
+        </div>`}
+        ${p.note && html`<div style="border-top:1px solid var(--line);padding-top:8px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted)">Note</div>
+          <div style="font-size:13px;line-height:1.4">${p.note}</div>
+        </div>`}
+        ${p.canNote && html`<div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:8px">
+          <label for="cellnote" style="font-size:12px;font-weight:600">${p.noteLabel}</label>
+          <textarea id="cellnote" rows="2" value=${p.noteDraft} onInput=${p.setNote} style="resize:vertical;font-size:13px;padding:6px 8px;border:1px solid var(--line2);border-radius:6px"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <span style="font-size:11px;color:var(--muted)">Adds a note. The value is not changed.</span>
+            <button onClick=${p.saveNote} class="ghost" style="height:30px;padding:0 12px;border:1px solid var(--line2);background:var(--card);color:var(--ink);border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">Save note</button>
+          </div>
+        </div>`}
+        ${p.canAmend && html`<div style="border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:6px">
+          <button onClick=${p.startAmend} style="align-self:flex-start;height:32px;padding:0 14px;border:1px solid var(--accent);background:var(--accent);color:#FFFFFF;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">Amend</button>
+          <span style="font-size:11px;color:var(--muted)">Signed entries are never edited in place. An amendment keeps the original and records why it changed.</span>
+        </div>`}
+        ${p.amending && html`<div style="border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:12px;font-weight:600">Amended value</div>
+          ${p.amendIsChoice && html`<div role="group" aria-label="Amended value" style="display:flex;gap:6px;flex-wrap:wrap">
+            ${p.amendOpts.map((o, j) => html`<button key=${j} aria-pressed=${o.selected} onClick=${o.pick} style=${o.style}>${o.label}</button>`)}
+          </div>`}
+          ${p.amendIsText && html`<input aria-label="Amended value" value=${p.amendV} onInput=${p.setAmendV} style="height:32px;padding:0 8px;border:1px solid var(--line2);border-radius:6px;font-size:13px" />`}
+          ${p.amendHasQual && html`<input aria-label="What kind" placeholder="What kind, if it helps" value=${p.amendQ} onInput=${p.setAmendQ} style="height:32px;padding:0 8px;border:1px solid var(--line2);border-radius:6px;font-size:13px" />`}
+          <label for="amendreason" style="font-size:12px;font-weight:600">Reason for amendment</label>
+          <input id="amendreason" value=${p.amendReason} onInput=${p.setAmendReason} placeholder="Required" style="height:32px;padding:0 8px;border:1px solid var(--line2);border-radius:6px;font-size:13px" />
+          <div style="display:flex;justify-content:flex-end;gap:8px">
+            <button onClick=${p.cancelAmend} class="ghost" style="height:32px;padding:0 12px;border:1px solid var(--line2);background:var(--card);color:var(--ink);border-radius:6px;font-size:13px;cursor:pointer">Cancel</button>
+            <button onClick=${p.saveAmend} disabled=${p.amendCant} style=${p.amendSaveStyle}>Save amendment</button>
+          </div>
+        </div>`}
+      </div>`;
+
+    const dialog = a.open && html`<div style="position:fixed;inset:0;z-index:30;background:rgba(20,21,27,0.35);display:flex;align-items:center;justify-content:center;padding:16px">
+      <div role="dialog" aria-modal="true" aria-labelledby="addrow-h" style="width:540px;max-width:100%;max-height:90vh;overflow:auto;background:var(--card);border-radius:12px;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;box-shadow:0 16px 48px rgba(20,21,27,0.25)">
+        <h2 id="addrow-h" style="margin:0;font-size:18px">Add to ${a.tabLabel}</h2>
+        <div role="group" aria-label="What to add" style="display:flex;border:1px solid var(--line2);border-radius:6px;overflow:hidden;align-self:flex-start">
+          <button aria-pressed=${a.isFinding} onClick=${a.pickFinding} style=${a.findingStyle}>A finding</button>
+          <button aria-pressed=${a.isScreener} onClick=${a.pickScreener} style=${a.screenerStyle}>A screener</button>
+        </div>
+        ${a.isFinding && html`<div style="display:flex;flex-direction:column;gap:10px">
+          <p style="margin:0;font-size:13px;color:var(--muted);line-height:1.45">Search for a coded finding first. If nothing fits, record it as uncoded text.</p>
+          <label for="rowsearch" style="font-size:13px;font-weight:600">Find a finding</label>
+          <input id="rowsearch" value=${a.q} onInput=${a.setQ} placeholder="e.g. capillary refill" style="height:38px;padding:0 10px;border:1px solid var(--line2);border-radius:6px;font-size:14px" />
+          <div style="display:flex;flex-direction:column;gap:4px;max-height:220px;overflow:auto">
+            ${a.results.map((o) => html`<button key=${o.label} onClick=${o.pick} aria-pressed=${o.selected} style=${o.style}><span style="font-weight:500">${o.label}</span><span style="font-size:12px;opacity:0.8">${o.sub}</span></button>`)}
+          </div>
+          <div style="font-size:12px;line-height:1.45;background:var(--card2);border:1px solid var(--line2);border-radius:8px;padding:10px">Goes on this patient's flowsheet, so the next nurse sees it. Afterward you can save it to your own flowsheet or suggest it to the unit's template; an admin reviews every suggestion.</div>
+        </div>`}
+        ${a.isScreener && html`<div style="display:flex;flex-direction:column;gap:10px">
+          <p style="margin:0;font-size:13px;color:var(--muted);line-height:1.45">Adds every question, its answer choices and its computed score. Answers stay in sync with the same screener on any other flowsheet.</p>
+          ${a.screeners.map((sc) => html`<button key=${sc.label} onClick=${sc.pick} disabled=${sc.disabled} aria-pressed=${sc.selected} style=${sc.style}><span style="font-weight:500">${sc.label}</span><span style="font-size:12px;opacity:0.8">${sc.sub}</span></button>`)}
+        </div>`}
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button onClick=${v.closeDlg} class="ghost" style="height:36px;padding:0 14px;border:1px solid var(--line2);background:var(--card);border-radius:6px;font-size:14px;cursor:pointer;color:var(--ink)">Cancel</button>
+          <button onClick=${a.add} disabled=${a.cant} style=${a.addStyle}>Add</button>
+        </div>
+      </div>
+    </div>`;
+
+    return html`<div style="display:flex;min-height:100vh;background:var(--ground)">
+      <nav aria-label="Nursing" class="sidenav">
+        <div style="font-size:15px;font-weight:700;padding:0 10px 16px">Meridian</div>
+        <div style="font-size:12px;font-weight:600;color:var(--muted);padding:0 10px 6px">Nursing</div>
+        <a href="#grid" aria-current="page" style="display:block;padding:9px 10px;border-radius:6px;background:var(--card2);color:var(--accent);font-weight:600;text-decoration:none;border-left:3px solid var(--accent)">Flowsheets</a>
+        <p style="margin:6px 10px 0;font-size:12px;line-height:1.4;color:var(--muted)">Replaces Assessments and Flowsheet.</p>
+      </nav>
+      <main style="flex-grow:1;min-width:0;display:flex;flex-direction:column">
+        <div style="background:var(--card);border-bottom:1px solid var(--line2);padding:12px 24px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap">
+          <span style="font-size:16px;font-weight:700">TEST, Patient A</span>
+          <span style="font-size:13px;color:var(--muted)">67 y · Female · MRN DEMO-0001 · Inpatient, day 2</span>
+          <span style="font-size:12px;color:var(--muted);border:1px solid var(--line2);border-radius:4px;padding:1px 6px">Demo data</span>
+        </div>
+        <div style="padding:20px 24px 12px;display:flex;flex-direction:column;gap:6px">
+          <h1 style="margin:0;font-size:22px;font-weight:700">Flowsheets</h1>
+          <p style="margin:0;font-size:13px;color:var(--muted);max-width:900px">Head-to-toe notes signed before this change stay readable as filed under Notes. This grid shows coded findings recorded from now on; earlier notes were not migrated.</p>
+        </div>
+        <div role="tablist" aria-label="Flowsheets" style="display:flex;gap:4px;padding:0 24px;border-bottom:1px solid var(--line2);overflow-x:auto">${tabs}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 24px">
+          <div role="group" aria-label="Time range" style="display:flex;border:1px solid var(--line2);border-radius:6px;overflow:hidden;background:var(--card)">
+            <button aria-pressed=${v.visit.on} onClick=${v.visit.pick} style=${v.visit.style}>This visit</button>
+            <button aria-pressed=${v.allTime.on} onClick=${v.allTime.pick} style=${v.allTime.style}>All time</button>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button onClick=${v.openAddRow} class="ghost" style="height:36px;padding:0 14px;border:1px solid var(--line2);border-radius:6px;background:var(--card);color:var(--ink);font-size:14px;font-weight:500;cursor:pointer">+ Add a row or screener</button>
+            ${d.none && html`<button onClick=${d.start} style="height:36px;padding:0 16px;border:1px solid var(--accent);border-radius:6px;background:var(--accent);color:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer">${d.startLabel}</button>`}
+            ${d.open && html`<span style="font-size:13px;color:var(--muted)">In progress since ${d.since}. Tab or Enter moves down the column.</span>
+              <button onClick=${d.discard} class="ghost" style="height:36px;padding:0 14px;border:1px solid var(--line2);border-radius:6px;background:var(--card);color:var(--ink);font-size:14px;cursor:pointer">Discard</button>
+              <button onClick=${d.sign} disabled=${d.cant} style=${d.signStyle}>Sign</button>`}
+          </div>
+        </div>
+        <div id="grid" style="margin:0 24px 24px;border:1px solid var(--line2);border-radius:8px;overflow:auto;max-height:660px;background:var(--card);position:relative">
+          <div style=${'min-width:' + v.minW + 'px'}>
+            <div style=${v.headStyle}>
+              <div style="position:sticky;left:0;z-index:4;background:var(--card2);border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:12px;font-weight:600;color:var(--muted);display:flex;align-items:flex-end">Measurement</div>
+              ${cols}
+            </div>
+            ${rows}
+          </div>
+        </div>
+        <p style="margin:0 24px 24px;font-size:12px;color:var(--muted)">Prototype with demo data only. No real patient information.</p>
+      </main>
+    </div>
+    ${popover}
+    ${dialog}`;
+  }
 }
+
+render(html`<${App} />`, document.getElementById('app'));
 </script>
 </body>
 </html>
