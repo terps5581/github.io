@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nursing Flowsheets</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14151B;--muted:#5C5F6E;--line:#ECEDF2;--line2:#D9DBE3;--card:#FFFFFF;--card2:#F5F6F9;--ground:#EEF0F4;--hover:#EEF0F7;--accent:#4B47D6;--abnormal:#C7261B;--ok:#1B7A3D;--warn:#FFB300;--warn-edge:#B87900}
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:var(--ground);font-variant-numeric:tabular-nums}
+button,input,textarea{font-family:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+input[data-col-input]:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent) !important}
+.cellbtn{cursor:pointer}
+.cellbtn:hover{background:var(--hover) !important}
+.ghost:hover{background:var(--hover) !important}
+a{color:var(--accent)}a:hover{color:#2F2BA8}
+</style>
+</helmet>
+<div style="display: flex; min-height: 100vh; background: var(--ground)">
+
+<nav aria-label="Nursing" style="width: 216px; flex-shrink: 0; background: var(--card); border-right: 1px solid var(--line2); padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 15px; font-weight: 700; padding: 0 10px 16px">Meridian</div>
+<div style="font-size: 12px; font-weight: 600; color: var(--muted); padding: 0 10px 6px">Nursing</div>
+<a href="#grid" aria-current="page" style="display: block; padding: 9px 10px; border-radius: 6px; background: var(--card2); color: var(--accent); font-weight: 600; text-decoration: none; border-left: 3px solid var(--accent)">Flowsheets</a>
+<p style="margin: 6px 10px 0; font-size: 12px; line-height: 1.4; color: var(--muted)">Replaces Assessments and Flowsheet.</p>
+</nav>
+
+<main style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column">
+
+<div style="background: var(--card); border-bottom: 1px solid var(--line2); padding: 12px 24px; display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap">
+<span style="font-size: 16px; font-weight: 700">TEST, Patient A</span>
+<span style="font-size: 13px; color: var(--muted)">67 y · Female · MRN DEMO-0001 · Inpatient, day 2</span>
+<span style="font-size: 12px; color: var(--muted); border: 1px solid var(--line2); border-radius: 4px; padding: 1px 6px">Demo data</span>
+</div>
+
+<div style="padding: 20px 24px 12px; display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 22px; font-weight: 700">Flowsheets</h1>
+<p style="margin: 0; font-size: 13px; color: var(--muted); max-width: 900px">Head-to-toe notes signed before this change stay readable as filed under Notes. This grid shows coded findings recorded from now on; earlier notes were not migrated.</p>
+</div>
+
+<div role="tablist" aria-label="Flowsheets" style="display: flex; gap: 4px; padding: 0 24px; border-bottom: 1px solid var(--line2); overflow-x: auto">
+<sc-for list="{{tabs}}" as="t" hint-placeholder-count="6">
+<button role="tab" aria-selected="{{t.selected}}" onClick="{{t.pick}}" class="ghost" style="{{t.style}}">{{t.label}}<sc-if value="{{t.custom}}" hint-placeholder-val="{{false}}"><span style="margin-left: 6px; font-size: 11px; font-weight: 500; color: var(--muted); border: 1px solid var(--line2); border-radius: 4px; padding: 0 5px">Custom</span></sc-if></button>
+</sc-for>
+</div>
+
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 24px">
+<div role="group" aria-label="Time range" style="display: flex; border: 1px solid var(--line2); border-radius: 6px; overflow: hidden; background: var(--card)">
+<button aria-pressed="{{visit.on}}" onClick="{{visit.pick}}" style="{{visit.style}}">This visit</button>
+<button aria-pressed="{{allTime.on}}" onClick="{{allTime.pick}}" style="{{allTime.style}}">All time</button>
+</div>
+<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap">
+<button onClick="{{openAddRow}}" class="ghost" style="height: 36px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 6px; background: var(--card); color: var(--ink); font-size: 14px; font-weight: 500; cursor: pointer">+ Add a row or screener</button>
+<sc-if value="{{draftBar.none}}" hint-placeholder-val="{{true}}">
+<button onClick="{{draftBar.start}}" style="height: 36px; padding: 0 16px; border: 1px solid var(--accent); border-radius: 6px; background: var(--accent); color: #FFFFFF; font-size: 14px; font-weight: 600; cursor: pointer">{{draftBar.startLabel}}</button>
+</sc-if>
+<sc-if value="{{draftBar.open}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 13px; color: var(--muted)">In progress since {{draftBar.since}}. Tab or Enter moves down the column.</span>
+<button onClick="{{draftBar.discard}}" class="ghost" style="height: 36px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 6px; background: var(--card); color: var(--ink); font-size: 14px; cursor: pointer">Discard</button>
+<button onClick="{{draftBar.sign}}" disabled="{{draftBar.cant}}" style="{{draftBar.signStyle}}">Sign</button>
+</sc-if>
+</div>
+</div>
+
+<div id="grid" style="margin: 0 24px 24px; border: 1px solid var(--line2); border-radius: 8px; overflow: auto; max-height: 660px; background: var(--card); position: relative">
+<div style="min-width: {{minW}}px">
+<div style="{{headStyle}}">
+<div style="position: sticky; left: 0; z-index: 4; background: var(--card2); border-right: 1px solid var(--line2); border-bottom: 1px solid var(--line2); padding: 8px 12px; font-size: 12px; font-weight: 600; color: var(--muted); display: flex; align-items: flex-end">Measurement</div>
+<sc-for list="{{cols}}" as="c" hint-placeholder-count="4">
+<div style="{{c.style}}">
+<div style="font-size: 11px; color: var(--muted)">{{c.d}}</div>
+<div style="font-size: 13px; font-weight: 700">{{c.t}}</div>
+<sc-if value="{{c.status}}" hint-placeholder-val="{{false}}"><div style="{{c.statusStyle}}">{{c.status}}</div></sc-if>
+</div>
+</sc-for>
+</div>
+
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+<sc-if value="{{r.isGroup}}" hint-placeholder-val="{{false}}">
+<div style="background: var(--card2); border-bottom: 1px solid var(--line2)">
+<button onClick="{{r.toggle}}" aria-expanded="{{r.expanded}}" class="ghost" style="position: sticky; left: 0; display: inline-flex; align-items: center; gap: 8px; border: 0; background: var(--card2); padding: 6px 12px; min-height: 30px; cursor: pointer; font-size: 12px; font-weight: 700; color: var(--ink)">
+<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" style="{{r.chevStyle}}"><path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span>{{r.label}}</span>
+<sc-if value="{{r.sync}}" hint-placeholder-val="{{false}}"><span style="font-weight: 400; color: var(--muted)">{{r.sync}}</span></sc-if>
+<sc-if value="{{r.hiddenNote}}" hint-placeholder-val="{{false}}"><span style="font-weight: 400; color: var(--muted)">{{r.hiddenNote}}</span></sc-if>
+</button>
+</div>
+</sc-if>
+<sc-if value="{{r.isRow}}" hint-placeholder-val="{{true}}">
+<div style="{{r.rowStyle}}">
+<div style="{{r.labelStyle}}">
+<sc-if value="{{r.isCustom}}" hint-placeholder-val="{{false}}">
+<button onClick="{{r.toggleMenu}}" aria-expanded="{{r.menuOpen}}" aria-label="{{r.menuAria}}" style="border: 0; background: transparent; padding: 0; margin: 0; text-align: left; font-size: inherit; color: var(--ink); cursor: pointer; font-weight: 500; text-decoration: underline; text-decoration-color: var(--line2); text-underline-offset: 3px">{{r.label}}</button>
+</sc-if>
+<sc-if value="{{r.notCustom}}" hint-placeholder-val="{{true}}">
+<span style="font-weight: 500">{{r.label}}</span>
+</sc-if>
+<span style="font-size: 12px; color: var(--muted)">{{r.unit}}</span>
+<sc-for list="{{r.tags}}" as="tg" hint-placeholder-count="0">
+<span style="{{tg.style}}">{{tg.text}}</span>
+</sc-for>
+<sc-if value="{{r.menuOpen}}" hint-placeholder-val="{{false}}">
+<div role="menu" aria-label="Row options" style="position: absolute; left: 8px; top: calc(100% - 2px); z-index: 12; width: 280px; background: var(--card); border: 1px solid var(--line2); border-radius: 8px; box-shadow: 0 8px 24px rgba(20,21,27,0.14); padding: 6px; display: flex; flex-direction: column; gap: 2px">
+<button role="menuitem" onClick="{{r.savePersonal}}" class="ghost" style="text-align: left; border: 0; background: var(--card); padding: 8px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; color: var(--ink)">Save to my own flowsheet</button>
+<button role="menuitem" onClick="{{r.suggest}}" class="ghost" style="text-align: left; border: 0; background: var(--card); padding: 8px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; color: var(--ink)">Suggest to the unit's template</button>
+<p style="margin: 4px 10px 6px; font-size: 12px; line-height: 1.4; color: var(--muted)">{{r.menuNote}}</p>
+</div>
+</sc-if>
+</div>
+<sc-for list="{{r.cells}}" as="cell" hint-placeholder-count="4">
+<sc-if value="{{cell.isBlank}}" hint-placeholder-val="{{false}}">
+<div aria-hidden="true" style="{{cell.style}}"></div>
+</sc-if>
+<sc-if value="{{cell.isStatic}}" hint-placeholder-val="{{false}}">
+<div style="{{cell.style}}"><span style="{{cell.textStyle}}">{{cell.text}}</span><sc-if value="{{cell.chip}}" hint-placeholder-val="{{false}}"><span style="{{cell.chipStyle}}">{{cell.chip}}</span></sc-if></div>
+</sc-if>
+<sc-if value="{{cell.isLive}}" hint-placeholder-val="{{true}}">
+<button class="cellbtn" onClick="{{cell.open}}" aria-label="{{cell.aria}}" style="{{cell.style}}">
+<span style="{{cell.textStyle}}">{{cell.text}}</span><sc-if value="{{cell.flag}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="margin-left: 4px; font-size: 11px; font-weight: 700; color: var(--abnormal)">{{cell.flag}}</span></sc-if>
+<sc-if value="{{cell.chip}}" hint-placeholder-val="{{false}}"><span style="{{cell.chipStyle}}">{{cell.chip}}</span></sc-if>
+<sc-if value="{{cell.qual}}" hint-placeholder-val="{{false}}"><span style="display: block; font-size: 12px; color: var(--muted)">{{cell.qual}}</span></sc-if>
+<sc-if value="{{cell.amended}}" hint-placeholder-val="{{false}}"><span style="display: block; font-size: 11px; color: var(--muted); font-style: italic">Amended</span></sc-if>
+<sc-if value="{{cell.hasNote}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; top: 4px; right: 4px; width: 7px; height: 7px; border-radius: 50%; background: var(--ink)"></span></sc-if>
+</button>
+</sc-if>
+<sc-if value="{{cell.isEditor}}" hint-placeholder-val="{{false}}">
+<div style="{{cell.style}}">
+<sc-if value="{{cell.isChoice}}" hint-placeholder-val="{{false}}">
+<input data-col-input="1" readOnly="{{true}}" value="{{cell.display}}" aria-label="{{cell.aria}}" placeholder="{{cell.placeholder}}" onKeyDown="{{cell.onKey}}" onFocus="{{cell.onFocus}}" onBlur="{{cell.onBlur}}" style="{{cell.inputStyle}}">
+</sc-if>
+<sc-if value="{{cell.isText}}" hint-placeholder-val="{{false}}">
+<input data-col-input="1" value="{{cell.display}}" aria-label="{{cell.aria}}" inputMode="{{cell.inputMode}}" onChange="{{cell.setText}}" onKeyDown="{{cell.onKey}}" style="{{cell.inputStyle}}">
+</sc-if>
+<sc-if value="{{cell.hasQual}}" hint-placeholder-val="{{false}}">
+<input data-col-input="1" value="{{cell.qual}}" aria-label="{{cell.qualAria}}" placeholder="What kind, if it helps" onChange="{{cell.setQual}}" onKeyDown="{{cell.onQualKey}}" style="{{cell.qualStyle}}">
+</sc-if>
+<sc-if value="{{cell.showOpts}}" hint-placeholder-val="{{false}}">
+<div role="listbox" aria-label="{{cell.aria}}" style="position: absolute; left: 0; top: calc(100% - 2px); z-index: 15; min-width: 220px; background: var(--card); border: 1px solid var(--line2); border-radius: 8px; box-shadow: 0 8px 24px rgba(20,21,27,0.16); padding: 4px; display: flex; flex-direction: column; gap: 1px">
+<sc-for list="{{cell.opts}}" as="o" hint-placeholder-count="2">
+<button tabIndex="-1" role="option" aria-selected="{{o.selected}}" onMouseDown="{{o.pick}}" style="{{o.style}}"><span style="color: var(--muted); width: 14px; display: inline-block">{{o.key}}</span>{{o.label}}</button>
+</sc-for>
+<div style="font-size: 11px; color: var(--muted); padding: 4px 8px 2px">Type the number or first letter</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</sc-for>
+</div>
+</sc-if>
+</sc-for>
+</div>
+</div>
+</main>
+</div>
+
+<sc-if value="{{pop.open}}" hint-placeholder-val="{{false}}">
+<button aria-label="Close details" onClick="{{closePop}}" style="position: fixed; inset: 0; z-index: 20; background: transparent; border: 0; cursor: default"></button>
+<div role="dialog" aria-label="{{pop.label}}" style="position: fixed; left: {{pop.x}}px; top: {{pop.y}}px; width: 340px; max-height: 80vh; overflow: auto; z-index: 21; background: var(--card); border: 1px solid var(--line2); border-radius: 10px; box-shadow: 0 12px 32px rgba(20,21,27,0.18); padding: 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline">
+<span style="font-size: 13px; font-weight: 600">{{pop.label}}</span>
+<span style="font-size: 12px; color: var(--muted)">{{pop.when}}</span>
+</div>
+<div>
+<span style="{{pop.valueStyle}}">{{pop.valueText}}</span>
+<sc-if value="{{pop.flagWord}}" hint-placeholder-val="{{false}}"><span style="margin-left: 8px; font-size: 12px; font-weight: 600; color: var(--abnormal)">{{pop.flagWord}}</span></sc-if>
+<sc-if value="{{pop.qual}}" hint-placeholder-val="{{false}}"><div style="font-size: 13px; color: var(--muted); margin-top: 2px">{{pop.qual}}</div></sc-if>
+<div style="font-size: 12px; color: var(--muted); margin-top: 4px">{{pop.signedText}}</div>
+</div>
+<sc-if value="{{pop.reason}}" hint-placeholder-val="{{false}}"><div style="font-size: 12px; line-height: 1.4; background: var(--card2); border: 1px solid var(--line2); border-radius: 6px; padding: 8px">{{pop.reason}}</div></sc-if>
+<sc-if value="{{pop.from}}" hint-placeholder-val="{{false}}"><div style="font-size: 12px; color: var(--muted); line-height: 1.4">{{pop.from}}</div></sc-if>
+<sc-if value="{{pop.hasHistory}}" hint-placeholder-val="{{false}}">
+<div style="border-top: 1px solid var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 11px; font-weight: 600; color: var(--muted)">Amendment history</div>
+<sc-for list="{{pop.history}}" as="h" hint-placeholder-count="1">
+<div style="font-size: 12px; line-height: 1.4"><span style="text-decoration: line-through; color: var(--muted)">{{h.was}}</span> to <strong>{{h.to}}</strong> at {{h.t}}. Reason: {{h.reason}}</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{pop.note}}" hint-placeholder-val="{{false}}">
+<div style="border-top: 1px solid var(--line); padding-top: 8px">
+<div style="font-size: 11px; font-weight: 600; color: var(--muted)">Note</div>
+<div style="font-size: 13px; line-height: 1.4">{{pop.note}}</div>
+</div>
+</sc-if>
+<sc-if value="{{pop.canNote}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); padding-top: 8px">
+<label for="cellnote" style="font-size: 12px; font-weight: 600">{{pop.noteLabel}}</label>
+<textarea id="cellnote" rows="2" value="{{pop.noteDraft}}" onChange="{{pop.setNote}}" style="resize: vertical; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line2); border-radius: 6px"></textarea>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+<span style="font-size: 11px; color: var(--muted)">Adds a note. The value is not changed.</span>
+<button onClick="{{pop.saveNote}}" class="ghost" style="height: 30px; padding: 0 12px; border: 1px solid var(--line2); background: var(--card); color: var(--ink); border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer">Save note</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{pop.canAmend}}" hint-placeholder-val="{{false}}">
+<div style="border-top: 1px solid var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 6px">
+<button onClick="{{pop.startAmend}}" style="align-self: flex-start; height: 32px; padding: 0 14px; border: 1px solid var(--accent); background: var(--accent); color: #FFFFFF; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer">Amend</button>
+<span style="font-size: 11px; color: var(--muted)">Signed entries are never edited in place. An amendment keeps the original and records why it changed.</span>
+</div>
+</sc-if>
+<sc-if value="{{pop.amending}}" hint-placeholder-val="{{false}}">
+<div style="border-top: 1px solid var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 12px; font-weight: 600">Amended value</div>
+<sc-if value="{{pop.amendIsChoice}}" hint-placeholder-val="{{false}}">
+<div role="group" aria-label="Amended value" style="display: flex; gap: 6px; flex-wrap: wrap">
+<sc-for list="{{pop.amendOpts}}" as="o" hint-placeholder-count="2">
+<button aria-pressed="{{o.selected}}" onClick="{{o.pick}}" style="{{o.style}}">{{o.label}}</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{pop.amendIsText}}" hint-placeholder-val="{{false}}">
+<input aria-label="Amended value" value="{{pop.amendV}}" onChange="{{pop.setAmendV}}" style="height: 32px; padding: 0 8px; border: 1px solid var(--line2); border-radius: 6px; font-size: 13px">
+</sc-if>
+<sc-if value="{{pop.amendHasQual}}" hint-placeholder-val="{{false}}">
+<input aria-label="What kind" placeholder="What kind, if it helps" value="{{pop.amendQ}}" onChange="{{pop.setAmendQ}}" style="height: 32px; padding: 0 8px; border: 1px solid var(--line2); border-radius: 6px; font-size: 13px">
+</sc-if>
+<label for="amendreason" style="font-size: 12px; font-weight: 600">Reason for amendment</label>
+<input id="amendreason" value="{{pop.amendReason}}" onChange="{{pop.setAmendReason}}" placeholder="Required" style="height: 32px; padding: 0 8px; border: 1px solid var(--line2); border-radius: 6px; font-size: 13px">
+<div style="display: flex; justify-content: flex-end; gap: 8px">
+<button onClick="{{pop.cancelAmend}}" class="ghost" style="height: 32px; padding: 0 12px; border: 1px solid var(--line2); background: var(--card); color: var(--ink); border-radius: 6px; font-size: 13px; cursor: pointer">Cancel</button>
+<button onClick="{{pop.saveAmend}}" disabled="{{pop.amendCant}}" style="{{pop.amendSaveStyle}}">Save amendment</button>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{addRow.open}}" hint-placeholder-val="{{false}}">
+<div style="position: fixed; inset: 0; z-index: 30; background: rgba(20,21,27,0.35); display: flex; align-items: center; justify-content: center; padding: 16px">
+<div role="dialog" aria-modal="true" aria-labelledby="addrow-h" style="width: 540px; max-width: 100%; max-height: 90vh; overflow: auto; background: var(--card); border-radius: 12px; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 16px 48px rgba(20,21,27,0.25)">
+<h2 id="addrow-h" style="margin: 0; font-size: 18px">Add to {{addRow.tabLabel}}</h2>
+<div role="group" aria-label="What to add" style="display: flex; border: 1px solid var(--line2); border-radius: 6px; overflow: hidden; align-self: flex-start">
+<button aria-pressed="{{addRow.isFinding}}" onClick="{{addRow.pickFinding}}" style="{{addRow.findingStyle}}">A finding</button>
+<button aria-pressed="{{addRow.isScreener}}" onClick="{{addRow.pickScreener}}" style="{{addRow.screenerStyle}}">A screener</button>
+</div>
+<sc-if value="{{addRow.isFinding}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p style="margin: 0; font-size: 13px; color: var(--muted); line-height: 1.45">Search for a coded finding first. If nothing fits, record it as uncoded text.</p>
+<label for="rowsearch" style="font-size: 13px; font-weight: 600">Find a finding</label>
+<input id="rowsearch" value="{{addRow.q}}" onChange="{{addRow.setQ}}" placeholder="e.g. capillary refill" style="height: 38px; padding: 0 10px; border: 1px solid var(--line2); border-radius: 6px; font-size: 14px">
+<div style="display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow: auto">
+<sc-for list="{{addRow.results}}" as="o" hint-placeholder-count="4">
+<button onClick="{{o.pick}}" aria-pressed="{{o.selected}}" style="{{o.style}}"><span style="font-weight: 500">{{o.label}}</span><span style="font-size: 12px; opacity: 0.8">{{o.sub}}</span></button>
+</sc-for>
+</div>
+<div style="font-size: 12px; line-height: 1.45; background: var(--card2); border: 1px solid var(--line2); border-radius: 8px; padding: 10px">Goes on this patient's flowsheet, so the next nurse sees it. Afterward you can save it to your own flowsheet or suggest it to the unit's template; an admin reviews every suggestion.</div>
+</div>
+</sc-if>
+<sc-if value="{{addRow.isScreener}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p style="margin: 0; font-size: 13px; color: var(--muted); line-height: 1.45">Adds every question, its answer choices and its computed score. Answers stay in sync with the same screener on any other flowsheet.</p>
+<sc-for list="{{addRow.screeners}}" as="sc" hint-placeholder-count="2">
+<button onClick="{{sc.pick}}" disabled="{{sc.disabled}}" aria-pressed="{{sc.selected}}" style="{{sc.style}}"><span style="font-weight: 500">{{sc.label}}</span><span style="font-size: 12px; opacity: 0.8">{{sc.sub}}</span></button>
+</sc-for>
+</div>
+</sc-if>
+<div style="display: flex; justify-content: flex-end; gap: 8px">
+<button onClick="{{closeDlg}}" class="ghost" style="height: 36px; padding: 0 14px; border: 1px solid var(--line2); background: var(--card); border-radius: 6px; font-size: 14px; cursor: pointer; color: var(--ink)">Cancel</button>
+<button onClick="{{addRow.add}}" disabled="{{addRow.cant}}" style="{{addRow.addStyle}}">Add</button>
+</div>
+</div>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+var LABEL_W = 272;
+var COL_W = 132;
+var TIME_COLS = [
+  { id: 'c0', d: 'Sep 30', t: '20:00', older: true },
+  { id: 'c1', d: 'Oct 1', t: '04:00' },
+  { id: 'c2', d: 'Oct 1', t: '08:00' },
+  { id: 'c3', d: 'Oct 1', t: '12:00' },
+  { id: 'c4', d: 'Oct 1', t: '16:00' }
+];
+var SHIFT_COLS = [
+  { id: 's1', d: 'Oct 1', t: '07:00-11:00' },
+  { id: 's2', d: 'Oct 1', t: '11:00-15:00' },
+  { id: 's3', d: 'Oct 1', t: '15:00-19:00' }
+];
+var TABS = [
+  { id: 'assess', label: 'Assessment' },
+  { id: 'vitals', label: 'Vitals' },
+  { id: 'pain', label: 'Pain' },
+  { id: 'io', label: 'Intake & Output' },
+  { id: 'scores', label: 'Scored instruments' },
+  { id: 'peds', label: 'Peds assessment', custom: true }
+];
+function finding(label, vals) { return { label: label, kind: 'coded', options: ['Normal', 'Abnormal'], abnormal: ['Abnormal'], qual: true, vals: vals || {} }; }
+function MEASURES() {
+  return {
+    temp: { label: 'Temperature', unit: '°C', kind: 'num', lo: 36.1, hi: 38.0, vals: { c0: '36.9', c1: '37.2', c2: '38.4', c3: '37.6', c4: '37.1' }, notes: { c2: 'Acetaminophen given 08:15. Recheck due 09:00.' } },
+    hr: { label: 'Heart rate', unit: '/min', kind: 'num', lo: 60, hi: 100, vals: { c0: '80', c1: '88', c2: '112', c3: '96', c4: '84' } },
+    bp: { label: 'Blood pressure', unit: 'mmHg', kind: 'text', vals: { c0: '126/78', c1: '128/76', c2: '138/84', c3: '124/78', c4: '122/74' } },
+    rr: { label: 'Respiratory rate', unit: '/min', kind: 'num', lo: 12, hi: 20, vals: { c0: '16', c1: '18', c2: '24', c3: '20', c4: '18' } },
+    spo2: { label: 'SpO2', unit: '%', kind: 'num', lo: 92, vals: { c0: '97', c1: '96', c2: '91', c3: '95', c4: '97' }, notes: { c2: 'Placed on 2 L nasal cannula.' } },
+    o2: { label: 'O2 delivery', kind: 'coded', options: ['Room air', 'Nasal cannula', 'Face mask'], vals: { c0: 'Room air', c1: 'Room air', c2: 'Nasal cannula', c3: 'Nasal cannula', c4: 'Room air' } },
+    wt: { label: 'Weight', unit: 'kg', kind: 'num', vals: { c1: '72.4' } },
+    pain_score: { label: 'Pain score', unit: '0-10', kind: 'num', vals: { c1: '2', c2: '6', c3: '4', c4: '2' } },
+    pain_site: { label: 'Pain location', kind: 'text', vals: { c2: 'Chest, left', c3: 'Chest, left' } },
+    pain_quality: { label: 'Pain quality', kind: 'coded', options: ['Aching', 'Sharp', 'Burning'], vals: { c2: 'Aching', c3: 'Aching' } },
+    breath: finding('Breath sounds', { c1: 'Normal', c2: { v: 'Abnormal', q: 'Bilateral crackles' }, c3: { v: 'Abnormal', q: 'Crackles, right base' }, c4: 'Normal' }),
+    resp_effort: finding('Respiratory effort', { c2: { v: 'Abnormal', q: 'Mild accessory muscle use' }, c3: 'Normal' }),
+    cough: finding('Cough', { c2: 'Normal', c3: 'Normal' }),
+    loc: finding('Level of consciousness', { c2: 'Normal', c3: 'Normal' }),
+    orient: finding('Orientation', { c2: 'Normal', c3: 'Normal' }),
+    mobility: finding('Mobility', { c2: { v: 'Abnormal', q: 'Assist of one' }, c3: { v: 'Abnormal', q: 'Assist of one' } }),
+    joints: finding('Joints and limbs', { c2: 'Normal', c3: 'Normal' }),
+    abdomen: finding('Abdomen', { c2: 'Normal', c3: 'Normal' }),
+    bowel: finding('Bowel sounds', { c2: 'Normal', c3: 'Normal' }),
+    urine_find: finding('Urine output', { c2: 'Normal', c3: 'Normal' }),
+    continence: finding('Continence', { c2: 'Normal', c3: 'Normal' }),
+    skin: finding('Skin integrity', { c2: 'Normal', c3: { v: 'Abnormal', q: 'Left heel, see wound row' } }),
+    wound: { label: 'Wound, left heel', kind: 'text', status: 'custom', coded: false, promo: {}, vals: { c3: 'Stage 2, 2 x 1.5 cm' }, notes: { c3: 'Offloading boot applied.' } },
+    mf_hist: { label: 'History of falling', kind: 'num', choices: [['No', 0], ['Yes', 25]], vals: { c1: '0', c3: '25' } },
+    mf_dx: { label: 'Secondary diagnosis', kind: 'num', choices: [['No', 0], ['Yes', 15]], vals: { c1: '15', c3: '15' } },
+    mf_aid: { label: 'Ambulatory aid', kind: 'num', choices: [['None, bed rest, or nurse assist', 0], ['Crutches, cane, or walker', 15], ['Furniture', 30]], vals: { c1: '0', c3: '15' } },
+    mf_iv: { label: 'IV or saline lock', kind: 'num', choices: [['No', 0], ['Yes', 20]], vals: { c1: '20', c3: '20' } },
+    mf_gait: { label: 'Gait', kind: 'num', choices: [['Normal, bed rest, or wheelchair', 0], ['Weak', 10], ['Impaired', 20]], vals: { c1: '10', c3: '20' } },
+    mf_mental: { label: 'Mental status', kind: 'num', choices: [['Oriented to own ability', 0], ['Overestimates or forgets limitations', 15]], vals: { c1: '0', c3: '0' } },
+    mf_total: { label: 'Total score', kind: 'computed', calc: { type: 'sum', from: ['mf_hist', 'mf_dx', 'mf_aid', 'mf_iv', 'mf_gait', 'mf_mental'] } },
+    mf_band: { label: 'Risk level', kind: 'computed', calc: { type: 'band', from: 'mf_total' } },
+    gcs_e: { label: 'Eye opening', kind: 'num', choices: [['Spontaneous', 4], ['To sound', 3], ['To pressure', 2], ['None', 1]], vals: { c1: '4' } },
+    gcs_v: { label: 'Verbal response', kind: 'num', choices: [['Oriented', 5], ['Confused', 4], ['Words', 3], ['Sounds', 2], ['None', 1]], vals: { c1: '5' } },
+    gcs_m: { label: 'Motor response', kind: 'num', choices: [['Obeys commands', 6], ['Localizing', 5], ['Normal flexion', 4], ['Abnormal flexion', 3], ['Extension', 2], ['None', 1]], vals: { c1: '6' } },
+    gcs_total: { label: 'Total score', kind: 'computed', calc: { type: 'sum', from: ['gcs_e', 'gcs_v', 'gcs_m'] } },
+    in_po: { label: 'PO', unit: 'mL', kind: 'num', vals: { s1: '240', s2: '360', s3: '120' } },
+    in_iv: { label: 'IV', unit: 'mL', kind: 'num', vals: { s1: '400', s2: '400', s3: '400' } },
+    in_ent: { label: 'Enteral', unit: 'mL', kind: 'num', vals: { s1: '0', s2: '0', s3: '0' } },
+    in_blood: { label: 'Blood products', unit: 'mL', kind: 'num', vals: { s1: '0', s2: '250', s3: '0' } },
+    in_total: { label: 'Intake total', unit: 'mL', kind: 'computed', calc: { type: 'sum', from: ['in_po', 'in_iv', 'in_ent', 'in_blood'] } },
+    out_urine: { label: 'Urine', unit: 'mL', kind: 'num', vals: { s1: '350', s2: '500' } },
+    out_emesis: { label: 'Emesis', unit: 'mL', kind: 'num', vals: { s1: '0', s2: '100', s3: '0' } },
+    out_drain: { label: 'Drains', unit: 'mL', kind: 'num', vals: { s1: '50', s2: '40', s3: '30' } },
+    out_stool: { label: 'Stool', unit: 'mL', kind: 'num', vals: { s1: '0', s2: '0', s3: '0' } },
+    out_ebl: { label: 'Blood loss', unit: 'mL', kind: 'num', vals: { s1: '0', s2: '0', s3: '0' } },
+    out_total: { label: 'Output total', unit: 'mL', kind: 'computed', calc: { type: 'sum', from: ['out_urine', 'out_emesis', 'out_drain', 'out_stool', 'out_ebl'] } },
+    balance: { label: 'Fluid balance', unit: 'mL', kind: 'computed', pinned: true, calc: { type: 'diff', a: 'in_total', b: 'out_total' } },
+    head_circ: { label: 'Head circumference', unit: 'cm', kind: 'num', vals: {} }
+  };
+}
+var SCREENERS = {
+  morse: { label: 'Morse Fall Scale', ids: ['mf_hist', 'mf_dx', 'mf_aid', 'mf_iv', 'mf_gait', 'mf_mental', 'mf_total', 'mf_band'], sub: '6 questions, scored, risk level' },
+  gcs: { label: 'Glasgow Coma Scale', ids: ['gcs_e', 'gcs_v', 'gcs_m', 'gcs_total'], sub: '3 questions, scored' }
+};
+function SCR(key) { return [{ g: SCREENERS[key].label, scr: key }].concat(SCREENERS[key].ids); }
+var TAB_ROWS = {
+  assess: [{ g: 'Vital signs' }, 'temp', 'hr', 'bp', 'rr', 'spo2', 'o2', { g: 'Pain' }, 'pain_score', 'pain_site', 'pain_quality', { g: 'Respiratory' }, 'breath', 'resp_effort', 'cough', { g: 'Neurological' }, 'loc', 'orient', { g: 'Musculoskeletal' }, 'mobility', 'joints', { g: 'Gastrointestinal' }, 'abdomen', 'bowel', { g: 'Genitourinary' }, 'urine_find', 'continence', { g: 'Skin' }, 'skin', 'wound'],
+  vitals: [{ g: 'Vital signs' }, 'temp', 'hr', 'bp', 'rr', 'spo2', 'o2', { g: 'Body measurements' }, 'wt'],
+  pain: [{ g: 'Pain' }, 'pain_score', 'pain_site', 'pain_quality'],
+  io: [{ g: 'Intake' }, 'in_po', 'in_iv', 'in_ent', 'in_blood', 'in_total', { g: 'Output' }, 'out_urine', 'out_emesis', 'out_drain', 'out_stool', 'out_ebl', 'out_total', 'balance'],
+  scores: SCR('morse').concat(SCR('gcs')),
+  peds: [{ g: 'Measurements' }, 'temp', 'hr', 'wt', { g: 'Growth' }, 'head_circ']
+};
+var CATALOG = ['Capillary refill', 'Peripheral pulses', 'Edema', 'Wound appearance', 'Pupil reaction', 'Drain site appearance', 'Pressure injury stage', 'Incision appearance'];
+var TAG = 'font-size: 11px; line-height: 16px; padding: 0 6px; border-radius: 4px; color: var(--muted); background: var(--card); white-space: nowrap; border: 1px solid var(--line2); ';
+function pill(on, dis) {
+  if (dis) return 'min-height: 32px; padding: 4px 12px; border-radius: 6px; font-size: 13px; text-align: left; background: var(--card2); color: var(--muted); border: 1px solid var(--line); cursor: not-allowed';
+  return 'min-height: 32px; padding: 4px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; text-align: left; ' +
+    (on ? 'background: var(--accent); color: #FFFFFF; border: 1px solid var(--accent); font-weight: 600' : 'background: var(--card); color: var(--ink); border: 1px solid var(--line2)');
+}
+function seg(on) {
+  return 'height: 32px; padding: 0 12px; border: 0; font-size: 13px; cursor: pointer; ' +
+    (on ? 'background: var(--accent); color: #FFFFFF; font-weight: 600' : 'background: var(--card); color: var(--ink)');
+}
+function primaryBtn(dis) {
+  return 'height: 36px; padding: 0 16px; border-radius: 6px; font-size: 14px; font-weight: 600; ' +
+    (dis ? 'background: var(--card2); color: var(--muted); border: 1px solid var(--line2); cursor: not-allowed' : 'background: var(--accent); color: #FFFFFF; border: 1px solid var(--accent); cursor: pointer');
+}
+function nowStamp() {
+  var d = new Date();
+  var hh = String(d.getHours()); if (hh.length < 2) hh = '0' + hh;
+  var mm = String(d.getMinutes()); if (mm.length < 2) mm = '0' + mm;
+  return { d: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), t: hh + ':' + mm };
+}
+function choicesOf(m) {
+  if (m.choices) return m.choices.map(function (c) { return { label: c[0] + ' (' + c[1] + ')', name: c[0], stored: String(c[1]) }; });
+  if (m.options) return m.options.map(function (o) { return { label: o, name: o, stored: o }; });
+  return null;
+}
+function readVal(v) { if (v == null || v === '') return null; return typeof v === 'string' ? { v: v, q: '' } : { v: v.v, q: v.q || '' }; }
+function displayOf(m, v, q) {
+  if (v == null || v === '') return '';
+  if (m.choices) { var c = m.choices.filter(function (x) { return String(x[1]) === v; })[0]; return c ? c[0] + ' (' + c[1] + ')' : v; }
+  return v + (q ? ', ' + q : '');
+}
+
+class Component extends DCLogic {
+  constructor(...a) {
+    super(...a);
+    this.state = {
+      tab: 'assess', allTime: false, measures: MEASURES(),
+      extra: { time: [], shift: [] }, draft: { time: null, shift: null },
+      added: { assess: [], vitals: [], pain: [], io: [], scores: [], peds: [] },
+      addedScr: { assess: [], vitals: [], pain: [], io: [], scores: [], peds: [] },
+      notes: {}, amends: {}, collapsed: {}, pop: null, noteDraft: '', amend: null,
+      dlg: null, rowMode: 'finding', q: '', sel: null, scrSel: null, rowMenu: null, focus: null, n: 0
+    };
+  }
+  k(id, c) { return id + '|' + c; }
+  setOf(tab) { return tab === 'io' ? 'shift' : 'time'; }
+  note(id, c) {
+    var key = this.k(id, c);
+    if (Object.prototype.hasOwnProperty.call(this.state.notes, key)) return this.state.notes[key];
+    var m = this.state.measures[id];
+    return (m.notes && m.notes[c]) || '';
+  }
+  numAt(id, c) {
+    var m = this.state.measures[id];
+    if (m.kind === 'computed') { var r = this.compute(id, c); return r.refused || r.empty ? null : parseFloat(r.v); }
+    var rv = readVal(m.vals[c]); if (!rv) return null;
+    var n = parseFloat(rv.v); return isNaN(n) ? null : n;
+  }
+  compute(id, c) {
+    var ms = this.state.measures, k = ms[id].calc, self = this;
+    if (k.type === 'sum') {
+      var xs = k.from.map(function (f) { return { f: f, v: self.numAt(f, c) }; });
+      var have = xs.filter(function (x) { return x.v != null; });
+      if (!have.length) return { empty: true };
+      var miss = xs.filter(function (x) { return x.v == null; });
+      if (miss.length) return { refused: true, reason: 'Not computed. Missing: ' + miss.map(function (x) { return ms[x.f].label; }).join(', ') + '.' };
+      return { v: String(have.reduce(function (a, x) { return a + x.v; }, 0)) };
+    }
+    if (k.type === 'band') {
+      var t = this.compute(k.from, c);
+      if (t.empty || t.refused) return t;
+      var n = parseFloat(t.v);
+      var b = n >= 45 ? 'High' : n >= 25 ? 'Moderate' : 'Low';
+      return { v: b, band: b };
+    }
+    var a = this.compute(k.a, c), bb = this.compute(k.b, c);
+    if (a.empty && bb.empty) return { empty: true };
+    if (a.refused || bb.refused || a.empty || bb.empty) {
+      var why = [];
+      if (a.refused) why.push('Intake: ' + a.reason.replace('Not computed. ', ''));
+      if (a.empty) why.push('No intake charted.');
+      if (bb.refused) why.push('Output: ' + bb.reason.replace('Not computed. ', ''));
+      if (bb.empty) why.push('No output charted.');
+      return { refused: true, reason: 'Not computed for this window. ' + why.join(' ') };
+    }
+    var d = parseFloat(a.v) - parseFloat(bb.v);
+    return { v: (d > 0 ? '+' : '') + d };
+  }
+  flagOf(m, v) {
+    var n = parseFloat(v);
+    if (m.kind !== 'num' || m.choices || isNaN(n)) return '';
+    if (m.hi != null && n > m.hi) return 'H';
+    if (m.lo != null && n < m.lo) return 'L';
+    return '';
+  }
+  isAbn(m, v) { return !!(this.flagOf(m, v) || (m.abnormal && m.abnormal.indexOf(v) >= 0)); }
+  fromText(m) {
+    var ms = this.state.measures;
+    if (m.calc.type === 'sum') return 'Computed server-side from: ' + m.calc.from.map(function (f) { return ms[f].label; }).join(', ') + '. To change it, amend a component.';
+    if (m.calc.type === 'band') return 'From the total score, using the instrument’s configured cutoffs.';
+    return 'Intake total minus output total for this window.';
+  }
+  tabRowIds(tab) {
+    var s = this.state, base = TAB_ROWS[tab].slice();
+    s.addedScr[tab].forEach(function (key) { base = base.concat(SCR(key)); });
+    if (s.added[tab].length) base = base.concat([{ g: 'Added for this patient' }]).concat(s.added[tab]);
+    return base;
+  }
+  hasScreener(tab, key) { return this.tabRowIds(tab).some(function (e) { return typeof e !== 'string' && e.scr === key; }); }
+  syncText(tab, ids) {
+    var self = this, names = [];
+    TABS.forEach(function (t) {
+      if (t.id === tab) return;
+      var other = self.tabRowIds(t.id);
+      if (ids.some(function (id) { return other.indexOf(id) >= 0; })) names.push(t.label);
+    });
+    return names.length ? 'Synced with ' + names.join(', ') : '';
+  }
+  colsFor(tab) {
+    var s = this.state, set = this.setOf(tab);
+    var cols = (set === 'shift' ? SHIFT_COLS : TIME_COLS).concat(s.extra[set]);
+    if (!s.allTime) cols = cols.filter(function (c) { return !c.older; });
+    return cols;
+  }
+  cloneMeasures() { return JSON.parse(JSON.stringify(this.state.measures)); }
+  move(e) {
+    var list = [].slice.call(document.querySelectorAll('[data-col-input]'));
+    var i = list.indexOf(e.currentTarget);
+    var t = list[i + (e.shiftKey ? -1 : 1)];
+    if (t) { e.preventDefault(); t.focus(); if (t.select && !t.readOnly) t.select(); }
+    else if (e.key === 'Enter') e.preventDefault();
+  }
+  setCell(id, c, nv, nq) {
+    var mm = this.cloneMeasures(), cur = readVal(mm[id].vals[c]);
+    var q = nq !== undefined ? nq : (cur ? cur.q : '');
+    if (nv === '' || nv == null) delete mm[id].vals[c];
+    else mm[id].vals[c] = q ? { v: nv, q: q } : nv;
+    this.setState({ measures: mm });
+  }
+
+  editorCell(id, col, base) {
+    var s = this.state, self = this, m = s.measures[id], key = this.k(id, col.id);
+    var cur = readVal(m.vals[col.id]) || { v: '', q: '' };
+    var ch = choicesOf(m), abn = cur.v ? this.isAbn(m, cur.v) : false;
+    var inputStyle = 'width: 100%; box-sizing: border-box; height: 26px; padding: 0 6px; border: 1px solid var(--line2); border-radius: 4px; font-size: 13px; background: var(--card); ' + (abn ? 'color: var(--abnormal); font-weight: 600; ' : 'color: var(--ink); ') + (ch ? 'cursor: pointer; caret-color: transparent' : '');
+    var focused = s.focus === key;
+    var pickVal = function (stored) { self.setCell(id, col.id, stored, stored === 'Abnormal' ? undefined : ''); };
+    var colLabel = col.d + ' ' + col.t;
+    var out = {
+      isBlank: false, isLive: false, isStatic: false, isEditor: true,
+      style: base + 'background: var(--card); overflow: visible; ' + (focused ? 'z-index: 6; ' : ''),
+      isChoice: !!ch, isText: !ch, inputStyle: inputStyle,
+      aria: m.label + ', ' + colLabel,
+      placeholder: ch ? 'Select' : '',
+      inputMode: m.kind === 'num' ? 'decimal' : 'text',
+      display: ch ? displayOf(m, cur.v, '') : cur.v,
+      hasQual: !!(m.qual && cur.v === 'Abnormal'), qual: cur.q,
+      qualAria: m.label + ', what kind', qualStyle: 'margin-top: 4px; width: 100%; box-sizing: border-box; height: 24px; padding: 0 6px; border: 1px solid var(--line2); border-radius: 4px; font-size: 12px; background: var(--card); color: var(--ink)',
+      setQual: function (e) { self.setCell(id, col.id, cur.v, e.target.value); },
+      onQualKey: function (e) { if (e.key === 'Tab' || e.key === 'Enter') self.move(e); },
+      setText: function (e) { self.setCell(id, col.id, e.target.value); },
+      showOpts: !!ch && focused,
+      onFocus: function () { if (self.state.focus !== key) self.setState({ focus: key }); },
+      onBlur: function () { if (self.state.focus === key) self.setState({ focus: null }); },
+      opts: [],
+      onKey: function (e) {
+        var kk = e.key;
+        if (kk === 'Tab' || kk === 'Enter') { self.move(e); return; }
+        if (!ch) return;
+        if (kk === 'Backspace' || kk === 'Delete') { e.preventDefault(); self.setCell(id, col.id, '', ''); return; }
+        var idx = -1; ch.forEach(function (c, i) { if (c.stored === cur.v) idx = i; });
+        if (kk === 'ArrowDown' || kk === 'ArrowUp') { e.preventDefault(); var ni = kk === 'ArrowDown' ? (idx + 1) % ch.length : (idx <= 0 ? ch.length - 1 : idx - 1); pickVal(ch[ni].stored); return; }
+        if (kk.length === 1) {
+          e.preventDefault();
+          var d = parseInt(kk, 10), pick = null;
+          if (!isNaN(d) && d >= 1 && d <= ch.length) pick = ch[d - 1];
+          else {
+            var starts = ch.filter(function (c) { return c.name.toLowerCase().charAt(0) === kk.toLowerCase(); });
+            if (starts.length) { var at = -1; starts.forEach(function (c, i) { if (c.stored === cur.v) at = i; }); pick = starts[(at + 1) % starts.length]; }
+          }
+          if (pick) pickVal(pick.stored);
+        }
+      }
+    };
+    if (ch) out.opts = ch.map(function (c, i) {
+      var on = c.stored === cur.v;
+      return {
+        key: String(i + 1), label: c.label, selected: on,
+        style: 'display: flex; gap: 6px; align-items: baseline; text-align: left; border: 0; border-radius: 6px; padding: 6px 8px; font-size: 13px; cursor: pointer; ' + (on ? 'background: var(--accent); color: #FFFFFF; font-weight: 600' : 'background: var(--card); color: var(--ink)'),
+        pick: function (e) { e.preventDefault(); pickVal(c.stored); }
+      };
+    });
+    return out;
+  }
+
+  cell(id, col, isDraft, pinned) {
+    var s = this.state, m = s.measures[id], self = this, key = this.k(id, col.id);
+    var base = 'position: relative; display: block; width: 100%; box-sizing: border-box; text-align: left; border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 5px 10px; min-height: 32px; font-size: 13px; line-height: 1.3; color: var(--ink); ';
+    if (pinned) base += 'border-top: 1px solid var(--line2); ';
+    if (isDraft) base += 'box-shadow: inset 2px 0 0 var(--accent); ';
+    var blank = { isBlank: true, isLive: false, isStatic: false, isEditor: false, style: base + 'background: ' + (pinned ? 'var(--card2)' : 'var(--card)') };
+    if (isDraft && m.kind !== 'computed') return this.editorCell(id, col, base);
+    var text, textStyle = '', flag = '', flagWord = '', qual = '', chip = '', chipStyle = '', bg = 'var(--card)', aria;
+    if (m.kind === 'computed') {
+      var r = this.compute(id, col.id);
+      if (r.empty) return blank;
+      bg = 'var(--card2)';
+      if (r.refused) { text = 'Not computed'; textStyle = 'font-size: 12px; color: var(--muted); font-style: italic'; aria = m.label + ', not computed'; }
+      else if (r.band) {
+        text = ''; chip = r.band;
+        chipStyle = r.band === 'High'
+          ? 'display: inline-block; font-size: 12px; font-weight: 600; padding: 0 6px; border-radius: 4px; background: var(--warn); border: 1px solid var(--warn-edge); color: #0F1015'
+          : 'display: inline-block; font-size: 12px; font-weight: 600; padding: 0 6px; border-radius: 4px; background: var(--card); border: 1px solid var(--line2); color: var(--ink)';
+        aria = m.label + ', ' + r.band;
+      } else { text = r.v; textStyle = 'font-weight: 700'; aria = m.label + ', ' + r.v + (m.unit ? ' ' + m.unit : ''); }
+      if (isDraft) return { isBlank: false, isLive: false, isStatic: true, isEditor: false, text: text, textStyle: textStyle, chip: chip, chipStyle: chipStyle, style: base + 'background: ' + bg };
+    } else {
+      var rv = readVal(m.vals[col.id]);
+      if (!rv) return blank;
+      text = rv.v;
+      if (m.choices) { var cc = m.choices.filter(function (x) { return String(x[1]) === rv.v; })[0]; qual = cc ? cc[0] : ''; }
+      else qual = rv.q;
+      flag = this.flagOf(m, rv.v);
+      flagWord = flag === 'H' ? 'high' : flag === 'L' ? 'low' : '';
+      if (this.isAbn(m, rv.v)) textStyle = 'color: var(--abnormal); font-weight: 600';
+      aria = m.label + ', ' + rv.v + (m.unit ? ' ' + m.unit : '') + (flagWord ? ', ' + flagWord : '') + (qual ? ', ' + qual : '');
+    }
+    var hasNote = !!this.note(id, col.id), amended = !!(s.amends[key] && s.amends[key].length);
+    if (hasNote) aria += ', has a note';
+    if (amended) aria += ', amended';
+    return {
+      isBlank: false, isLive: true, isStatic: false, isEditor: false,
+      text: text, textStyle: textStyle, flag: flag, qual: qual, chip: chip, chipStyle: chipStyle, hasNote: hasNote, amended: amended,
+      aria: aria + '. Open details.',
+      style: base + 'background: ' + bg,
+      open: function (e) {
+        var rc = e.currentTarget.getBoundingClientRect();
+        var W = window.innerWidth, H = window.innerHeight;
+        var x = Math.max(8, Math.min(rc.left, W - 356));
+        var y = rc.bottom + 6 + 360 > H ? Math.max(8, rc.top - 366) : rc.bottom + 6;
+        self.setState({ pop: { id: id, c: col.id, x: Math.round(x), y: Math.round(y) }, noteDraft: self.note(id, col.id), amend: null });
+      }
+    };
+  }
+
+  renderVals() {
+    var s = this.state, self = this, ms = s.measures, tab = s.tab, set = this.setOf(tab);
+    var cols = this.colsFor(tab), n = cols.length, draftId = s.draft[set];
+    var tmpl = 'display: grid; grid-template-columns: ' + LABEL_W + 'px repeat(' + n + ', minmax(' + COL_W + 'px, 1fr)); ';
+    var colsOut = cols.map(function (c) {
+      var isDraft = c.id === draftId;
+      return {
+        d: c.d, t: c.t,
+        status: isDraft ? 'Draft' : c.signedAt ? 'Signed ' + c.signedAt : '',
+        statusStyle: 'font-size: 11px; font-weight: 600; ' + (isDraft ? 'color: var(--accent)' : 'color: var(--muted)'),
+        style: 'background: var(--card2); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line2); padding: 8px 10px; ' + (isDraft ? 'box-shadow: inset 0 -2px 0 var(--accent), inset 2px 0 0 var(--accent)' : '')
+      };
+    });
+
+    var entries = this.tabRowIds(tab), rows = [], collapsed = false;
+    for (var i = 0; i < entries.length; i++) {
+      var en = entries[i];
+      if (typeof en !== 'string') {
+        var gkey = tab + '|' + en.g;
+        collapsed = !!s.collapsed[gkey];
+        var gids = [];
+        for (var j = i + 1; j < entries.length && typeof entries[j] === 'string'; j++) gids.push(entries[j]);
+        rows.push((function (gk, label, isCol, ids) {
+          return {
+            isGroup: true, isRow: false, label: label, expanded: !isCol,
+            sync: self.syncText(tab, ids),
+            hiddenNote: isCol ? '· ' + ids.length + ' rows hidden' : '',
+            chevStyle: 'transition: transform 120ms; transform: rotate(' + (isCol ? 0 : 90) + 'deg)',
+            toggle: function () { var nc = Object.assign({}, self.state.collapsed); nc[gk] = !nc[gk]; self.setState({ collapsed: nc, focus: null }); }
+          };
+        })(gkey, en.g, collapsed, gids));
+        continue;
+      }
+      if (collapsed) continue;
+      rows.push(this.dataRow(en, tab, cols, draftId, tmpl));
+    }
+
+    var tabs = TABS.map(function (t) {
+      var on = t.id === tab;
+      return {
+        label: t.label, custom: !!t.custom, selected: on,
+        pick: function () { self.setState({ tab: t.id, pop: null, rowMenu: null, focus: null }); },
+        style: 'height: 42px; padding: 0 14px; border: 0; border-bottom: 2px solid ' + (on ? 'var(--accent)' : 'transparent') + '; background: transparent; font-size: 14px; white-space: nowrap; cursor: pointer; ' + (on ? 'color: var(--accent); font-weight: 600' : 'color: var(--muted); font-weight: 500')
+      };
+    });
+
+    var draftCol = draftId ? s.extra[set].filter(function (c) { return c.id === draftId; })[0] : null;
+    var draftHasData = draftId ? Object.keys(ms).some(function (mid) { return ms[mid].vals && readVal(ms[mid].vals[draftId]); }) : false;
+    var draftBar = {
+      none: !draftId, open: !!draftId, since: draftCol ? draftCol.t : '',
+      startLabel: tab === 'io' ? 'Chart intake & output' : 'Start assessment',
+      cant: !draftHasData, signStyle: primaryBtn(!draftHasData),
+      start: function () {
+        var st = nowStamp(), nn = self.state.n + 1, id = 'n' + nn;
+        var col = set === 'shift' ? { id: id, d: st.d, t: 'From ' + st.t } : { id: id, d: st.d, t: st.t };
+        var ex = { time: self.state.extra.time.slice(), shift: self.state.extra.shift.slice() };
+        ex[set].push(col);
+        var dr = Object.assign({}, self.state.draft); dr[set] = id;
+        self.setState({ extra: ex, draft: dr, n: nn, pop: null, rowMenu: null });
+        setTimeout(function () { var f = document.querySelector('[data-col-input]'); if (f) f.focus(); }, 60);
+      },
+      discard: function () {
+        var mm = self.cloneMeasures();
+        Object.keys(mm).forEach(function (mid) { if (mm[mid].vals) delete mm[mid].vals[draftId]; });
+        var ex = { time: self.state.extra.time.slice(), shift: self.state.extra.shift.slice() };
+        ex[set] = ex[set].filter(function (c) { return c.id !== draftId; });
+        var dr = Object.assign({}, self.state.draft); dr[set] = null;
+        self.setState({ measures: mm, extra: ex, draft: dr, focus: null });
+      },
+      sign: function () {
+        var st = nowStamp();
+        var ex = { time: self.state.extra.time.slice(), shift: self.state.extra.shift.slice() };
+        ex[set] = ex[set].map(function (c) { return c.id === draftId ? Object.assign({}, c, { signedAt: st.t }) : c; });
+        var dr = Object.assign({}, self.state.draft); dr[set] = null;
+        self.setState({ extra: ex, draft: dr, focus: null });
+      }
+    };
+
+    var pop = { open: false };
+    if (s.pop) pop = this.popVals(cols);
+
+    var tabLabel = TABS.filter(function (t) { return t.id === tab; })[0].label;
+    var q = (s.q || '').trim();
+    var results = CATALOG.filter(function (c) { return !q || c.toLowerCase().indexOf(q.toLowerCase()) >= 0; }).map(function (c) {
+      var on = s.sel && s.sel.coded && s.sel.label === c;
+      return { label: c, sub: 'Coded concept', selected: !!on, style: pill(on) + '; display: flex; justify-content: space-between; gap: 12px; align-items: center', pick: function () { self.setState({ sel: { label: c, coded: true } }); } };
+    });
+    if (q && !CATALOG.some(function (c) { return c.toLowerCase() === q.toLowerCase(); })) {
+      var onU = s.sel && !s.sel.coded;
+      results.push({ label: 'Record as uncoded: “' + q + '”', sub: 'Text only, no code', selected: !!onU, style: pill(onU) + '; display: flex; justify-content: space-between; gap: 12px; align-items: center; border-style: dashed', pick: function () { self.setState({ sel: { label: q, coded: false } }); } });
+    }
+    var isF = s.rowMode === 'finding';
+    var screeners = Object.keys(SCREENERS).map(function (key) {
+      var present = self.hasScreener(tab, key), on = s.scrSel === key;
+      return { label: SCREENERS[key].label, sub: present ? 'Already on this flowsheet' : SCREENERS[key].sub, disabled: present, selected: on, style: pill(on, present) + '; display: flex; justify-content: space-between; gap: 12px; align-items: center', pick: function () { if (!present) self.setState({ scrSel: key }); } };
+    });
+    var cantAdd = isF ? !s.sel : !s.scrSel;
+    var addRow = {
+      open: s.dlg === 'row', q: s.q, tabLabel: tabLabel, results: results, screeners: screeners,
+      isFinding: isF, isScreener: !isF, findingStyle: seg(isF), screenerStyle: seg(!isF),
+      pickFinding: function () { self.setState({ rowMode: 'finding' }); },
+      pickScreener: function () { self.setState({ rowMode: 'screener' }); },
+      cant: cantAdd, addStyle: primaryBtn(cantAdd),
+      setQ: function (e) { self.setState({ q: e.target.value, sel: null }); },
+      add: function () {
+        var st2 = self.state;
+        if (st2.rowMode === 'screener') {
+          if (!st2.scrSel) return;
+          var as = Object.assign({}, st2.addedScr); as[tab] = as[tab].concat([st2.scrSel]);
+          self.setState({ addedScr: as, dlg: null, scrSel: null });
+          return;
+        }
+        if (!st2.sel) return;
+        var mm = self.cloneMeasures(), nn = st2.n + 1, nid = 'x' + nn;
+        mm[nid] = { label: st2.sel.label, kind: 'text', status: 'custom', coded: st2.sel.coded, promo: {}, vals: {} };
+        var ad = Object.assign({}, st2.added); ad[tab] = ad[tab].concat([nid]);
+        self.setState({ measures: mm, added: ad, n: nn, dlg: null, q: '', sel: null });
+      }
+    };
+
+    return {
+      tabs: tabs, cols: colsOut, rows: rows, pop: pop, addRow: addRow, draftBar: draftBar,
+      minW: LABEL_W + n * COL_W,
+      headStyle: tmpl + 'position: sticky; top: 0; z-index: 5',
+      openAddRow: function () { self.setState({ dlg: 'row', q: '', sel: null, scrSel: null, rowMode: 'finding', pop: null, rowMenu: null }); },
+      closeDlg: function () { self.setState({ dlg: null, q: '', sel: null, scrSel: null }); },
+      closePop: function () { self.setState({ pop: null, amend: null }); },
+      visit: { on: !s.allTime, style: seg(!s.allTime), pick: function () { self.setState({ allTime: false }); } },
+      allTime: { on: s.allTime, style: seg(s.allTime), pick: function () { self.setState({ allTime: true }); } }
+    };
+  }
+
+  dataRow(id, tab, cols, draftId, tmpl) {
+    var s = this.state, self = this, m = s.measures[id], pinned = !!m.pinned;
+    var tags = [];
+    if (m.kind === 'computed') tags.push({ text: 'Computed', style: TAG });
+    if (m.status === 'custom') {
+      tags.push({ text: 'This patient', style: TAG });
+      if (m.coded === false) tags.push({ text: 'Uncoded', style: TAG });
+      if (m.promo && m.promo.personal) tags.push({ text: 'In my flowsheet', style: TAG });
+      if (m.promo && m.promo.suggested) tags.push({ text: 'Suggested to unit, awaiting admin', style: TAG + 'border-color: var(--warn-edge); background: var(--warn); color: #0F1015' });
+    }
+    var menuOpen = s.rowMenu === id;
+    return {
+      isGroup: false, isRow: true, label: m.label, unit: m.unit || '', tags: tags,
+      isCustom: m.status === 'custom', notCustom: m.status !== 'custom', menuOpen: menuOpen,
+      menuAria: m.label + ', row options',
+      menuNote: m.coded === false ? 'Uncoded rows are coded by an admin before they can join the unit template. No local code is ever assigned automatically.' : 'An admin reviews suggestions before every nurse on the unit sees this row.',
+      toggleMenu: function () { self.setState({ rowMenu: menuOpen ? null : id }); },
+      savePersonal: function () { var mm = self.cloneMeasures(); mm[id].promo = Object.assign({}, mm[id].promo, { personal: true }); self.setState({ measures: mm, rowMenu: null }); },
+      suggest: function () { var mm = self.cloneMeasures(); mm[id].promo = Object.assign({}, mm[id].promo, { suggested: true }); self.setState({ measures: mm, rowMenu: null }); },
+      rowStyle: tmpl + (pinned ? 'position: sticky; bottom: 0; z-index: 3; ' : ''),
+      labelStyle: 'position: sticky; left: 0; z-index: ' + (menuOpen ? 13 : 2) + '; background: ' + (pinned ? 'var(--card2)' : 'var(--card)') + '; border-right: 1px solid var(--line2); border-bottom: 1px solid var(--line); ' + (pinned ? 'border-top: 1px solid var(--line2); font-weight: 700; ' : '') + 'padding: 5px 12px; font-size: 13px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px',
+      cells: cols.map(function (c) { return self.cell(id, c, c.id === draftId, pinned); })
+    };
+  }
+
+  popVals(cols) {
+    var s = this.state, self = this, ms = s.measures;
+    var pid = s.pop.id, pc = s.pop.c, pm = ms[pid];
+    var allCols = TIME_COLS.concat(SHIFT_COLS, s.extra.time, s.extra.shift);
+    var colObj = allCols.filter(function (c) { return c.id === pc; })[0] || { d: '', t: '' };
+    var isC = pm.kind === 'computed', valueText = '', qual = '', reason = '', flagWord = '', vStyle = 'font-size: 20px; font-weight: 700';
+    var cur = readVal(pm.vals ? pm.vals[pc] : null) || { v: '', q: '' };
+    if (isC) {
+      var cr = this.compute(pid, pc);
+      valueText = cr.refused ? 'Not computed' : cr.v;
+      reason = cr.refused ? cr.reason : '';
+      if (cr.refused) vStyle = 'font-size: 15px; font-weight: 600; color: var(--muted)';
+    } else {
+      valueText = cur.v + (pm.unit && pm.kind === 'num' && !pm.choices ? ' ' + pm.unit : '');
+      if (pm.choices) { var cc = pm.choices.filter(function (x) { return String(x[1]) === cur.v; })[0]; qual = cc ? cc[0] : ''; } else qual = cur.q;
+      var f = this.flagOf(pm, cur.v);
+      flagWord = f === 'H' ? 'High' : f === 'L' ? 'Low' : '';
+      if (this.isAbn(pm, cur.v)) vStyle += '; color: var(--abnormal)';
+    }
+    var pkey = this.k(pid, pc), existing = this.note(pid, pc);
+    var hist = (s.amends[pkey] || []).map(function (h) { return { was: h.was, to: h.to, t: h.t, reason: h.reason }; });
+    var am = s.amend, ch = choicesOf(pm);
+    var amendCant = true;
+    if (am) amendCant = !am.v || !am.reason.trim() || (am.v === cur.v && (am.q || '') === (cur.q || ''));
+    var setAm = function (patch) { self.setState({ amend: Object.assign({}, self.state.amend, patch) }); };
+    return {
+      open: true, x: s.pop.x, y: s.pop.y, label: pm.label + (pm.unit && !isC ? ' (' + pm.unit + ')' : ''), when: colObj.d + ' ' + colObj.t,
+      valueText: valueText, valueStyle: vStyle, qual: qual, reason: reason, flagWord: flagWord,
+      signedText: colObj.signedAt ? 'Signed at ' + colObj.signedAt + ' by you' : 'Signed',
+      from: isC ? this.fromText(pm) : '', note: existing,
+      hasHistory: hist.length > 0, history: hist,
+      canNote: !isC && !am, noteLabel: existing ? 'Edit note' : 'Add a note', noteDraft: s.noteDraft,
+      setNote: function (e) { self.setState({ noteDraft: e.target.value }); },
+      saveNote: function () { var nd = Object.assign({}, s.notes); nd[pkey] = (self.state.noteDraft || '').trim(); self.setState({ notes: nd, pop: null }); },
+      canAmend: !isC && !am,
+      startAmend: function () { self.setState({ amend: { v: cur.v, q: cur.q || '', reason: '' } }); },
+      amending: !!am,
+      amendIsChoice: !!ch, amendIsText: !ch,
+      amendOpts: ch ? ch.map(function (c) { var on = am && am.v === c.stored; return { label: c.label, selected: !!on, style: pill(on), pick: function () { setAm({ v: c.stored, q: c.stored === 'Abnormal' ? self.state.amend.q : '' }); } }; }) : [],
+      amendV: am ? am.v : '', amendQ: am ? am.q : '', amendReason: am ? am.reason : '',
+      amendHasQual: !!(am && pm.qual && am.v === 'Abnormal'),
+      setAmendV: function (e) { setAm({ v: e.target.value }); },
+      setAmendQ: function (e) { setAm({ q: e.target.value }); },
+      setAmendReason: function (e) { setAm({ reason: e.target.value }); },
+      cancelAmend: function () { self.setState({ amend: null }); },
+      amendCant: amendCant, amendSaveStyle: primaryBtn(amendCant).replace('height: 36px', 'height: 32px').replace('font-size: 14px', 'font-size: 13px'),
+      saveAmend: function () {
+        var a2 = self.state.amend; if (!a2 || !a2.v || !a2.reason.trim()) return;
+        var mm = self.cloneMeasures();
+        mm[pid].vals[pc] = a2.q ? { v: a2.v, q: a2.q } : a2.v;
+        var amd = Object.assign({}, self.state.amends);
+        amd[pkey] = (amd[pkey] || []).concat([{ was: displayOf(pm, cur.v, cur.q), to: displayOf(pm, a2.v, a2.q), t: nowStamp().t, reason: a2.reason.trim() }]);
+        self.setState({ measures: mm, amends: amd, amend: null, pop: null });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
